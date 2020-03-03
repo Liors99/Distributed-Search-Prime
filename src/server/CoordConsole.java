@@ -35,7 +35,7 @@ public class CoordConsole {
 		
 	}
 	
-	private static BigInteger getBound(PrintStream console, Scanner scan, String boundType) {
+	static BigInteger getBound(PrintStream console, Scanner scan, String boundType) {
 		BigInteger result = new BigInteger("0");
 		boolean validInput = false;
 		
@@ -53,21 +53,24 @@ public class CoordConsole {
 		return result;
 	}
 	
-	private static BigInteger parseInput(String str) throws NumberFormatException {
+	public static BigInteger parseInput(String str) throws NumberFormatException {
 		BigInteger result = new BigInteger("0");
 		if (str.matches("\\d*[eE]\\d*")) {
 			String[] baseExp = str.split("[eE]");
 			result = new BigInteger(baseExp[0]);
-			result = result.pow(Integer.parseInt(baseExp[1]));
+			result = result.multiply(new BigInteger("10").pow(Integer.parseInt(baseExp[1])));
 		}
 		else {
 			result = new BigInteger(str);
+			if (result.compareTo(new BigInteger("0")) <= 0) {
+				throw new NumberFormatException();
+			}
 		}
 		return result;
 		
 	}
 	
-	private static int getPrimeCount(PrintStream console, Scanner scan){
+	static int getPrimeCount(PrintStream console, Scanner scan){
 		int result = 0;
 		boolean validInput = false;
 		String input;
