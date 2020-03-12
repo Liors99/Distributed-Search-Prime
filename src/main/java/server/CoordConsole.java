@@ -10,15 +10,31 @@ import java.util.*;
 public class CoordConsole {
 	//pick fav port number
 	private static final int ServerPort = 4444;
-
-
+	//by default run as 
+	private static int mode=0;
+	
+	private static boolean validRange = false;
+	private static BigInteger lowerBound;
+	private static BigInteger upperBound;
+	private static int primeLimit;
+	private static ServerSocket s;
+	
 	public static void main(String[] args) {
+		if (args.length>0) {
+			mode=Integer.parseInt(args[0]);
+		}
+		if (mode==0) {
+			setup();
+			console();
+		}
+		//run a subscriber
+		else {}
+	}
+
+
+	public static void console() {
 		PrintStream console = new PrintStream(System.out);
 		Scanner scan = new Scanner(System.in);
-		boolean validRange = false;
-		BigInteger lowerBound;
-		BigInteger upperBound;
-		int primeLimit;
 		
 		while (!validRange) {
 			lowerBound = getBound(console, scan, "lower");
@@ -98,22 +114,23 @@ public class CoordConsole {
 				console.println("Error: Please enter a positive integer");
 			}
 		}
-		//Get Network info for testing
-		try {
-			ServerSocket s=new ServerSocket(ServerPort);
-			InetAddress ip = InetAddress.getLocalHost();
-            String hostname = ip.getHostName();
-            System.out.println("Your current IP address : " + ip);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		return result;
 		
 		
 	}
 	
-
+public static void setup() {
+	//Get Network info for testing
+			try {
+				s=new ServerSocket(ServerPort);
+				InetAddress ip = InetAddress.getLocalHost();
+	            String hostname = ip.getHostName();
+	            System.out.println("Your current IP address : " + ip);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+}
 	
 }
