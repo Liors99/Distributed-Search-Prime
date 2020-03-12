@@ -1,9 +1,16 @@
 package server;
 import java.io.*;
 import java.math.*;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.SocketImpl;
 import java.util.*;
 
+
 public class CoordConsole {
+	//pick fav port number
+	private static final int ServerPort = 4444;
+
 
 	public static void main(String[] args) {
 		PrintStream console = new PrintStream(System.out);
@@ -91,7 +98,22 @@ public class CoordConsole {
 				console.println("Error: Please enter a positive integer");
 			}
 		}
+		//Get Network info for testing
+		try {
+			ServerSocket s=new ServerSocket(ServerPort);
+			InetAddress ip = InetAddress.getLocalHost();
+            String hostname = ip.getHostName();
+            System.out.println("Your current IP address : " + ip);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return result;
+		
+		
 	}
+	
+
+	
 }
