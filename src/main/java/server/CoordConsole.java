@@ -1,15 +1,18 @@
+//either no arguments or mode + Coordinator IP
 package server;
 import java.io.*;
 import java.math.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketImpl;
+import java.net.UnknownHostException;
 import java.util.*;
 
 
 public class CoordConsole {
 	//pick fav port number
-	private static final int ServerPort = 4444;
+	private static int ServerPort = 4444;
 	//by default run as 
 	private static int mode=0;
 	
@@ -28,7 +31,9 @@ public class CoordConsole {
 			console();
 		}
 		//run a subscriber
-		else {}
+		else {
+			connect(args[1]);
+		}
 	}
 
 
@@ -131,6 +136,18 @@ public static void setup() {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+}
+
+public static void connect(String ip) {
+	try {
+		Socket socket = new Socket(ip, ServerPort);
+	} catch (UnknownHostException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 }
 	
 }
