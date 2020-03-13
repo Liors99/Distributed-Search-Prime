@@ -11,8 +11,11 @@ import java.util.*;
 
 
 public class CoordConsole {
+	 //going to have to be updated on each machine
+	static String [] Ips= {"192.168.56.1", "192.168.56.1", "192.168.56.1"};
 	//pick fav port number
-	private static int ServerPort = 4444;
+	private static int [] ServerPorts = {4444, 5555, 6666};
+	static String[] status= {"dead", "dead", "dead"};
 	//by default run as 
 	private static int mode=0;
 	
@@ -21,19 +24,35 @@ public class CoordConsole {
 	private static BigInteger upperBound;
 	private static int primeLimit;
 	private static ServerSocket s;
+	static Socket [] sockets =new Socket [3];
+    static int send =3000;
+	static int timeout=5000;
+	private static int id; 
 	
 	public static void main(String[] args) {
-		if (args.length>0) {
-			mode=Integer.parseInt(args[0]);
+	 id=Integer.parseInt(args[0]);
+	 status[id]="setup";
+	 //Create a server socket and two other sockets
+	 createServer();
+	 Accept a=new Accept(s);
+	 //Attempt to connect to other servers
+	 for (int i=0; i<3; i++) {
+		if (i!=id) {
+			try {
+				sockets[i] = new Socket(Ips[i], ServerPorts[i]);
+				//May  need to actually ask but good enough for now
+				if (status[i]=="dead") {
+					status[i]="active";
+					Recieve r=new Recieve(sockets[i], send, timeout);
+					r.run();
+				}
+			} catch (Exception e) {
+				//Assume still inactive, they will contact us
+			}
 		}
-		if (mode==0) {
-			setup();
-			console();
-		}
-		//run a subscriber
-		else {
-			connect(args[1]);
-		}
+	 } //end loop
+	 
+	 
 	}
 
 
@@ -128,7 +147,7 @@ public class CoordConsole {
 public static void setup() {
 	//Get Network info for testing
 			try {
-				s=new ServerSocket(ServerPort);
+				s=new ServerSocket();
 				InetAddress ip = InetAddress.getLocalHost();
 	            String hostname = ip.getHostName();
 	            System.out.println("Your current IP address : " + ip);
@@ -138,9 +157,9 @@ public static void setup() {
 			}
 }
 
-public static void connect(String ip) {
+public static void createServer() {
 	try {
-		Socket socket = new Socket(ip, ServerPort);
+		s = new ServerSocket(ServerPorts[id]);
 	} catch (UnknownHostException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
