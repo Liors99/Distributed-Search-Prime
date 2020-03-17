@@ -11,6 +11,7 @@ import java.util.*;
 
 
 public class CoordConsole {
+	public static boolean debug=true; 
 	 //going to have to be updated on each machine
 	static String [] Ips= {"192.168.56.1", "192.168.56.1", "192.168.56.1"};
 	//pick fav port number
@@ -24,34 +25,47 @@ public class CoordConsole {
 	private static BigInteger upperBound;
 	private static int primeLimit;
 	private static ServerSocket s;
-	static Socket [] sockets =new Socket [3];
     static int send =3000;
 	static int timeout=5000;
 	private static int id; 
 	
 	public static void main(String[] args) {
+	 Socket [] sockets =new Socket [3];
 	 id=Integer.parseInt(args[0]);
 	 status[id]="setup";
 	 //Create a server socket and two other sockets
-	 createServer();
+	 setup();
+	 //listen
 	 Accept a=new Accept(s);
+	 Thread thread = new Thread(a);
+	 thread.start();
 	 //Attempt to connect to other servers
 	 for (int i=0; i<3; i++) {
 		if (i!=id) {
 			try {
 				sockets[i] = new Socket(Ips[i], ServerPorts[i]);
+				if (debug) {
+					System.out.println("Connected to "+sockets[i]);
+				}
 				//May  need to actually ask but good enough for now
 				if (status[i]=="dead") {
 					status[i]="active";
 					Recieve r=new Recieve(sockets[i], send, timeout);
-					r.run();
+					Thread thread1 = new Thread(r);
+					thread1.start();
 				}
 			} catch (Exception e) {
 				//Assume still inactive, they will contact us
+				System.out.println(i+" suspected inactive");
 			}
 		}
 	 } //end loop
-	 
+	 //need to give everyone time to start up 
+	 //then need to host an election
+	 //for now just going to keep alive forever :)
+	 while (true) {
+		 
+	 }
 	 
 	}
 
@@ -147,7 +161,7 @@ public class CoordConsole {
 public static void setup() {
 	//Get Network info for testing
 			try {
-				s=new ServerSocket();
+				s=new ServerSocket(ServerPorts[id]);
 				InetAddress ip = InetAddress.getLocalHost();
 	            String hostname = ip.getHostName();
 	            System.out.println("Your current IP address : " + ip);

@@ -31,6 +31,8 @@ public class Recieve implements Runnable {
 
 	@Override
 	public void run() {
+		Thread thread = new Thread(c);
+		thread.start();
 		long startTime = System.currentTimeMillis();
 		long estimatedTime=0;
 		while (estimatedTime<timeout) {
