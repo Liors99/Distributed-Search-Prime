@@ -71,6 +71,31 @@ class TaskSchedulerTest {
 
     }
 
+    @Test
+    void scheduleTaskTest2(){
+        TaskScheduler TS = new TaskScheduler();
+        TS.setTotalScore(new BigInt("25"));
+
+        WorkerRecord wR1 = new WorkerRecord();
+        WorkerRecord wR2 = new WorkerRecord();
+        WorkerRecord wR3 = new WorkerRecord();
+        WorkerRecord wR4 = new WorkerRecord();
+
+        wR1.setScore(5);
+        wR2.setScore(10);
+        wR3.setScore(5);
+        wR4.setScore(5);
+
+
+        TS.addToWorkerQueue(wR1);
+        TS.addToWorkerQueue(wR2);
+        TS.addToWorkerQueue(wR3);
+        TS.addToWorkerQueue(wR4);
+
+
+        TS.scheduleTask(new BigInt("100"), new BigInt("101"));
+
+    }
 
 
 }
