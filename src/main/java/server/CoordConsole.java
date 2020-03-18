@@ -12,7 +12,6 @@ public class CoordConsole {
 		BigInteger lowerBound;
 		BigInteger upperBound;
 		int primeLimit;
-		
 		while (!validRange) {
 			lowerBound = getBound(console, scan, "lower");
 			upperBound = getBound(console, scan, "upper");
