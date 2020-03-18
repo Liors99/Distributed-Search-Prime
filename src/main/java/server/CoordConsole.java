@@ -4,6 +4,7 @@ import java.math.*;
 import java.util.*;
 
 public class CoordConsole {
+	public static boolean debug=true; 
 
 	public static void main(String[] args) {
 		PrintStream console = new PrintStream(System.out);
