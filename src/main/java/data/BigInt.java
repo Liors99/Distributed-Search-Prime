@@ -16,6 +16,10 @@ public class BigInt extends BigInteger {
 		this(val.toString());
 	}
 	
+	public BigInteger toBigInteger() {
+		return new BigInteger(this.toString());
+	}
+	
 	public boolean isEven() {
 		return this.mod(BigInt.TWO) == BigInt.ZERO;
 	}

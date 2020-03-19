@@ -22,6 +22,14 @@ class BigIntTest {
 	}
 
 	@Test
+	void testToBigInteger() {
+		assertDoesNotThrow(() -> {
+			testSubject.toBigInteger();
+		});
+		assertTrue(testSubject.toBigInteger().getClass().equals(BigInteger.class));
+	}
+	
+	@Test
 	void testIsEven() {
 		//Zero is even
 		assertTrue(testSubject.isEven());
@@ -38,6 +46,7 @@ class BigIntTest {
 		testSubject = new BigInt(Integer.toString(Integer.MIN_VALUE+1));
 		assertFalse(testSubject.isEven());
 	}
+	
 
 	@Test
 	void testIsZero() {
