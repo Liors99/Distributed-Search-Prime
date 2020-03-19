@@ -1,9 +1,13 @@
+
 package data;
 
 import java.math.BigInteger;
 
 public class BigInt extends BigInteger {
-
+  private String val;
+  
+  public String getVal(){ return this.val;}
+  
 	public BigInt(String val) {
 		super(val);
 	}
