@@ -17,7 +17,7 @@ public class PrimeSearch extends Thread{
 			lower = lowerLimit;
 		}
 		if (upperLimit.mod(BigInteger.TWO) == BigInteger.ZERO) {
-			upper = lowerLimit.add(BigInteger.ONE);
+			upper = upperLimit.add(BigInteger.ONE);
 		}
 		else {
 			upper = upperLimit;
@@ -38,20 +38,36 @@ public class PrimeSearch extends Thread{
 	
 	public BigInteger search() {
 		BigInteger index = lower;
+		System.out.println(lower);
+		System.out.println(upper);
+		long start = System.currentTimeMillis();
+
 		if(lower.compareTo(BigInteger.TWO) <= 0 && upper.compareTo(BigInteger.TWO) >= 0) {
 			System.out.println("2 is in range, testing if number is even");
 			if (subject.mod(BigInteger.TWO) == BigInteger.ZERO ) {
 				return BigInteger.TWO;
 			}
 		}
+		int counter = 1000000;
+		
 		while (index.compareTo(upper) <= 0) {
+			
 			if (subject.mod(index) == BigInteger.ZERO) {
 				return index;
 			} else {
 				index = index.add(BigInteger.TWO);
-			} 
+			}
+			counter--;
+			if (counter == 0) {
+				counter=1000000;
+				System.out.println(index);
+			}
 		}
+		long stop = System.currentTimeMillis();
+		System.out.println(stop-start);
+		
 		return BigInteger.ZERO;
+		
 	}
 	
 }
