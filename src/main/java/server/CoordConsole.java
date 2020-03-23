@@ -27,7 +27,7 @@ public class CoordConsole {
 	private static ServerSocket s;
     static int send =3000;
 	static int timeout=5000;
-	private static int id; 
+	static int id; 
 	
 	public static void main(String[] args) {
 	 Socket [] sockets =new Socket [3];
@@ -49,7 +49,6 @@ public class CoordConsole {
 				}
 				//May  need to actually ask but good enough for now
 				if (status[i]=="dead") {
-					status[i]="active";
 					Recieve r=new Recieve(sockets[i], send, timeout);
 					Thread thread1 = new Thread(r);
 					thread1.start();
@@ -181,6 +180,15 @@ public static void createServer() {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
+}
+
+public static void updateConnection(Map<String, String> map) {
+	int id=Integer.parseInt(map.get("id"));
+	if (map.containsKey("status")) {
+		status[id]=map.get("status");
+	}
+	
+	
 }
 	
 }

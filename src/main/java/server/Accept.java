@@ -22,10 +22,6 @@ public class Accept implements Runnable {
 				if (CoordConsole.debug==true) {
 					System.out.println("Recieved connection from "+ip);
 				}
-				//for (int i =0; i<3; i++) {
-					//this will not work on one computer
-					//if (CoordConsole.Ips[i]==ip.split(":")[0]){
-						//CoordConsole.status[i]="active";
 						Recieve r=new Recieve(ref, CoordConsole.send, CoordConsole.timeout);
 						Thread thread = new Thread(r);
 						thread.start();

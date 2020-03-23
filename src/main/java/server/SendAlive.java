@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class SendAlive implements Runnable {
 	DataOutputStream out;
 	int frequency;
+	boolean run=true;
 	
 	public SendAlive(DataOutputStream out, int freq) throws SocketException {
 		this.out=out;
@@ -22,18 +23,16 @@ public class SendAlive implements Runnable {
 
 	@Override
 	public void run() {
-		while (true){
+		while (run){
 			try {
 				TimeUnit.MILLISECONDS.sleep(frequency);
 			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				//Dont care about errors here
 			}
 		    try {
-				out.writeBytes("Type:A");
+				out.writeUTF("type:A");
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
 			}	
 		}
 		

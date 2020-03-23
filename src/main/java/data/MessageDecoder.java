@@ -10,7 +10,6 @@ public class MessageDecoder {
 
 	public static boolean parse(String message) {
 		Map<String, String> map = new HashMap<String, String>();
-		
 		//split into key value pairs
 		String[] space=message.split(" ");
 		for (String i:space) {
@@ -43,6 +42,14 @@ public class MessageDecoder {
 		if (type.equals("A")) {
 			//Message is a keepalive
 			//no further action needed
+			return true;
+		}
+		else if (type.equals("id")) {
+			//Identify a server 
+			CoordConsole.updateConnection(map);
+			if (CoordConsole.debug) {
+				System.out.println("Recieved: "+message);
+			}
 			return true;
 		}
 		else {

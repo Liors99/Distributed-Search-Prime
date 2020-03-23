@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 
+import data.MessageDecoder;
+
 public class Recieve implements Runnable {
 	
 	private Socket s;
@@ -25,6 +27,7 @@ public class Recieve implements Runnable {
 		out = new DataOutputStream(s.getOutputStream());
 		in = new DataInputStream(s.getInputStream());
 		c=new SendAlive(out,send);
+		out.writeUTF("type:id id:"+CoordConsole.id+" status:"+CoordConsole.status[CoordConsole.id]);
 		
 		
 	}
@@ -35,20 +38,24 @@ public class Recieve implements Runnable {
 		thread.start();
 		long startTime = System.currentTimeMillis();
 		long estimatedTime=0;
+		String temp;
 		while (estimatedTime<timeout) {
 		    try {
-				if (in.readUTF().isEmpty()) {
+		    	temp=in.readUTF();
 				 //Read something
-				//todo message parsing
-					startTime = System.currentTimeMillis();
-				}
+				 MessageDecoder.parse(temp);
+				startTime = System.currentTimeMillis();
+				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
 			}
 
 		estimatedTime = System.currentTimeMillis() - startTime;
-		}
+		} // out of loop
+		//Someone timed out
+		System.out.println("Timeout detected");
+		//Shutdown sender
+		c.run=false;
 	}
 
 }
