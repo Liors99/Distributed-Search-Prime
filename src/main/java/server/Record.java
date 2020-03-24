@@ -14,6 +14,29 @@ public class Record {
         this.Port = Port;
         this.timeout = timeout;
     }
+    
+    Record(String serial){
+    	String [] split=serial.split(" ");
+    	for (int i=0; i<split.length; i++) {
+    		String [] sub=split[i].split(":");
+    		if (sub[0].equals("IP")) {
+    			IP=sub[1];	
+    		}
+    		else if (sub[0].equals("Port")) {
+    			Port=Integer.parseInt(sub[1]);
+    		}
+    		else if (sub[0].equals("timeout")) {
+    			if (i==split.length-2) {
+    			    timeout=Timestamp.valueOf(sub[1]+" "+split[i+1]);
+    			    break;
+    			}
+    			else {
+    				timeout=Timestamp.valueOf(sub[1]);
+    			}
+    		}
+    	}
+    	
+    }
 
     public String getIP() {
         return IP;
@@ -37,5 +60,11 @@ public class Record {
 
     public void setTimeout(Timestamp timeout) {
         this.timeout = timeout;
+    }
+    
+    public String toString() {
+    	String value="Object:Record{IP:"+IP+" Port:"+Port+" timeout:"+timeout.toString()+"}";
+		return value;
+    	
     }
 }
