@@ -36,9 +36,10 @@ public class WorkerConsole {
 				
 		}
 		
-		PrimeSearch ps = new PrimeSearch(new BigInteger("3"), new BigInteger("68000000000000000000000000"), new BigInteger("46843439956249365837687076705518861850009996536661"));
+		PrimeSearch ps = new PrimeSearch(new BigInteger("3"), new BigInteger("1000000000"), 
+				new BigInteger("46843439956249365837687076705518861850009996536661"));
 		ps.start();
-		
+
 		
 	}
 

@@ -1,23 +1,28 @@
 package server;
 
+import data.BigInt;
+
 import java.math.BigInteger;
 import java.sql.Timestamp;
 
 public class WorkerRecord extends Record{
     private int WID;
-    private double score;
+    private int score; //1->10 10 2 5 4 + 21 0.47
     private Timestamp startedWork;
-    private BigInteger[] workrange;
+    private BigInt[] workrange;
+    private Boolean isDone;
     static final double DEFAULTSCORE=100;
 
     WorkerRecord(){super();}
 
     // you can use new Timestamp(System.currentTimeMillis());
-    WorkerRecord(String IP, int Port, int WID, double score, Timestamp timeout){
+    WorkerRecord(String IP, int Port, int WID, int score, Timestamp timeout){
         super(IP, Port, timeout);
         this.setScore(score);
         this.setWID(WID);
+        this.isDone = true;
     }
+
 
     /**
      * change score based on time spent on previous task
@@ -35,15 +40,16 @@ public class WorkerRecord extends Record{
         this.WID = WID;
     }
 
-    public double getScore() {
+    public int getScore() {
         return score;
     }
 
-    public void setScore(double score) {
+    public void setScore(int score) {
         this.score = score;
     }
 
     public void stopWork(){
+        this.isDone = true;
         Timestamp stop = new Timestamp(System.currentTimeMillis());
         long delta = stop.getTime() - startedWork.getTime();
         deriveScore(delta);
@@ -57,14 +63,23 @@ public class WorkerRecord extends Record{
         this.startedWork = startedWork;
     }
     public void startWork(){
+        this.isDone = false;
         startedWork = new Timestamp(System.currentTimeMillis());
     }
 
-    public BigInteger[] getWorkrange() {
+    public BigInt[] getWorkrange() {
         return workrange;
     }
 
-    public void setWorkrange(BigInteger[] workrange) {
+    public void setWorkrange(BigInt[] workrange) {
         this.workrange = workrange;
+    }
+
+    public Boolean getDone() {
+        return isDone;
+    }
+
+    public void setDone(Boolean done) {
+        isDone = done;
     }
 }

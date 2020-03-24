@@ -1,11 +1,27 @@
+
 package data;
 
 import java.math.BigInteger;
 
 public class BigInt extends BigInteger {
-
+  private String val;
+  
+  public String getVal(){ return this.val;}
+  
 	public BigInt(String val) {
 		super(val);
+	}
+	
+	public BigInt(BigInteger val) {
+		super(val.toString());
+	}
+	
+	public BigInt(BigInt val) {
+		this(val.toString());
+	}
+	
+	public BigInteger toBigInteger() {
+		return new BigInteger(this.toString());
 	}
 	
 	public boolean isEven() {
@@ -13,7 +29,7 @@ public class BigInt extends BigInteger {
 	}
 	
 	public boolean isZero() {
-		return this == BigInt.ZERO;
+		return this.compareTo(BigInt.ZERO) == 0;
 	}
 	
 	public boolean gt(BigInteger val) {
@@ -34,6 +50,11 @@ public class BigInt extends BigInteger {
 	
 	public boolean equals(BigInteger val) {
 		return this.compareTo(val) == 0;
+	}
+	
+	public boolean dividesBy(BigInteger val) {
+		BigInt remainder = new BigInt(this.divideAndRemainder(val)[1]);
+		return remainder.isZero();
 	}
 
 }
