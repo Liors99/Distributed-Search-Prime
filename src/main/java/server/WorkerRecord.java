@@ -5,7 +5,7 @@ import data.BigInt;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 
-public class WorkerRecord extends Record{
+public class WorkerRecord extends Record implements Comparable<WorkerRecord>{
     private int WID;
     private int score; //1->10 10 2 5 4 + 21 0.47
     private Timestamp startedWork;
@@ -82,4 +82,17 @@ public class WorkerRecord extends Record{
     public void setDone(Boolean done) {
         isDone = done;
     }
+
+	@Override
+	public int compareTo(WorkerRecord o) {
+		if(this.getScore() > o.getScore()) {
+			return -1;
+		}
+		else if (this.getScore() < o.getScore()) {
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}
 }
