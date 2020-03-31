@@ -6,6 +6,7 @@ public class Record {
     private String IP;
     private int Port;
     private Timestamp timeout;
+    public boolean flag=true;
 
     Record(){}
 
@@ -16,6 +17,12 @@ public class Record {
     }
     
     Record(String serial){
+    	if(serial.contains("Object:Record")) {
+    		serial=serial.split("Object:Record\\{")[1].split("\\}")[0];
+    	}
+    	if (serial.equals("null")) {
+    	  return;
+    	}
     	String [] split=serial.split(" ");
     	for (int i=0; i<split.length; i++) {
     		String [] sub=split[i].split(":");
