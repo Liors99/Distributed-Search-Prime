@@ -48,4 +48,25 @@ public class SerialTests {
 		WorkerRecord y=new WorkerRecord(res);
 		assertTrue(y.toString().equals(res));
 	}
+	
+	@Test
+	void testSubRecord() {
+		SubscriberRecord r=new SubscriberRecord("192.48.0.1", 420, java.sql.Timestamp.valueOf("2007-09-23 10:10:10.0"));
+		String sample=r.toString();
+		assertTrue(sample.equals("Object:SubscriberRecord{super:Object:Record{IP:192.48.0.1 Port:420 timeout:2007-09-23 10:10:10.0}}"));
+	}
+	
+	
+	@Test
+	void testDeSubRecord() {
+		SubscriberRecord r=new SubscriberRecord("192.48.0.1", 420, java.sql.Timestamp.valueOf("2007-09-23 10:10:10.0"));
+		String sample=r.toString();
+		//remove outer brackets
+		String close=sample.split("\\{", 2)[1];
+		int i = close.lastIndexOf("}");
+		close=close.substring(0, i);
+		SubscriberRecord r2=new SubscriberRecord(close);
+		String sample2=r2.toString();
+		assertTrue(sample.equals(sample2));
+	}
 }
