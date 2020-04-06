@@ -54,6 +54,7 @@ public class TaskScheduler {
     }
 
     /**
+     * to be run in a separate thread
      *  called once finalized range; assigns work to workers while they are in queue
      * @return if done
      */
@@ -70,6 +71,7 @@ public class TaskScheduler {
                 System.out.println(currentLower.toString(10));
                 WorkerRecord wR = getWorkerQueue().poll();
                 BigInt[] range = deriveRange(wR, current, currentLower);
+                wR.setWorkrange(range);
                 sendRange(wR, range); //send range to worker
                 currentLower = new BigInt (range[1].add(new BigInt("1")).toString(10)); //get max value of the range
                 System.out.println(range[1].toString(10));
@@ -79,6 +81,24 @@ public class TaskScheduler {
         }
         return true;
     }
+
+    /**
+     * should be called as part of handling worker timeout in a separate thread
+     * reschedule work uncompleted due to worker disconnecting
+     * @param oldWR record of worker disconnected
+     * @param wR the worker to reschedule to
+     * @return true on success
+     */
+    public boolean reschedule(WorkerRecord oldWR, WorkerRecord wR){
+        int i=0;
+        while(getWorkerQueue().size() == 0){i++;}
+        wR = getWorkerQueue().poll();
+        BigInt[] range = oldWR.getWorkrange();
+        sendRange(oldWR, range); //send range to worker
+        wR.setWorkrange(range);
+        return true;
+    }
+
 
     public boolean processResults(WorkerRecord wR, BigInt[] factors) {
         wR.stopWork();
