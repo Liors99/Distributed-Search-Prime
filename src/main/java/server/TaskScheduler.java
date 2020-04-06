@@ -13,6 +13,9 @@ public class TaskScheduler {
     private BigInt totalScore;
     private int doneWorkers;
 
+    //TODO: need to keep track of scheduled work and id when worker goes down
+    //TODO: add threads to scheduler and make reschedule async?
+
     TaskScheduler(){
 
         WorkerQueue = new PriorityQueue<WorkerRecord>();
