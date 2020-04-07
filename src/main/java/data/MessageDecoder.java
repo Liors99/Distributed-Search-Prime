@@ -13,7 +13,14 @@ public class MessageDecoder {
 	public static boolean parse(String message) {
 		//split into key value pairs
 		String[] space=message.split(" ");
-		String type=space[0].split(":")[1];
+		String type;
+		try {
+		  type=space[0].split(":")[1];
+		}
+		catch (Exception e){
+			return false;
+		}
+		
 		
 		
 		//Add your own methods here
