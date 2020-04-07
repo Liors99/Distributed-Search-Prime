@@ -5,45 +5,44 @@ import data.BigInt;
 import java.math.BigInteger;
 
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
 
 public class TaskScheduler {
-    private Queue<WorkerRecord> WorkerQueue;
+    private PriorityQueue<WorkerRecord> WorkerQueue;
     private BigInt totalScore;
     private int doneWorkers;
 
     TaskScheduler(){
 
-        WorkerQueue = new LinkedList<WorkerRecord>();
+        WorkerQueue = new PriorityQueue<WorkerRecord>();
         this.doneWorkers = 0;
     }
 
+    /**
+     * Derives the range for a given worker
+     * @param wR - the worker's record
+     * @param curNum - the current number being worked on, i.e. the global upper bound
+     * @param currentLower - the current lower bound for the range
+     * @return - returns a tuple, where bound[0] = lower bound and bound[1] = upper bound
+     */
     public BigInt[] deriveRange(WorkerRecord wR, BigInt curNum, BigInt currentLower){
         BigInt[] bound = new BigInt[2];
-        //score multiplier
-        BigInteger size = curNum.subtract(new BigInt("3")).add(new BigInteger("1"));
-        BigInteger fraction;
-        if (size.mod(totalScore).compareTo(BigInteger.ZERO)==0){
-            fraction = size.divide(totalScore);
-        }else{
-            fraction = size.divide(totalScore).add(new BigInteger("1"));
-        }
-
-        BigInteger delta = fraction.multiply(new BigInt(Integer.toString(wR.getScore())));
-        int radix = 10;
-        BigInt dt = new BigInt(delta.toString(radix));
-        /*
-        System.out.println(fraction.toString(10));
-        System.out.println(totalScore.toString(10));
-        System.out.println(dt.toString(10));
-        */
+        
+        //score multiplier -> calculation : range[i] = lower + totalNums*(score[i]/totalScore)
+        BigInt size = new BigInt(curNum.subtract(new BigInt("3")).add(new BigInteger("1"))); //Get total numbers in the range
+        BigInteger fraction = size.divide(totalScore); //get totalNums/totalScore
+       
+        //get totalNums*(score[i]/totalScore)
+        BigInteger delta = fraction.multiply(new BigInt(Integer.toString(wR.getScore()))); 
+        BigInt dt = new BigInt(delta);
+        
+        //Set bounds
         bound[0] = currentLower;
-        bound[1] = new BigInt(currentLower.add(dt).toString(10));
+        bound[1] = new BigInt(currentLower.add(dt));
         if (bound[1].gt(curNum)){
             bound[1] = curNum;
         }
-        //lower + range = new lower
-        //floor
         return bound;
     }
 
@@ -109,11 +108,11 @@ public class TaskScheduler {
         return true;
     }
 
-    public Queue<WorkerRecord> getWorkerQueue() {
+    public PriorityQueue<WorkerRecord> getWorkerQueue() {
         return WorkerQueue;
     }
 
-    public void setWorkerQueue(Queue<WorkerRecord> workerQueue) {
+    public void setWorkerQueue(PriorityQueue<WorkerRecord> workerQueue) {
         WorkerQueue = workerQueue;
     }
 
