@@ -11,7 +11,7 @@ import data.MessageDecoder;
 
 public class Recieve implements Runnable {
 	
-	private Socket s;
+	Socket s;
 	private int timeout;
 	private int send;
 	private SendAlive c;

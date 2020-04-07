@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.net.SocketImpl;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 public class CoordConsole {
@@ -16,18 +17,19 @@ public class CoordConsole {
 	 //going to have to be updated on each machine
 	static String [] Ips= {"192.168.56.1", "192.168.56.1", "192.168.56.1"};
 	//pick fav port number
-	private static int [] ServerPorts = {4444, 5555, 6666};
+	static int [] ServerPorts = {4444, 5555, 6666};
 	static String[] status= {"dead", "dead", "dead"};
 	//by default run as 
 	private static int mode=0;
+	public static Socket [] sockets =new Socket [3];
 	
 	private static boolean validRange = false;
 	private static BigInteger lowerBound;
 	private static BigInteger upperBound;
 	private static int primeLimit;
 	private static ServerSocket s;
-    static int send =3000;
-	static int timeout=5000;
+    static int send =100000;
+	static int timeout=20000000;
 	static int id; 
 	
 	public static void main(String[] args) {
@@ -40,6 +42,13 @@ public class CoordConsole {
 	 Accept a=new Accept(s);
 	 Thread thread = new Thread(a);
 	 thread.start();
+	//might recommend sleeping for a bit to activate servers, feel free to increase
+		 try {
+			TimeUnit.SECONDS.sleep(20);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	 //Attempt to connect to other servers
 	 for (int i=0; i<3; i++) {
 		if (i!=id) {
@@ -49,7 +58,8 @@ public class CoordConsole {
 					System.out.println("Connected to "+sockets[i]);
 				}
 				//May  need to actually ask but good enough for now
-				if (status[i]=="dead") {
+				if (status[i].equals("dead")) {
+					status[i]="setup";
 					Recieve r=new Recieve(sockets[i], send, timeout);
 					Thread thread1 = new Thread(r);
 					thread1.start();
@@ -62,11 +72,33 @@ public class CoordConsole {
 	 } //end loop
 	 //need to give everyone time to start up 
 	 //then need to host an election
+	 
 	 //for now just going to keep alive forever :)
-	 while (true) {
-		 
+	 
+	 //Not currently using election
+	 if (id==0){
+		 mode=1;
+	 }
+	 if (mode==1) {
+		 console();
+		 for (int i=0; i<3; i++) {
+				if (i!=id) {
+					if (!status[i].equals("dead")&sockets[1]!=null){
+						try {
+							OutputStream s=sockets[i].getOutputStream();
+							new DataOutputStream(s).writeUTF("type:goal upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					
+				}
+		 } //end for loop
 	 }
 	 
+	 
+	while(true){}
 	}
 
 
@@ -185,11 +217,31 @@ public static void createServer() {
 
 public static void updateConnection(Map<String, String> map) {
 	int id=Integer.parseInt(map.get("id"));
-	if (map.containsKey("status")) {
-		status[id]=map.get("status");
+	try {
+		sockets[id] = new Socket(Ips[id], ServerPorts[id]);
+	} catch (UnknownHostException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
 	}
+		if (map.containsKey("status")) {
+			status[id]=map.get("status");
+		}
+
+  }
 	
-	
+	public static void task(Map<String, String> map) {
+		if (map.containsKey("upper")) {
+			upperBound=new BigInteger(map.get("upper"));
+		}
+		if (map.containsKey("lower")) {
+			upperBound=new BigInteger(map.get("lower"));
+		}
+		if (map.containsKey("limit")) {
+			primeLimit=Integer.parseInt((map.get("limit")));
+		}		
 }
 	
 }
