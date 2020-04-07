@@ -79,6 +79,7 @@ public class CoordConsole {
 	 if (id==0){
 		 mode=1;
 	 }
+	 //get input and send to other servers
 	 if (mode==1) {
 		 console();
 		 for (int i=0; i<3; i++) {
