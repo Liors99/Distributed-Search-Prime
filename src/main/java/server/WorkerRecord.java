@@ -22,6 +22,45 @@ public class WorkerRecord extends Record implements Comparable<WorkerRecord>{
         this.setWID(WID);
         this.isDone = true;
     }
+    
+    WorkerRecord(String serial){
+    	super(serial.split(" super:")[1]);
+    	String [] split=serial.split(" super:");
+    	if (split[0].contains("Object:WorkerRecord{")) {
+    		split=split[0].split("Object:WorkerRecord\\{");
+    	}
+    	String me=split[1];
+    	String[] fields=me.split(" ");
+    	for (int i=0; i<fields.length; i++) {
+    		String [] keys=fields[i].split(":");
+    		if(keys[0].equals("WID")) {
+    			WID=Integer.valueOf(keys[1]);
+    		}
+    		else if (keys[0].equals("score")) {
+    			score=Integer.valueOf(keys[1]);
+    		}
+    		else if (keys[0].equals("isDone")) {
+    			if(!keys[1].equals("null")) {
+    			   isDone=Boolean.valueOf(keys[1]);
+    			}
+    		}
+    		else if (keys[0].equals("startedWork")) {
+    			startedWork=Timestamp.valueOf(keys[1]+" "+split[i+1]);
+    			i=i+1;
+    		}
+    		else if (keys[0].equals("workrange")) {
+    			if (!keys[1].equals("null")){
+    				String [] vals=keys[1].split(",");
+    				workrange=new BigInt [vals.length];
+    				for (int j=0; j<vals.length; j++) {
+    					workrange[j]=new BigInt(vals[j]);
+    				}
+    							
+    			}
+    		}
+    	}
+    	
+    }
 
 
     /**
@@ -95,4 +134,31 @@ public class WorkerRecord extends Record implements Comparable<WorkerRecord>{
 			return 0;
 		}
 	}
+	public String toString() {
+		String ret="Object:WorkerRecord{WID:"+WID;
+		ret=ret+" score:"+score;
+		ret=ret+" isDone:"+isDone;
+		if(startedWork!=null) {
+		 ret=ret+" startedWork:"+startedWork.toString();
+		}
+		if (workrange!=null) {
+		ret=ret+" workrange:";
+		for (int i=0; i<workrange.length; i++) {
+			ret=ret+workrange[i].toBigInteger().toString();
+			if (i!=workrange.length-2) {
+				ret=ret+",";
+			}
+		 }
+		}
+		try {
+		ret=ret+" super:"+super.toString();
+		}
+		catch (NullPointerException e){
+			ret=ret+" super:{null}";
+		}
+		return ret+"}";
+		
+	}
+	
+
 }
