@@ -132,7 +132,7 @@ class TaskSchedulerTest {
 
         WorkerRecord wr = pq.remove();
         WorkerRecord wR5 = new WorkerRecord();
-
+        TS.putActiveWorker(wR5);
         TS.reschedule(wR5, wr);
         assertEquals(wR5.getWorkrange(),wr.getWorkrange());
 

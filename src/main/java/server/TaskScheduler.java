@@ -18,6 +18,7 @@ public class TaskScheduler {
     TaskScheduler(){
 
         WorkerQueue = new PriorityQueue<WorkerRecord>();
+        ActiveWorkers = new HashMap<Integer, Boolean>();
         this.doneWorkers = 0;
     }
 
@@ -157,6 +158,16 @@ public class TaskScheduler {
 
     public HashMap<Integer, Boolean> getActiveWorkers() {
         return ActiveWorkers;
+    }
+
+    public boolean putActiveWorker(WorkerRecord wR){
+        this.ActiveWorkers.put(wR.getWID(), true);
+        return true;
+    }
+
+    public boolean deactivateActiveWorker(WorkerRecord wR){
+        this.ActiveWorkers.put(wR.getWID(), false);
+        return true;
     }
 
     public void setActiveWorkers(HashMap<Integer, Boolean> activeWorkers) {
