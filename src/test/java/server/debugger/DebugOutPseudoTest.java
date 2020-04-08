@@ -30,5 +30,18 @@ public class DebugOutPseudoTest {
 
     }
 
+    /**
+     * please view output to check it works
+     */
+    @Test
+    void looptestDebugMessage() {
+        DebugOut dOut = new DebugOut();
+        dOut.start();
+        System.out.println("See console out!");
+        for(int i=0;i<1000;i++) {
+            DebugMessage dM = new DebugMessage("Hello #" + i);
+            dOut.addMessageToQueue(dM);
+        }
+    }
 
 }

@@ -1,19 +1,20 @@
 package server.debugger;
 
-import java.util.LinkedList;
-import java.util.Queue;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 public class DebugOut extends Thread{
-    private static Queue<DebugMessage>  MessageQueue = new LinkedList<DebugMessage>();
+    private static BlockingQueue<DebugMessage>  MessageQueue = new LinkedBlockingDeque<DebugMessage>();
 
     public DebugOut(){}
 
-    public boolean addMessageToQueue(DebugMessage dM){
+    public synchronized boolean addMessageToQueue(DebugMessage dM){
         MessageQueue.add(dM);
         return true;
     }
 
-    public DebugMessage getMessageFromQueue() throws NullPointerException{
+    public synchronized DebugMessage getMessageFromQueue() throws NullPointerException{
         if(MessageQueue.size()>0){
             return MessageQueue.poll();
         }else{
@@ -21,6 +22,9 @@ public class DebugOut extends Thread{
         }
     }
 
+    /**
+     * has to be started in CoordConsole
+     */
     public void run(){
         while(true) {
             while (MessageQueue.size() == 0) {
