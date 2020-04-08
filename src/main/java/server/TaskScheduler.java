@@ -4,12 +4,14 @@ import data.BigInt;
 
 import java.math.BigInteger;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
 public class TaskScheduler {
     private PriorityQueue<WorkerRecord> WorkerQueue;
+    private HashMap<Integer, Boolean> ActiveWorkers; //checks if worker with wid is working or not. Working only if true. If not on list/or set to false not working.
     private BigInt totalScore;
     private int doneWorkers;
 
@@ -50,6 +52,7 @@ public class TaskScheduler {
         wR.setWorkrange(range);
         wR.startWork();
         //send range
+        ActiveWorkers.put(wR.getWID(),true);
         return false;
     }
 
@@ -94,7 +97,9 @@ public class TaskScheduler {
         while(getWorkerQueue().size() == 0){i++;}
         wR = getWorkerQueue().poll();
         BigInt[] range = oldWR.getWorkrange();
-        sendRange(oldWR, range); //send range to worker
+        ActiveWorkers.put(oldWR.getWID(),false);
+        ActiveWorkers.put(wR.getWID(),true);
+        sendRange(wR, range); //send range to worker
         wR.setWorkrange(range);
         return true;
     }
@@ -102,6 +107,7 @@ public class TaskScheduler {
 
     public boolean processResults(WorkerRecord wR, BigInt[] factors) {
         wR.stopWork();
+        ActiveWorkers.put(wR.getWID(),false);
         getWorkerQueue().add(wR);
         doneWorkers++;
         if (!validateResults(wR, factors)){
@@ -149,4 +155,11 @@ public class TaskScheduler {
         this.totalScore = totalScore;
     }
 
+    public HashMap<Integer, Boolean> getActiveWorkers() {
+        return ActiveWorkers;
+    }
+
+    public void setActiveWorkers(HashMap<Integer, Boolean> activeWorkers) {
+        ActiveWorkers = activeWorkers;
+    }
 }
