@@ -53,7 +53,7 @@ public class DebugOut extends Thread{
                     f.createNewFile();
                 }
                 FileWriter fileWriter = new FileWriter(f, true);
-                fileWriter.write(dm.getMessage());
+                fileWriter.write(dm.getMessage()+"\n");
                 fileWriter.flush(); //manually flushes message to the log file
             } catch (IOException e) {
                 e.printStackTrace();
