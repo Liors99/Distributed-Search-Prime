@@ -1,13 +1,26 @@
 package server.debugger;
 
 
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class DebugOut extends Thread{
+    public static Boolean debugMode = true;
     private static BlockingQueue<DebugMessage>  MessageQueue = new LinkedBlockingDeque<DebugMessage>();
+    private String logFileName;
 
-    public DebugOut(){}
+    public DebugOut(){
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+        LocalDateTime now = LocalDateTime.now();
+        this.logFileName = dtf.format(now);
+        System.out.println("log file created: " + this.logFileName);
+    }
 
     public synchronized boolean addMessageToQueue(DebugMessage dM){
         MessageQueue.add(dM);
@@ -30,7 +43,21 @@ public class DebugOut extends Thread{
             while (MessageQueue.size() == 0) {
                 yield();
             }
-            System.out.println(getMessageFromQueue().getMessage());
+            DebugMessage dm = getMessageFromQueue();
+            if(debugMode) {
+                System.out.println(dm.getMessage());
+            }
+            File f = new File(System.getProperty("user.dir")+"\\"+logFileName+".log");
+            try{
+                if(!f.exists()){
+                    f.createNewFile();
+                }
+                FileWriter fileWriter = new FileWriter(f, true);
+                fileWriter.write(dm.getMessage());
+                fileWriter.flush(); //manually flushes message to the log file
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

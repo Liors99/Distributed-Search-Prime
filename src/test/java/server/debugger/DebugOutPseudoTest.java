@@ -32,7 +32,7 @@ public class DebugOutPseudoTest {
 
     /**
      * please view output to check it works
-     */
+    */
     @Test
     void looptestDebugMessage() {
         DebugOut dOut = new DebugOut();
