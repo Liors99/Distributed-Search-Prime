@@ -3,45 +3,37 @@ package server;
 import java.util.HashMap;
 
 public class ElectionProtocol {
-
+	
 	/**
-	 * Randomly determine the coordinator on initial startup
+	 * Randomly generate a number to simulate the roll of a die. 
 	 *
-	 * @param  numServers the number of servers in the system
-	 * @return      the randomly determined coordinator
+	 * @return      the randomly determined number
 	 */
-	public int initialCoord(int numServers) {
-		double roll = 0.0; 
-		int coordinator = 0;
-		HashMap<String, Double> servers = new HashMap<String, Double>();
-		
-		for(int x = 1; x <= numServers; x++) {
-			roll = Math.random();
-			servers.put(Integer.toString(x),roll);
-		}
-		
-		//Compare rolls
-		double highestRoll = 0.0; 
-		for(int x = 1; x <= numServers; x++) {
-			if(servers.get(Integer.toString(x)) > highestRoll) {
-				highestRoll = servers.get(Integer.toString(x)); 
-			}
-			else if (servers.get(Integer.toString(x)) == highestRoll) {
-				x = 1; 
-				roll = 0.0; 
-				for(int x1 = 1; x1 <= servers.size(); x1++) {
-					roll = Math.random();
-					servers.put(Integer.toString(x1),roll);
-				}
-			}
-		}
-		
-		for(int x = 1; x <= numServers; x++) {
-			if(servers.get(Integer.toString(x)) == highestRoll) {
-				coordinator = x;
-			}
-		}
-		
-		return coordinator; 
+	public static double roll() {
+		double roll = 0; 
+		roll = Math.random();
+		return roll; 
 	}
+	
+	/**
+	 * Comparison operator for dice rolls 
+	 *
+	 * @param  roll1 the random roll of object 1 
+	 * @param  roll2 the random roll of object 2 
+	 * @return      true if roll1 higher than roll2, false otherwise. 
+	 */
+	public static boolean isHigher(double roll1, double roll2) {
+		if(roll1 > roll2) {
+			return true; 
+		}else if(roll1 == roll2) {
+			//re-roll if equal
+			roll1 = roll(); 
+			roll2 = roll(); 
+			isHigher(roll1,roll2); 
+		} else {
+			return false; 
+		} 
+		return true; 
+	}
+
 }
