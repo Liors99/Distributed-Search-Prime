@@ -39,9 +39,16 @@ public class DebugOut extends Thread{
      * has to be started in CoordConsole
      */
     public void run(){
+        long start = System.currentTimeMillis();
         while(true) {
             while (MessageQueue.size() == 0) {
                 yield();
+            }
+            if (System.currentTimeMillis() - start <= 1500) {
+                continue;
+            }else{
+
+                start = System.currentTimeMillis();
             }
             DebugMessage dm = getMessageFromQueue();
             if(debugMode) {

@@ -7,8 +7,8 @@ public class DebugIndependentTest {
      * of course assuming that at least one debug message is printed
      * @param args
      */
-    //public static void main(String[] args){
-    public static void notMain(String[] args){
+    public static void main(String[] args){
+    //public static void notMain(String[] args){
 
         DebugOut dOut = new DebugOut();
         dOut.start();

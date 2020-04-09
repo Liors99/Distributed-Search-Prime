@@ -15,6 +15,7 @@ public class DebugIn extends Thread{
             if(DebugOut.debugMode){
                 System.out.print("[DEBUG]: ");
             }
+
             input = scan.nextLine();
             if(input.equals("debug")){
                 DebugOut.debugMode = !DebugOut.debugMode;
