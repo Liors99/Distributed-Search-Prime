@@ -105,7 +105,39 @@ class TaskSchedulerTest {
         
 
     }
-    
 
+    @Test
+    void rescheduleTaskTest(){
+        TaskScheduler TS = new TaskScheduler();
+        TS.setTotalScore(new BigInt("25"));
+
+        WorkerRecord wR1 = new WorkerRecord();
+        WorkerRecord wR2 = new WorkerRecord();
+        WorkerRecord wR3 = new WorkerRecord();
+        WorkerRecord wR4 = new WorkerRecord();
+
+        wR1.setScore(5);
+        wR2.setScore(10);
+        wR3.setScore(5);
+        wR4.setScore(7);
+
+
+        TS.addToWorkerQueue(wR1);
+        TS.addToWorkerQueue(wR2);
+        TS.addToWorkerQueue(wR3);
+        TS.addToWorkerQueue(wR4);
+
+
+        PriorityQueue<WorkerRecord> pq = TS.getWorkerQueue();
+
+        WorkerRecord wr = pq.remove();
+        WorkerRecord wR5 = new WorkerRecord();
+        TS.putActiveWorker(wR5);
+        TS.reschedule(wR5, wr);
+        assertEquals(wR5.getWorkrange(),wr.getWorkrange());
+
+
+
+    }
 
 }

@@ -32,7 +32,8 @@ public class CoordConsole {
 	static int timeout=20000000;
 	static int id; 
 	
-	public static void main(String[] args) {
+	//public static void main(String[] args) {
+	public static void notMain(String[] args){
 	 Socket [] sockets =new Socket [3];
 	 id=Integer.parseInt(args[0]);
 	 status[id]="setup";
