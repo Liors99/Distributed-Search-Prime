@@ -6,7 +6,7 @@ public class HandShakeWorker {
 	private final String SUB_EMPTY="-1"; // A placeholder for an empty slot in the array
 	
 	private SubscriberInfo[] subscribers_info;
-	private int ttl;
+	private int ka;
 	
 	
 	class SubscriberInfo {
@@ -35,7 +35,7 @@ public class HandShakeWorker {
 	}
 
 	//If the ttl is known
-	public HandShakeWorker(int ttl) {
+	public HandShakeWorker(int ka) {
 		
 		//Initialize the subscriber information
 		this.subscribers_info = new SubscriberInfo[MAX_SUBS];
@@ -45,7 +45,7 @@ public class HandShakeWorker {
 		}
 		
 		
-		this.ttl=ttl;
+		this.ka=ka;
 		
 	}
 	
@@ -97,7 +97,7 @@ public class HandShakeWorker {
 	 */
 	public String serializeHandShake(String obj) {
 		StringBuilder s = new StringBuilder();
-		s.append("type:HSW "+obj+": "+Integer.toString(ttl)+" ");
+		s.append("type:HSW "+obj+": "+Integer.toString(ka)+" ");
 		
 		for(int i=0; i<this.subscribers_info.length; i++) {
 			s.append(this.subscribers_info[i].getIp()+" ");
@@ -119,7 +119,7 @@ public class HandShakeWorker {
 		
 		//Set the TTL
 		int s_ttl = Integer.parseInt(serialized[2]);
-		this.setTtl(s_ttl);
+		this.setKA(s_ttl);
 		
 		//Add subscriber information
 		for(int i=3; i<serialized.length; i+=2) {
@@ -129,12 +129,12 @@ public class HandShakeWorker {
 	}
 	
 	//Getters and setters for the ttl
-	public void setTtl(int t) {
-		this.ttl=t;
+	public void setKA(int ka) {
+		this.ka=ka;
 	}
 	
-	public int getTtl() {
-		return this.ttl;
+	public int getKA() {
+		return this.ka;
 	}
 	
 	

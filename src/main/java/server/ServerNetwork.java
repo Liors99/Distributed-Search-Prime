@@ -82,12 +82,17 @@ public class ServerNetwork implements Runnable{
 	  * @param IP
 	  * @param port
 	  * @param msg
+	 * @throws Exception 
 	  */
-	 public void send(String IP, int port, String msg) {
+	 public void send(String IP, int port, String msg) throws Exception {
 		 
 		 
 		 String key = "/"+IP+Integer.toString(port);
-		 while(!client_to_socket.containsKey(key)) {}
+		 
+		 //Check if IP/port combination is registered in this server
+		 if(!client_to_socket.containsKey(key)) {
+			 throw new Exception("The specified IP/port number combination is not registered in this server");
+		 }
 		 
 		 //The key has been found
 		 Socket target = client_to_socket.get(key);
@@ -107,14 +112,18 @@ public class ServerNetwork implements Runnable{
 	 * Gets the next message on the queue, blocks until a message appears on the queue
 	 * @return
 	 */
-	public String recieveNextMessage() {
+	public synchronized String recieveNextMessage() {
 		while(MessageQueue.isEmpty()) {}
 		
 		return MessageQueue.poll();
 	 }
 	 
 	 
-	public void addToMessageQueue(String msg) {
+	/**
+	 * Adds the next message to queue
+	 * @param msg - msg to be added
+	 */
+	public synchronized void addToMessageQueue(String msg) {
 		MessageQueue.add(msg);
 	 }
 	 

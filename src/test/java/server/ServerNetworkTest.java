@@ -47,10 +47,10 @@ public class ServerNetworkTest {
 	
 	
 	
-	/*
+	
 	@Test
-	void testSend() throws UnknownHostException, IOException, InterruptedException {
-		int port = 9001;
+	void testSend() throws Exception {
+		int port = 9002;
 		
 		ServerNetwork server = new ServerNetwork("localhost", port);
 		new Thread(server).start();
@@ -58,8 +58,6 @@ public class ServerNetworkTest {
 		Socket client = new Socket("localhost", port);
 		
 		DataInputStream client_in = new DataInputStream(client.getInputStream());
-		
-		System.out.println(client.getLocalPort());
 		
 		//Thread.sleep(4000);
 		
@@ -69,7 +67,7 @@ public class ServerNetworkTest {
 		
 		client.close();
 	}
-	*/
+	
 	
 	
 }
