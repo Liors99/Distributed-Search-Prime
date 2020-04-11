@@ -6,9 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import server.CoordConsole;
+import server.Store;
 
 //Message format assisting 
 public class MessageDecoder {
+	
+	static Store s=new Store();
 
 	public static boolean parse(String message) {
 		//split into key value pairs
@@ -44,6 +47,11 @@ public class MessageDecoder {
 				System.out.println("Recieved: "+message);
 			}
 			return true;	
+		}
+		else if (type.equals("file")) {
+			s=new Store(); //empty old file
+			s.update(space[1]);
+			return true;
 		}
 		else {
 			//Message type unknown 

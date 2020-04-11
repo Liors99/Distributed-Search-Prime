@@ -105,20 +105,23 @@ public class Store {
 	        file.close();
 	        writer.close();
 	        out.close();
-	        System.out.println("hello");
 	        Files.move(temp.getAbsoluteFile().toPath(), f.getAbsoluteFile().toPath(), REPLACE_EXISTING);     
 	        out = new RandomAccessFile("output.txt", "rw");
-	        System.out.println("test");
 	    }
 	    
 	   public void send(Socket s) {
 		   synchronized(lock) {
-		          byte [] mybytearray  = new byte [(int)f.length()];
+			      String head="type:file ";
+		          byte [] mybytearray  = new byte [head.length()+(int)f.length()];
 		          FileInputStream fis;
 				try {
 					fis = new FileInputStream(f);
 					BufferedInputStream bis = new BufferedInputStream(fis);
-			        bis.read(mybytearray,0,mybytearray.length);
+					byte [] header=head.getBytes();
+					for (byte i:header) {
+						mybytearray[i]=header[i];
+					}
+			        bis.read(mybytearray,head.length(),mybytearray.length);
 			        OutputStream os = s.getOutputStream();
 			        System.out.println("Sending " + f + "(" + mybytearray.length + " bytes)");
 			        os.write(mybytearray,0,mybytearray.length);
@@ -137,6 +140,18 @@ public class Store {
 		   }
 	   }
 	    
+	   public void update(String data) {
+		   synchronized(lock) {
+		   try {
+			    PrintWriter out = new PrintWriter("output.txt");
+			    out.print(data);
+			    out.close();
+		     } catch (FileNotFoundException e) {
+		 	// TODO Auto-generated catch block
+			e.printStackTrace();
+		     }
+		}
+	   }  
 	   public void shutdown() {
 		   synchronized(lock) {
 			 try {
