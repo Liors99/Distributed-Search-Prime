@@ -36,11 +36,16 @@ public class ElectionProtocol {
 		return true; 
 	}
 	
-	public static void main(String args[]) {
-		//All servers do their initial roll on their individual systems 
-		double server1 = roll(); 
-		double server2 = roll(); 
-		double server3 = roll(); 
+	/**
+	 * Randomly determine the coordinator on initial startup
+	 *
+	 * @param  numServers the number of servers in the system
+	 * @return      the randomly determined coordinator
+	 */
+	public int initialCoord(int numServers) {
+		double roll = 0.0; 
+		int coordinator = 0;
+		HashMap<String, Double> servers = new HashMap<String, Double>();
 		
 		String coord = "Server0"; 
 		//Usage example 
