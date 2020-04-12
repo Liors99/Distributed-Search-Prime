@@ -18,8 +18,7 @@ import data.NetworkMessage;
 //Adapted from http://tutorials.jenkov.com/java-multithreaded-servers/multithreaded-server.html
 
 public class ServerNetwork implements Runnable{
-	
- 	private int port;
+	private int port;
     private ServerSocket serverSocket;
     private boolean isStopped;
     private Thread runningThread;
@@ -184,7 +183,79 @@ public class ServerNetwork implements Runnable{
 	    }
 	}
 	
-	
+	public int getPort() {
+		return port;
+	}
+
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+
+	public ServerSocket getServerSocket() {
+		return serverSocket;
+	}
+
+
+	public void setServerSocket(ServerSocket serverSocket) {
+		this.serverSocket = serverSocket;
+	}
+
+
+	public Thread getRunningThread() {
+		return runningThread;
+	}
+
+
+	public void setRunningThread(Thread runningThread) {
+		this.runningThread = runningThread;
+	}
+
+
+	public Socket getSocket() {
+		return socket;
+	}
+
+
+	public void setSocket(Socket socket) {
+		this.socket = socket;
+	}
+
+
+	public DataOutputStream getOut() {
+		return out;
+	}
+
+
+	public void setOut(DataOutputStream out) {
+		this.out = out;
+	}
+
+
+	public HashMap<String, Socket> getClient_to_socket() {
+		return client_to_socket;
+	}
+
+
+	public void setClient_to_socket(HashMap<String, Socket> client_to_socket) {
+		this.client_to_socket = client_to_socket;
+	}
+
+
+	public BlockingQueue<String> getMessageQueue() {
+		return MessageQueue;
+	}
+
+
+	public void setMessageQueue(BlockingQueue<String> messageQueue) {
+		MessageQueue = messageQueue;
+	}
+
+
+	public void setStopped(boolean isStopped) {
+		this.isStopped = isStopped;
+	}
 	    
 	    
 	
