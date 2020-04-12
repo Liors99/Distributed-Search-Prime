@@ -4,7 +4,7 @@ import java.net.*;
 public class Networking {
 	public static final int NUMBER_OF_SERVERS = 3;
 	
-	private class ConnectionInfo{
+	public class ConnectionInfo{
 		String hostname;
 		int port;
 		
@@ -35,5 +35,12 @@ public class Networking {
 			connections[i] = new ConnectionInfo(hostnames[i], ports[i]);			
 		}
 	}
+	
+	public ConnectionInfo getConnectionInfo(int index) {
+		return connections[index];
+	}
+	
+	
+	
 
 }
