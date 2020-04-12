@@ -23,8 +23,7 @@ public class MessageDecoder {
 		catch (Exception e){
 			return false;
 		}
-		
-		
+			
 		
 		//Add your own methods here
 		if (type.equals("A")) {
@@ -52,6 +51,7 @@ public class MessageDecoder {
 			s=new Store(); //empty old file
 			s.update(space[1]);
 			return true;
+		}
 		else if(type.equals("initialElection")) {
 			//TODO: Initial Election Messages 
 			return true; 
@@ -59,6 +59,13 @@ public class MessageDecoder {
 		else if(type.equals("reElection")) {
 			//TODO: reElection Messages 
 			return true; 
+		}
+		else if (type.equals("rc")) {
+			//Server has recovered
+			CoordConsole.status[CoordConsole.id]="active";
+		}
+		else if (type.equals("workers")) {
+			//TODO: figure out worker storage
 		}
 		else {
 			//Message type unknown 

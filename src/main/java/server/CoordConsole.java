@@ -22,6 +22,7 @@ public class CoordConsole {
 	//by default run as 
 	private static int mode=0;
 	public static Socket [] sockets =new Socket [3];
+	public static ArrayList<WorkerRecord> wr= new ArrayList<WorkerRecord>();
 	
 	static boolean validRange = false;
 	static BigInteger lowerBound;
@@ -30,7 +31,7 @@ public class CoordConsole {
 	private static ServerSocket s;
     static int send =100000;
 	static int timeout=20000000;
-	static int id; 
+	public static int id; 
 	
 	public static void main(String[] args) {
 	//public static void notMain(String[] args){

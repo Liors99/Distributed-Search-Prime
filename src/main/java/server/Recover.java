@@ -22,11 +22,20 @@ public class  Recover implements Runnable {
 		try {
 			o = s.getOutputStream();
 			//send task 
-			new DataOutputStream(o).writeUTF("type:goal upper:"+CoordConsole.upperBound.toString()+" lower:"+CoordConsole.lowerBound.toString()+" limit:"+CoordConsole.primeLimit);
+			DataOutputStream d=new DataOutputStream(o);
+		    d.writeUTF("type:goal upper:"+CoordConsole.upperBound.toString()+" lower:"+CoordConsole.lowerBound.toString()+" limit:"+CoordConsole.primeLimit);
 			//send long term
 			Store.send(s);
 			//send workers
+			//Not sure where worker records will currently be stored
+			String workers="type:workers: ";
+			for (WorkerRecord i:CoordConsole.wr) {
+				workers=workers+i.toString();
+			}
+			d.writeUTF(workers);
 			//need to know data struct
+			//Inform completed recovery
+			d.writeUTF("type:rc");
 			o.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
