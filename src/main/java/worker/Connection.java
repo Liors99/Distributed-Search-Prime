@@ -1,16 +1,16 @@
 package worker;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.*;
+
+import data.NetworkMessage;
 
 public class Connection extends Thread{
 
 	private String hostname;
 	private int port;
 	private Socket sock;
-	private InputStream sockIn;
-	private OutputStream sockOut;
+	private DataInputStream sockIn;
+	private DataOutputStream sockOut;
 	
 	public Connection(String hostname, int port) {
 		this.hostname = hostname;
@@ -26,12 +26,23 @@ public class Connection extends Thread{
 	public void connect() {
 		try {
 			sock = new Socket(hostname, port);
-			sockIn = sock.getInputStream();
-			sockOut = sock.getOutputStream();
+			sockIn = new DataInputStream(sock.getInputStream());
+			sockOut = new DataOutputStream(sock.getOutputStream());
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	void sendInitialHandshake() {
+		try {
+			NetworkMessage.send(sockOut, "type:WorkerHandshake");
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 }
