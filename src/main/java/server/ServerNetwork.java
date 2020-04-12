@@ -1,7 +1,10 @@
 package server;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -20,6 +23,7 @@ public class ServerNetwork implements Runnable{
     private ServerSocket serverSocket;
     private boolean isStopped;
     private Thread runningThread;
+    private Socket socket; 
     
     private DataOutputStream out;
     
@@ -109,6 +113,23 @@ public class ServerNetwork implements Runnable{
 	 }
 	 
 	 /**
+	  * Opens up a TCP connection 
+	  * @param IP
+	  * @param port
+	 * @throws Exception 
+	  */
+	 public boolean startConnection(String IP, int port) throws Exception {
+		 
+		 socket = new Socket(IP, port);
+		 if(socket.isConnected()) {
+			 client_to_socket.put(IP.toString()+Integer.toString(port),socket);
+			 return true; 
+		 }
+		 return false; 
+		 
+	 }
+	 
+	 /**
 	 * Gets the next message on the queue, blocks until a message appears on the queue
 	 * @return
 	 */
@@ -149,6 +170,8 @@ public class ServerNetwork implements Runnable{
 	        throw new RuntimeException("Cannot open port 8080", e);
 	    }
 	}
+	
+	
 	    
 	    
 	
