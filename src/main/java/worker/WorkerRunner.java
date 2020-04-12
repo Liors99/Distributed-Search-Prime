@@ -55,7 +55,7 @@ public class WorkerRunner extends Thread{
 						console.println("Please enter the port of server #"+i+": ");
 						ports[i] = Integer.parseInt(input.nextLine());
 					}
-					console.println("All server info has been recieved");
+					console.println("All server info has been received");
 					break;
 				}
 				else {
