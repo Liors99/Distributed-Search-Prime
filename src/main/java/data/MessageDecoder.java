@@ -45,6 +45,14 @@ public class MessageDecoder {
 			}
 			return true;	
 		}
+		else if(type.equals("initialElection")) {
+			//TODO: Initial Election Messages 
+			return true; 
+		}
+		else if(type.equals("reElection")) {
+			//TODO: reElection Messages 
+			return true; 
+		}
 		else {
 			//Message type unknown 
 			if (CoordConsole.debug) {
