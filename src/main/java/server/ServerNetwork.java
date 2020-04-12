@@ -133,7 +133,7 @@ public class ServerNetwork implements Runnable{
 	 * Gets the next message on the queue, blocks until a message appears on the queue
 	 * @return
 	 */
-	public synchronized String recieveNextMessage() {
+	public String recieveNextMessage() {
 		while(MessageQueue.isEmpty()) {}
 		
 		return MessageQueue.poll();

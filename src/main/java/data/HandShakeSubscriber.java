@@ -12,6 +12,12 @@ public class HandShakeSubscriber {
 		generateToken();
 	}
 	
+	
+	public HandShakeSubscriber(int ka) {
+		this();
+		setKA(ka);
+	}
+	
 
 	/**
 	 * Generates a random number for leader election
