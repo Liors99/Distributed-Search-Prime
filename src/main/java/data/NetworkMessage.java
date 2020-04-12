@@ -49,7 +49,7 @@ public class NetworkMessage {
 	 * @return
 	 * @throws IOException
 	 */
-	public static String recieve(DataInputStream in) throws IOException {
+	public static String receive(DataInputStream in) throws IOException {
 		
 		//Read in the length of the input
 		byte[] length_bytes = new byte[4]; // The length of the input

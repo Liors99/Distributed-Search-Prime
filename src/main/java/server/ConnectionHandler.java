@@ -34,17 +34,17 @@ public class ConnectionHandler implements Runnable{
 
     public void run() {
     	while(isConnected) {
-    		recieve();
+    		receive();
     	}
     	
     }
     
 
-	public void recieve()  {
+	public void receive()  {
     	try {
     		if(in.available()>0) {
     			
-    			String next_msg = NetworkMessage.recieve(in);
+    			String next_msg = NetworkMessage.receive(in);
         		this.server.addToMessageQueue(next_msg);
     		}
     		

@@ -34,14 +34,14 @@ public class MessageDecoder {
 			Map<String, String> map=createmap(message);
 			CoordConsole.updateConnection(map);
 			if (CoordConsole.debug) {
-				System.out.println("Recieved: "+message);
+				System.out.println("Received: "+message);
 			}
 			return true;
 		}
 		else if(type.equals("goal")) {
 			CoordConsole.task(createmap(message));
 			if (CoordConsole.debug) {
-				System.out.println("Recieved: "+message);
+				System.out.println("Received: "+message);
 			}
 			return true;	
 		}
