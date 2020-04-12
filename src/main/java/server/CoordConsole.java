@@ -23,10 +23,10 @@ public class CoordConsole {
 	private static int mode=0;
 	public static Socket [] sockets =new Socket [3];
 	
-	private static boolean validRange = false;
-	private static BigInteger lowerBound;
-	private static BigInteger upperBound;
-	private static int primeLimit;
+	static boolean validRange = false;
+	static BigInteger lowerBound;
+	static BigInteger upperBound;
+	static int primeLimit;
 	private static ServerSocket s;
     static int send =100000;
 	static int timeout=20000000;

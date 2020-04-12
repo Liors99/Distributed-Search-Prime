@@ -21,8 +21,8 @@ import java.nio.file.Files;
 public class Store {
 	
 	RandomAccessFile out;
-	File f;
-	private final Object lock = new Object();
+	static File f;
+	private final static Object lock = new Object();
 	
 	
 	//only initialize once 
@@ -109,7 +109,7 @@ public class Store {
 	        out = new RandomAccessFile("output.txt", "rw");
 	    }
 	    
-	   public void send(Socket s) {
+	   public static void send(Socket s) {
 		   synchronized(lock) {
 			      String head="type:file ";
 		          byte [] mybytearray  = new byte [head.length()+(int)f.length()];
