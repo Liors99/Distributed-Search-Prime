@@ -29,5 +29,12 @@ public class HandshakeSubscriberTest {
 		assertEquals(30, hss.getKA());
 		assertEquals(10, hss.getToken());
 	}
+	
+	@Test
+	void testKA() {
+		HandShakeSubscriber hss = new HandShakeSubscriber(60);
+		
+		assertEquals(60, hss.getKA());
+	}
 
 }

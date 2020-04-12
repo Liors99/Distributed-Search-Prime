@@ -6,10 +6,16 @@ public class HandShakeSubscriber {
 	private double token;
 	
 	/**
-	 * Constructor, generates a a random token when first set up
+	 * Constructor, generates a random token when first set up
 	 */
 	public HandShakeSubscriber() {
 		generateToken();
+	}
+	
+	
+	public HandShakeSubscriber(int ka) {
+		this();
+		setKA(ka);
 	}
 	
 

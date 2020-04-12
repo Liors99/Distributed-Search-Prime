@@ -52,6 +52,13 @@ public class MessageDecoder {
 			s=new Store(); //empty old file
 			s.update(space[1]);
 			return true;
+		else if(type.equals("initialElection")) {
+			//TODO: Initial Election Messages 
+			return true; 
+		}
+		else if(type.equals("reElection")) {
+			//TODO: reElection Messages 
+			return true; 
 		}
 		else {
 			//Message type unknown 

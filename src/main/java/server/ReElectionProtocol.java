@@ -7,7 +7,7 @@ public class ReElectionProtocol {
 	 *
 	 * @param  time1 down time of first server
 	 * @param  time2 down time of second server
-	 * @return      the server with the least amount of downtime
+	 * @return      the server with the least amount of down time
 	 */
 	public int compareDownTime(long time1, long time2) {
 		int server = 1; 
