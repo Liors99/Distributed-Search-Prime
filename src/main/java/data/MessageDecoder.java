@@ -75,6 +75,7 @@ public class MessageDecoder {
 			//do nothing message not right
 			return false;
 		}
+		return false;
 		
 	}
 	

@@ -18,7 +18,7 @@ public class CoordConsole {
 	static String [] Ips= {"192.168.56.1", "192.168.56.1", "192.168.56.1"};
 	//pick fav port number
 	static int [] ServerPorts = {4444, 5555, 6666};
-	static String[] status= {"dead", "dead", "dead"};
+	public static String[] status= {"dead", "dead", "dead"};
 	//by default run as 
 	private static int mode=0;
 	public static Socket [] sockets =new Socket [3];
@@ -92,6 +92,7 @@ public class CoordConsole {
 						try {
 							OutputStream s=sockets[i].getOutputStream();
 							new DataOutputStream(s).writeUTF("type:goal upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit);
+							status[id]="active";
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -246,7 +247,9 @@ public static void updateConnection(Map<String, String> map) {
 		}
 		if (map.containsKey("limit")) {
 			primeLimit=Integer.parseInt((map.get("limit")));
-		}		
+		}	
+		status[id]="active";
+	
 }
 	
 }
