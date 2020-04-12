@@ -19,7 +19,7 @@ public class ServerNetworkTest {
 	/*
 	
 	@Test
-	void testRecieve() throws UnknownHostException, IOException, InterruptedException {
+	void testReceive() throws UnknownHostException, IOException, InterruptedException {
 		
 		int port = 9001;
 		
@@ -38,9 +38,9 @@ public class ServerNetworkTest {
         NetworkMessage.send(out, "Hello 3");
 
         
-        System.out.println(server.recieveNextMessage());
-        System.out.println(server.recieveNextMessage());
-        System.out.println(server.recieveNextMessage());
+        System.out.println(server.receiveNextMessage());
+        System.out.println(server.receiveNextMessage());
+        System.out.println(server.receiveNextMessage());
         server.printConnections();
         
         client.close();
@@ -68,7 +68,7 @@ public class ServerNetworkTest {
 				
 				server.send("127.0.0.1", client.getLocalPort(), "Hello client!");
 				
-				System.out.println(NetworkMessage.recieve(client_in));
+				System.out.println(NetworkMessage.receive(client_in));
 				
 				client.close();
 				

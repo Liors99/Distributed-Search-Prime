@@ -25,7 +25,7 @@ public class ServerNetwork implements Runnable{
     
     private HashMap<String, Socket> client_to_socket;
     
-    private BlockingQueue<String> MessageQueue = new LinkedBlockingDeque<String>(); //Message queue for all messages recieved from all threads
+    private BlockingQueue<String> MessageQueue = new LinkedBlockingDeque<String>(); //Message queue for all messages received from all threads
 	
 	public ServerNetwork(String ip, int port) {
 		this.port=port;
@@ -112,7 +112,7 @@ public class ServerNetwork implements Runnable{
 	 * Gets the next message on the queue, blocks until a message appears on the queue
 	 * @return
 	 */
-	public String recieveNextMessage() {
+	public String receiveNextMessage() {
 		while(MessageQueue.isEmpty()) {}
 		
 		return MessageQueue.poll();

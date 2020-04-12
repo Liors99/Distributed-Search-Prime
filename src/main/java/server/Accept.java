@@ -22,9 +22,9 @@ public class Accept implements Runnable {
 				String separator = "/";
 				String ip=ref.getInetAddress().toString().split(Pattern.quote(separator))[1];
 				if (CoordConsole.debug==true) {
-					System.out.println("Recieved connection from "+ip);
+					System.out.println("Received connection from "+ip);
 				}
-				Recieve r=new Recieve(ref, CoordConsole.send, CoordConsole.timeout);
+				Receive r=new Receive(ref, CoordConsole.send, CoordConsole.timeout);
 				Thread thread = new Thread(r);
 				thread.start();
 						

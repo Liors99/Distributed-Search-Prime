@@ -62,7 +62,7 @@ public class CoordConsole {
 				//May need to actually ask but good enough for now
 				if (status[i].equals("dead")) {
 					status[i]="setup";
-					Recieve r=new Recieve(sockets[i], send, timeout);
+					Receive r=new Receive(sockets[i], send, timeout);
 					Thread thread1 = new Thread(r);
 					thread1.start();
 				}
