@@ -16,7 +16,7 @@ import data.NetworkMessage;
 
 public class ServerNetworkTest {
 	
-	/*
+	
 	
 	@Test
 	void testRecieve() throws UnknownHostException, IOException, InterruptedException {
@@ -87,7 +87,7 @@ public class ServerNetworkTest {
 	@Test
 	void testConnect() throws Exception {
 		
-		int port = 9001;
+		int port = 9100;
 		
 		System.out.println("Started");
 		ServerNetwork server = new ServerNetwork("localhost", port);
@@ -95,14 +95,55 @@ public class ServerNetworkTest {
 		
 		server.startConnection("localhost", port);
 		
-		Socket client = new Socket("localhost", 9002);
+		//Socket client = new Socket("localhost", port);
 		
         server.printConnections();
         
-        client.close();
+        //client.close();
 	}
 	
-	*/
+	
+	@Test
+	void testCommunicate() throws Exception {
+		
+		int port = 9101;
+		
+		System.out.println("Started");
+		ServerNetwork server = new ServerNetwork("127.0.0.1", port);
+		ServerNetwork server2 = new ServerNetwork("127.0.0.1", port+1);
+		new Thread(server).start();
+		new Thread(server2).start();
+		
+		Socket out = server.startConnection("127.0.0.1", port+1);
+		
+		//Socket client = new Socket("localhost", port);
+		
+		//Thread.sleep(4000);
+		//System.out.println("-----------------------");
+        //server.printConnections();
+		//System.out.println("-----------------------");
+		
+		boolean isFail = true; 
+		//while(isFail) {
+			try {
+				//System.out.println(out.getLocalPort());
+				server.printConnections();
+				//server2.printConnections(); 
+				server.send("127.0.0.1", 9102, "test");
+				isFail = false; 
+			} catch(Exception e) {
+				//e.printStackTrace();
+			}
+		//}
+        System.out.println(server2.recieveNextMessage());  
+        
+        
+        server.stop(); 
+        server2.stop(); 
+        //client.close();
+	}
+	
+	
 	
 	
 	

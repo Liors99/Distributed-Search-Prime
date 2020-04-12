@@ -50,8 +50,9 @@ public class ServerNetwork implements Runnable{
 	            	InetAddress in_ip=inSocket.getInetAddress();
 	                int in_port=inSocket.getPort();
 	                
-	                System.out.println("Got a connection from " +in_ip.toString()+Integer.toString(in_port));
-	                client_to_socket.put(in_ip.toString()+Integer.toString(in_port),inSocket);
+	                String ip_port = removeSlash(in_ip.toString()+Integer.toString(in_port));
+	                System.out.println("Got a connection from " + ip_port);
+	                client_to_socket.put(ip_port,inSocket);
 
 	            } catch (IOException e) {
 	                if(isStopped()) {
@@ -74,10 +75,22 @@ public class ServerNetwork implements Runnable{
 	 /**
 	  * Prints all the connections that this server has (IP + port number)
 	  */
-	 public void printConnections() {
+	 public synchronized void printConnections() {
 		 for (String ip_port : client_to_socket.keySet()) {
 				System.out.println(ip_port);
 			}
+	 }
+	 
+	 private String removeSlash(String ip_port) {
+		 StringBuilder s = new StringBuilder();
+		 if(ip_port.charAt(0) == '/') {
+			 for(int i = 1; i < ip_port.length(); i++) {
+				 s.append(ip_port.charAt(i));
+			 }
+			 return s.toString(); 
+		 } else {
+			 return ip_port; 
+		 }
 	 }
 	 
 	 
@@ -91,7 +104,7 @@ public class ServerNetwork implements Runnable{
 	 public void send(String IP, int port, String msg) throws Exception {
 		 
 		 
-		 String key = "/"+IP+Integer.toString(port);
+		 String key = IP+Integer.toString(port);
 		 
 		 //Check if IP/port combination is registered in this server
 		 if(!client_to_socket.containsKey(key)) {
@@ -118,14 +131,14 @@ public class ServerNetwork implements Runnable{
 	  * @param port
 	 * @throws Exception 
 	  */
-	 public boolean startConnection(String IP, int port) throws Exception {
+	 public Socket startConnection(String IP, int port) throws Exception {
 		 
-		 socket = new Socket(IP, port);
-		 if(socket.isConnected()) {
-			 client_to_socket.put(IP.toString()+Integer.toString(port),socket);
-			 return true; 
+		 Socket socket_server = new Socket(IP, port);
+		 if(socket_server.isConnected()) {
+			 client_to_socket.put(IP.toString()+Integer.toString(port),socket_server);
+			 return socket_server; 
 		 }
-		 return false; 
+		 return null; 
 		 
 	 }
 	 
