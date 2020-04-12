@@ -49,23 +49,37 @@ public class ServerNetworkTest {
 	
 	
 	@Test
-	void testSend() throws Exception {
+	void testSend(){
 		int port = 9002;
 		
 		ServerNetwork server = new ServerNetwork("localhost", port);
 		new Thread(server).start();
 		
-		Socket client = new Socket("localhost", port);
-		
-		DataInputStream client_in = new DataInputStream(client.getInputStream());
+		Boolean isFailed= true;
 		
 		//Thread.sleep(4000);
 		
-		server.send("127.0.0.1", client.getLocalPort(), "Hello client!");
+		while(isFailed) {
+			try {
+				Socket client = new Socket("localhost", port);
+				
+				DataInputStream client_in = new DataInputStream(client.getInputStream());
+				server.send("127.0.0.1", client.getLocalPort(), "Hello client!");
+				
+				System.out.println(NetworkMessage.recieve(client_in));
+				
+				client.close();
+				
+				isFailed=false;
+			}
+			catch(Exception e){
+				System.out.println("Failed sending");
+			}
+		}
 		
-		System.out.println(NetworkMessage.recieve(client_in));
 		
-		client.close();
+		
+		
 	}
 	
 	
