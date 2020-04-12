@@ -1,8 +1,18 @@
 package server;
 
+import java.io.DataInputStream;
+import java.net.Socket;
 import java.util.HashMap;
 
+import data.NetworkMessage;
+
 public class ElectionProtocol {
+	
+	private Socket[] servers;
+
+	public ElectionProtocol(Socket[] servers) {
+		this.servers = servers;
+	}
 	
 	/**
 	 * Randomly generate a number to simulate the roll of a die. 
@@ -36,18 +46,6 @@ public class ElectionProtocol {
 		return true; 
 	}
 	
-	/**
-	 * Randomly determine the coordinator on initial startup
-	 *
-	 * @param  numServers the number of servers in the system
-	 * @return      the randomly determined coordinator
-	 */
-	public int initialCoord(int numServers) {
-		double roll = 0.0; 
-		int coordinator = 0;
-		HashMap<String, Double> servers = new HashMap<String, Double>();
-		
-		String coord = "Server0"; 
 		//Usage example 
 		//Need to translate to servers communicating with one another
 		
@@ -61,7 +59,9 @@ public class ElectionProtocol {
 		//Server x runs isHigher() and compares 
 		//If Server x is higher, then server x is the coordinator 
 		//If Server 3 is higher, then server 3 is the coordinator 
-		if(isHigher(server1,server2)) {
+
+	
+	/* 		if(isHigher(server1,server2)) {
 			
 			if(isHigher(server1, server3)) { 
 				coord = "Server1"; 
@@ -74,11 +74,6 @@ public class ElectionProtocol {
 			} else {
 				coord = "Server3";
 			}
-		}
-		
-		System.out.println(coord); 
-		
-		
-	}
+		} */
 
 }

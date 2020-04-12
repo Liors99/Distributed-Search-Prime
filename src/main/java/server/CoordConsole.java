@@ -32,8 +32,8 @@ public class CoordConsole {
 	static int timeout=20000000;
 	static int id; 
 	
-	//public static void main(String[] args) {
-	public static void notMain(String[] args){
+	public static void main(String[] args) {
+	//public static void notMain(String[] args){
 	 Socket [] sockets =new Socket [3];
 	 id=Integer.parseInt(args[0]);
 	 status[id]="setup";
@@ -58,7 +58,7 @@ public class CoordConsole {
 				if (debug) {
 					System.out.println("Connected to "+sockets[i]);
 				}
-				//May  need to actually ask but good enough for now
+				//May need to actually ask but good enough for now
 				if (status[i].equals("dead")) {
 					status[i]="setup";
 					Recieve r=new Recieve(sockets[i], send, timeout);
@@ -73,6 +73,8 @@ public class CoordConsole {
 	 } //end loop
 	 //need to give everyone time to start up 
 	 //then need to host an election
+	 
+	 ElectionProtocol initialElection = new ElectionProtocol(sockets);
 	 
 	 //for now just going to keep alive forever :)
 	 
