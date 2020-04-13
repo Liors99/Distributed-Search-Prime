@@ -15,25 +15,26 @@ import java.util.concurrent.TimeUnit;
 public class CoordConsole {
 	public static boolean debug=true; 
 	 //going to have to be updated on each machine
-	static String [] Ips= {"192.168.56.1", "192.168.56.1", "192.168.56.1"};
+	static String [] Ips= {"192.168.1.65", "192.168.1.65", "192.168.1.65"};
 	//pick fav port number
 	static int [] ServerPorts = {4444, 5555, 6666};
-	static String[] status= {"dead", "dead", "dead"};
+	public static String[] status= {"dead", "dead", "dead"};
 	//by default run as 
 	private static int mode=0;
 	public static Socket [] sockets =new Socket [3];
+	public static ArrayList<WorkerRecord> wr= new ArrayList<WorkerRecord>();
 	
-	private static boolean validRange = false;
-	private static BigInteger lowerBound;
-	private static BigInteger upperBound;
-	private static int primeLimit;
+	static boolean validRange = false;
+	static BigInteger lowerBound;
+	static BigInteger upperBound;
+	static int primeLimit;
 	private static ServerSocket s;
-    static int send =100000;
-	static int timeout=20000000;
-	static int id; 
+    static int send =1000;
+	static int timeout=2000;
+	public static int id=-1; 
 	
-	//public static void main(String[] args) {
-	public static void notMain(String[] args){
+	public static void main(String[] args) {
+	//public static void notMain(String[] args){
 	 Socket [] sockets =new Socket [3];
 	 id=Integer.parseInt(args[0]);
 	 status[id]="setup";
@@ -58,10 +59,10 @@ public class CoordConsole {
 				if (debug) {
 					System.out.println("Connected to "+sockets[i]);
 				}
-				//May  need to actually ask but good enough for now
+				//May need to actually ask but good enough for now
 				if (status[i].equals("dead")) {
 					status[i]="setup";
-					Recieve r=new Recieve(sockets[i], send, timeout);
+					Receive r=new Receive(sockets[i], send, timeout);
 					Thread thread1 = new Thread(r);
 					thread1.start();
 				}
@@ -74,6 +75,8 @@ public class CoordConsole {
 	 //need to give everyone time to start up 
 	 //then need to host an election
 	 
+	 ElectionProtocol initialElection = new ElectionProtocol(sockets);
+	 
 	 //for now just going to keep alive forever :)
 	 
 	 //Not currently using election
@@ -83,6 +86,7 @@ public class CoordConsole {
 	 //get input and send to other servers
 	 if (mode==1) {
 		 console();
+		 status[id]="active";
 		 for (int i=0; i<3; i++) {
 				if (i!=id) {
 					if (!status[i].equals("dead")&sockets[1]!=null){
@@ -219,18 +223,25 @@ public static void createServer() {
 
 public static void updateConnection(Map<String, String> map) {
 	int id=Integer.parseInt(map.get("id"));
-	try {
-		sockets[id] = new Socket(Ips[id], ServerPorts[id]);
-	} catch (UnknownHostException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
 		if (map.containsKey("status")) {
-			status[id]=map.get("status");
+			if (status[id].equals("dead") && status[CoordConsole.id].equals("active")) {
+			  try {
+				sockets[id] = new Socket(Ips[id], ServerPorts[id]);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			  status[id]="recover";
+			  Recover r=new Recover();
+			  r.setup(id);
+			  r.run();
+			}
+			else
+			{
+			    status[id]=map.get("status");
+			}
 		}
+		
 
   }
 	
@@ -243,7 +254,14 @@ public static void updateConnection(Map<String, String> map) {
 		}
 		if (map.containsKey("limit")) {
 			primeLimit=Integer.parseInt((map.get("limit")));
-		}		
+		}	
+		if(map.containsKey("recover")) {
+			status[id]="recover";
+		}
+		else {
+		    status[id]="active";
+		}
+	
 }
 	
 }

@@ -9,7 +9,7 @@ import java.net.SocketException;
 
 import data.MessageDecoder;
 
-public class Recieve implements Runnable {
+public class Receive implements Runnable {
 	
 	Socket s;
 	private int timeout;
@@ -18,7 +18,7 @@ public class Recieve implements Runnable {
 	private DataOutputStream out;
 	private DataInputStream in;
 
-	public Recieve(Socket s, int send, int timeout) throws IOException {
+	public Receive(Socket s, int send, int timeout) throws IOException {
 		//Add any required variables here
 		this.s=s;
 		this.send=send;
@@ -39,7 +39,7 @@ public class Recieve implements Runnable {
 		long startTime = System.currentTimeMillis();
 		long estimatedTime=0;
 		String temp;
-		while (estimatedTime<timeout) {
+		while (estimatedTime<timeout || !CoordConsole.status[CoordConsole.id].equals("active")) {
 		    try {
 		    	temp=in.readUTF();
 				 //Read something
