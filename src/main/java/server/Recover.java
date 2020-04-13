@@ -23,11 +23,12 @@ public class  Recover implements Runnable {
 			o = s.getOutputStream();
 			//send task 
 			DataOutputStream d=new DataOutputStream(o);
-		    d.writeUTF("type:goal upper:"+CoordConsole.upperBound.toString()+" lower:"+CoordConsole.lowerBound.toString()+" limit:"+CoordConsole.primeLimit);
+		    d.writeUTF("type:goal upper:"+CoordConsole.upperBound.toString()+" lower:"+CoordConsole.lowerBound.toString()+" limit:"+CoordConsole.primeLimit +" recover:true");
 			//send long term
 			Store.send(s);
 			//send workers
 			//Not sure where worker records will currently be stored
+			d=new DataOutputStream(o);
 			String workers="type:workers: ";
 			for (WorkerRecord i:CoordConsole.wr) {
 				workers=workers+i.toString();

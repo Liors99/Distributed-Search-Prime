@@ -112,16 +112,17 @@ public class Store {
 	   public static void send(Socket s) {
 		   synchronized(lock) {
 			      String head="type:file ";
-		          byte [] mybytearray  = new byte [head.length()+(int)f.length()];
+			      byte [] header=head.getBytes();
+		          byte [] mybytearray  = new byte [header.length+(int)f.length()];
 		          FileInputStream fis;
 				try {
 					fis = new FileInputStream(f);
-					BufferedInputStream bis = new BufferedInputStream(fis);
-					byte [] header=head.getBytes();
-					for (byte i:header) {
+					
+				    BufferedInputStream bis = new BufferedInputStream(fis);
+					for (int i=0; i<header.length; i++) {
 						mybytearray[i]=header[i];
 					}
-			        bis.read(mybytearray,head.length(),mybytearray.length);
+			        bis.read(mybytearray,head.length(),(int) f.length());
 			        OutputStream os = s.getOutputStream();
 			        System.out.println("Sending " + f + "(" + mybytearray.length + " bytes)");
 			        os.write(mybytearray,0,mybytearray.length);
@@ -129,7 +130,7 @@ public class Store {
 			        System.out.println(f+" sent");
 			        if (fis != null) bis.close();
 			        if (bis != null) bis.close();
-			        if (os != null) os.close();
+			        //if (os != null) os.close();
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
