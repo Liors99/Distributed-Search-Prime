@@ -69,13 +69,6 @@ public class ServerNetwork implements Runnable{
 	                System.out.println("Got a connection from " + ip_port);
 	                client_to_socket.put(ip_port,inSocket);
 	                
-	               for(int i=0; i< InitializeServerCluster.ips.length; i++) {
-	            	   if(InitializeServerCluster.ips[i].equals(in_ip) && InitializeServerCluster.ports[i] == in_port ) {
-	            		   servers.add(ip_port);
-	            	   }
-	               }
-	                	
-	                
 
 	            } catch (IOException e) {
 	                if(isStopped()) {
@@ -104,7 +97,7 @@ public class ServerNetwork implements Runnable{
 			}
 	 }
 
-	 private String removeSlash(String ip_port) {
+	 public String removeSlash(String ip_port) {
 		 StringBuilder s = new StringBuilder();
 		 if(ip_port.charAt(0) == '/') {
 			 for(int i = 1; i < ip_port.length(); i++) {
@@ -176,7 +169,25 @@ public class ServerNetwork implements Runnable{
 	  * @return
 	  */
 	 public boolean isServer(String ip, int port) {
-		 return servers.contains(ip+Integer.toString(port));
+		 for(int i=0; i<InitializeServerCluster.ips.length; i++) {
+				for(int j=0; j<InitializeServerCluster.ports.length; j++) {
+					if(ip.equals(InitializeServerCluster.ips[i])){
+						if(InitializeServerCluster.ports[j] == port || 
+								InitializeServerCluster.ports[j] + InitializeServerCluster.offset*(i+1) == port) {
+
+							//System.out.println("Server "+ Integer.toString(port) + "Has disconnected");
+							return true;
+						}
+					}
+				}
+		 }
+		 
+		 return false;
+	 }
+	 
+	 
+	 public void addServer(String ip, int port) {
+		 servers.add(removeSlash(ip+Integer.toString(port)));
 	 }
 
 	 /**

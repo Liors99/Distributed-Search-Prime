@@ -92,6 +92,9 @@ public class InitializeServerCluster {
                     System.out.println("Initiated Connection to " + ips[i] + " "+ Integer.toString(ports[i]));
                     System.out.println((!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]+offset))));
                     offsetted[i] = false; 
+                    
+                    server.addServer(ips[i], ports[i]);
+                    server.addServer(ips[id], ports[id]+(offset*(i+1)));
                 }catch(BindException e){
                     //System.out.println("got an exception");
                     
