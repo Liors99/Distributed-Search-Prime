@@ -22,9 +22,28 @@ public class Connection extends Thread{
 	}
 	
 	public void run() {
-		connect();
-		sendInitialHandshake();
-		connect();
+
+		while (true) {
+			try {
+				connect();
+				Thread.sleep(2000);
+				sendInitialHandshake();				
+				break;
+			}
+			catch (Exception e) {
+				
+			}
+		}
+		
+		while (true) {
+			try {
+				connect();
+				break;
+			}
+			catch (Exception e) {
+				
+			}
+		}
 		while(!killswitch) {
 			
 		}
@@ -56,8 +75,7 @@ public class Connection extends Thread{
 			port = Integer.parseInt(responseMap.get("port"));			
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
 		}
 		
 	}

@@ -13,6 +13,7 @@ public class WorkerConnection extends Thread {
 	public Socket sock;
 	public DataOutputStream sockOut;
 	public DataInputStream sockIn;
+	public boolean ready = false;
 	private boolean killswitch = false;
 	
 	public WorkerConnection() throws IOException{
@@ -31,7 +32,7 @@ public class WorkerConnection extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+		ready = true;
 		while(!killswitch) {
 			
 		}

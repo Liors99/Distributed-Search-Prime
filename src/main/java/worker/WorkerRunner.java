@@ -115,8 +115,7 @@ public class WorkerRunner extends Thread{
 //				connections[i].sock.setSoTimeout(5000);
 				handshake = NetworkMessage.receive(connections[i].sockIn);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
 			}
 			if (handshake != null) {
 				System.out.println("Received handshake:"+handshake);
