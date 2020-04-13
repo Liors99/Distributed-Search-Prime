@@ -135,6 +135,26 @@ public class ServerNetwork implements Runnable{
 
 
 	 }
+	 
+	 /**
+	  * Sends a message to the specified IP and port number that corresponds to an entity, blocks until the message is sent
+	  * @param IP
+	  * @param port
+	  * @param msg
+	 * @throws Exception
+	  */
+	 public void sendServers(String msg) throws Exception {
+		 for (Socket i: client_to_socket.values()) {
+			 try {
+					out = new DataOutputStream(i.getOutputStream());
+					NetworkMessage.send(out, msg);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			 
+		 }
+	 }
 
 	 /**
 	  * Opens up a TCP connection

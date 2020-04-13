@@ -17,7 +17,7 @@ public class Coordinator {
     
     public Coordinator(int id, List<ServerNetwork> ServerNetworkConnections, ServerNetwork server) {
     	this.id=id;
-    	this.ServerNetworkConnections=ServerNetworkConnections;
+    	Coordinator.ServerNetworkConnections=ServerNetworkConnections;
     	this.server=server;
     }
 	/**
@@ -31,13 +31,11 @@ public class Coordinator {
 		primeLimit=CoordConsole.primeLimit;
 		String task="type:goal upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit;
 		// Send tasks to other servers
-		for (ServerNetwork i: ServerNetworkConnections) {
-			try {
-				i.send(i.getIp(), i.getPort(), task);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			server.sendServers(task);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
     }
