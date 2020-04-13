@@ -12,7 +12,7 @@ public class WorkerConnection extends Thread {
 	public DataInputStream sockIn;
 	private boolean killswitch = false;
 	
-	public WorkerConnection(int id) throws IOException{
+	public WorkerConnection() throws IOException{
 		
 		servSock = new ServerSocket(0);
 
