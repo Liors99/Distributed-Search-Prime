@@ -59,6 +59,13 @@ public class InitializeServerCluster {
         }
 
         System.out.println("Leader selected:"+LeaderId);
+        if(LeaderId==id) {
+        	Coordinator c = new Coordinator(id, ServerNetworkConnections, server);
+        	c.notMain();
+        }
+        else {
+        	Subscriber s;
+        }     
 
     }
 
