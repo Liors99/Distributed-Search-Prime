@@ -2,8 +2,11 @@ package worker;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.net.*;
 import java.util.*;
 
+import data.MessageDecoder;
+import data.NetworkMessage;
 import worker.Networking.ConnectionInfo;
 
 
@@ -14,8 +17,16 @@ public class WorkerRunner extends Thread{
 	String[] hostnames;
 	int[] ports;
 	Connection[] connections;
+	int currentCoordinator;
+	private boolean killswitch = false;
 	
 	Networking network;
+	
+	public WorkerRunner() {
+		hostnames = new String[Networking.NUMBER_OF_SERVERS];
+		ports = new int[Networking.NUMBER_OF_SERVERS];
+		connections = new Connection[Networking.NUMBER_OF_SERVERS];
+	}
 	
 	public void run() {
 		runConsole(console, input);
@@ -26,12 +37,59 @@ public class WorkerRunner extends Thread{
 			connections[i] = new Connection(curConnection.hostname, curConnection.port);
 		}
 		
+		
 		for (int i = 0; i<Networking.NUMBER_OF_SERVERS; i++) {
-			connections[i].run();
+			connections[i].start();
 		}
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		findCoordinator();
+		String task = getTask();
+		Map<String, String> assignMap = MessageDecoder.createmap(task);
+		String lower = assignMap.get("lower");
+		String upper = assignMap.get("upper");
+		String tested = assignMap.get("tested");
+		System.out.println("I got assigned: lower:"+lower+" upper:"+upper+" tested number:"+ tested);
+		PrimeSearch ps = new PrimeSearch(new BigInteger(lower), new BigInteger(upper), new BigInteger(tested));
+		ps.run();
+	}
+	
+	
+	public String getTask() {
+		String task = null;
+		Socket coordSocket = connections[currentCoordinator].sock;
+		while(!killswitch && task==null) {
+			try {
+				coordSocket.setSoTimeout(5000);
+				task = NetworkMessage.receive(new DataInputStream(coordSocket.getInputStream()));
+			} catch (Exception e) {
+
+			}
+		}
+		return task;
 		
 	}
 	
+	public void findCoordinator() {
+		String handshake = null;
+		for(int i = 0; i<Networking.NUMBER_OF_SERVERS; i++) {
+			try {
+//				connections[i].sock.setSoTimeout(5000);
+				handshake = NetworkMessage.receive(connections[i].sockIn);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if (handshake != null) {
+				System.out.println("Received handshake:"+handshake);
+				currentCoordinator = i;
+				break;
+			}
+		}
+	}
 	
 	public void runConsole(PrintStream console, Scanner input) {
 		String userIn;
@@ -67,11 +125,11 @@ public class WorkerRunner extends Thread{
 				
 		}
 		
-		PrimeSearch ps = new PrimeSearch(new BigInteger("3"), new BigInteger("1000000000"), 
-				new BigInteger("46843439956249365837687076705518861850009996536661"));
-		ps.start();
-
 		
+	}
+	
+	public void kill() {
+		killswitch = true;
 	}
 
 }

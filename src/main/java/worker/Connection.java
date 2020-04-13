@@ -46,6 +46,8 @@ public class Connection extends Thread{
 	
 	void sendInitialHandshake() {
 		try {
+			Thread.sleep(2000);
+
 			NetworkMessage.send(sockOut, "type:WorkerHandshake");
 			String response = NetworkMessage.receive(sockIn);
 			System.out.println("Received:"+ response);
@@ -53,7 +55,7 @@ public class Connection extends Thread{
 			sock.close();
 			port = Integer.parseInt(responseMap.get("port"));			
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
