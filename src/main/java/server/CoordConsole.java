@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class CoordConsole {
 	public static boolean debug=true; 
 	 //going to have to be updated on each machine
-	static String [] Ips= {"192.168.56.1", "192.168.56.1", "192.168.56.1"};
+	static String [] Ips= {"192.168.1.65", "192.168.1.65", "192.168.1.65"};
 	//pick fav port number
 	static int [] ServerPorts = {4444, 5555, 6666};
 	static String[] status= {"dead", "dead", "dead"};
