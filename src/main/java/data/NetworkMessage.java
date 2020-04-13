@@ -41,6 +41,7 @@ public class NetworkMessage {
 	 */
 	public static void send(DataOutputStream out, String msg) throws IOException {
 		out.write(NetworkMessage.toNetworkMessage(msg));
+		out.flush();
 	}
 	
 	/**

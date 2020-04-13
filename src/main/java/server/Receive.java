@@ -39,7 +39,7 @@ public class Receive implements Runnable {
 		long startTime = System.currentTimeMillis();
 		long estimatedTime=0;
 		String temp;
-		while (estimatedTime<timeout) {
+		while (estimatedTime<timeout || !CoordConsole.status[CoordConsole.id].equals("active")) {
 		    try {
 		    	temp=in.readUTF();
 				 //Read something

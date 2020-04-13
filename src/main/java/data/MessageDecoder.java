@@ -6,9 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import server.CoordConsole;
+import server.Store;
 
 //Message format assisting 
 public class MessageDecoder {
+	
+	static Store s=new Store();
 
 	public static boolean parse(String message) {
 		//split into key value pairs
@@ -20,8 +23,7 @@ public class MessageDecoder {
 		catch (Exception e){
 			return false;
 		}
-		
-		
+			
 		
 		//Add your own methods here
 		if (type.equals("A")) {
@@ -45,8 +47,12 @@ public class MessageDecoder {
 			}
 			return true;	
 		}
+		else if (type.equals("file")) {
+			s=new Store(); //empty old file
+			s.update(space[1]);
+			return true;
+		}
 		else if(type.equals("WorkerHandshake")) {
-			
 		}
 		else if(type.equals("initialElection")) {
 			//TODO: Initial Election Messages 
@@ -55,6 +61,13 @@ public class MessageDecoder {
 		else if(type.equals("reElection")) {
 			//TODO: reElection Messages 
 			return true; 
+		}
+		else if (type.equals("rc")) {
+			//Server has recovered
+			CoordConsole.status[CoordConsole.id]="active";
+		}
+		else if (type.equals("workers")) {
+			//TODO: figure out worker storage
 		}
 		else {
 			//Message type unknown 
