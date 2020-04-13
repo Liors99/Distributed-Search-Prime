@@ -18,6 +18,17 @@ import data.NetworkMessage;
 //Adapted from http://tutorials.jenkov.com/java-multithreaded-servers/multithreaded-server.html
 
 public class ServerNetwork implements Runnable{
+	private String ip; 
+	public String getIp() {
+		return ip;
+	}
+
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+
 	private int port;
     private ServerSocket serverSocket;
     private boolean isStopped;
@@ -33,6 +44,7 @@ public class ServerNetwork implements Runnable{
 	public ServerNetwork(String ip, int port) {
 		this.port=port;
 		client_to_socket = new HashMap<>();
+		this.ip = ip; 
 	}
 
 
@@ -92,7 +104,6 @@ public class ServerNetwork implements Runnable{
 		 }
 	 }
 
-
 	 /**
 	  * Sends a message to the specified IP and port number that corresponds to an entity, blocks until the message is sent
 	  * @param IP
@@ -130,9 +141,9 @@ public class ServerNetwork implements Runnable{
 	  * @param port
 	 * @throws Exception
 	  */
-	 public Socket startConnection(String IP, int port) throws Exception {
+	 public Socket startConnection(String IP, int port, String IP_from, int port_from) throws Exception {
 
-		 Socket socket_server = new Socket(IP, port);
+		 Socket socket_server = new Socket(InetAddress.getByName(IP), port,InetAddress.getByName(IP_from), port_from);
 		 if(socket_server.isConnected()) {
 			 client_to_socket.put(IP.toString()+Integer.toString(port),socket_server);
 			 return socket_server;
@@ -150,6 +161,14 @@ public class ServerNetwork implements Runnable{
 
 		return MessageQueue.poll();
 	 }
+
+	 /**
+	 * Peek without pulling message to verify it is yours 
+	 * @return
+	 */
+	public String peekNextMessage() {
+		return MessageQueue.peek(); 
+	}
 
 
 	/**

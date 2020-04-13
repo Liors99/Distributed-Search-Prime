@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -17,7 +18,7 @@ import data.NetworkMessage;
 public class ServerNetworkTest {
 
 
-
+/*
 	@Test
 	void testRecieve() throws UnknownHostException, IOException, InterruptedException {
 
@@ -101,7 +102,7 @@ public class ServerNetworkTest {
 
         //client.close();
 	}
-
+*/
 
 	@Test
 	void testCommunicate() throws Exception {
@@ -114,8 +115,8 @@ public class ServerNetworkTest {
 		new Thread(server).start();
 		new Thread(server2).start();
 
-		Socket out = server.startConnection("127.0.0.1", port+1);
-
+		Socket out = server.startConnection("127.0.0.1", port+1, "127.0.0.1", port + 20);
+		//Socket socket2 = new Socket(InetAddress.getByName("127.0.0.1"), port+1, InetAddress.getByName("127.0.0.1"), port+20);
 		//Socket client = new Socket("localhost", port);
 
 		//Thread.sleep(4000);
@@ -129,7 +130,8 @@ public class ServerNetworkTest {
 				//System.out.println(out.getLocalPort());
 				server.printConnections();
 				//server2.printConnections();
-				server.send("127.0.0.1", 9102, "test");
+				server.send("127.0.0.1", port+1, "test");
+				//socket2.getOutputStream().write("test".getBytes());
 				isFail = false;
 			} catch(Exception e) {
 				//e.printStackTrace();

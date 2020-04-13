@@ -8,7 +8,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class InitializeServerCluster {
-
+/*
+	1. you get to choose whether it is a first start or a reconnection to an existing architecture
+	2. based on that, there is a decision made whether or not an election or reelection is appropriate
+	3. if you are reconnecting, you get the updates you need to get in order to come back alive
+	4. after your role is determined, you run the appropriate procedure for your role
+*/
 	public static final int port = 11000;
 
 	public static List<ServerNetwork> ServerNetworkConnections;
@@ -17,11 +22,13 @@ public class InitializeServerCluster {
 	public static ServerNetwork server;
 	public static Integer id;
 	public static Integer LeaderId;
+	public static final Integer offset = 20;
+	public static boolean[] offsetted = {false, false, false};
 
 	public static void main(String args[]) throws Exception {
 		//Keep track of server connections
 		id = 0;
-		ServerNetworkConnections = new LinkedList<ServerNetwork>();
+		//ServerNetworkConnections = new LinkedList<ServerNetwork>();
 
 		if (args.length > 0) {
 		    try {
@@ -35,16 +42,21 @@ public class InitializeServerCluster {
 		        System.exit(1);
 		    }
 		}
-		server = new ServerNetwork(ips[id], ports[id]);
+		server = new ServerNetwork(ips[id], ports[id]);//?
 		new Thread(server).start();
 		//If not initialized, then start
+		System.out.println("ServerNetwork started!");
 		establishConnections();
+		System.out.println("Connections Established!");
 
+		System.out.println("Initial leader election initiated!");
 		LeaderId = -1;
 		while(LeaderId == -1){
 			//DO initial election
 			LeaderId = initial_election();
 		}
+
+		System.out.println("Leader selected:"+LeaderId);
 
 	}
 
@@ -56,16 +68,18 @@ public class InitializeServerCluster {
 				continue;
 			}
 			//check if key in hashmap
-			if(!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))){
-				//if not start a connection
-				Socket Sk = null;
-				while(Sk == null){
-					try{
-						Sk = server.startConnection(ips[i],ports[i]);
-					}catch(Exception e){
-						//e.printStackTrace();
-					}
+
+			//if not start a connection
+			Socket Sk = null;
+			while(Sk == null && (/*!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i])) ||*/ !server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]+offset)))){ //check for +20
+				try{
+					Sk = server.startConnection(ips[i],ports[i], ips[id], ports[id]+offset);
+				}catch(Exception e){
+					//e.printStackTrace();
+				}
 			}
+			if(Sk == null){
+				offsetted[i] = true;
 			}
 		}
 	}
@@ -82,8 +96,11 @@ public class InitializeServerCluster {
 			if (i==id){
 				continue;
 			}
-			server.send(ips[id],ports[id],serializedToken);
+			//check if in hashtable or +20
+			int p = (offsetted[i])?ports[id]+offset:ports[id];
+			server.send(ips[i], p, serializedToken);
 		}
+
 		String responses[] = new String[2];
 		responses[0] = server.recieveNextMessage();
 		responses[1] = server.recieveNextMessage();
@@ -99,15 +116,14 @@ public class InitializeServerCluster {
 		vals[1] = HsDecoded1.getToken();
 		vals[2] = HsDecoded2.getToken();
 
-		double max = -1;
-		//find max double token
-		for(double v : vals){
-			if (v > max){
-				max = v;
-			}
-		}
 
+		double max = findMax(vals);
+		int winner = findWinnerID(vals, max);
+		return winner;
 
+	}
+
+	public static int findWinnerID(double[] vals, double max){
 		int counter = 0;
 		int winner = -1;
 		for(int i=0;i<3;i++){
@@ -122,7 +138,19 @@ public class InitializeServerCluster {
 		return winner;
 	}
 
-	public Integer reelection(){
+	public static double findMax(double[] vals){
+		double max = -1;
+		//find max double token
+		for(double v : vals){
+			if (v > max){
+				max = v;
+			}
+		}
+		return max;
+	}
+
+
+	public static Integer reelection(){
 		return 1;
 	}
 }
