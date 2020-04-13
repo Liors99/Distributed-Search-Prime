@@ -64,8 +64,12 @@ public class InitializeServerCluster {
         	c.notMain();
         }
         else {
-        	Subscriber s;
-        }     
+        	Subscriber s = new Subscriber(id, LeaderId, server);
+        	System.out.println(server.receiveNextMessage());
+        	
+        } 
+        
+        while(true) {}
 
     }
 
@@ -89,7 +93,8 @@ public class InitializeServerCluster {
                     System.out.println((!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]+offset))));
                     offsetted[i] = false; 
                 }catch(BindException e){
-                    System.out.println("got an exception");
+                    //System.out.println("got an exception");
+                    
                     //offsetted[i] = true; 
                     //break;
                     //e.printStackTrace();

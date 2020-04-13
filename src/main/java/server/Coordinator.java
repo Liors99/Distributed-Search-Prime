@@ -20,6 +20,7 @@ public class Coordinator {
     	Coordinator.ServerNetworkConnections=ServerNetworkConnections;
     	this.server=server;
     }
+    
 	/**
 	 * Run as a coordinator 
 	 */

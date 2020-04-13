@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -41,6 +42,8 @@ public class ServerNetwork implements Runnable{
 
 
     private BlockingQueue<String> MessageQueue = new LinkedBlockingDeque<String>(); //Message queue for all messages recieved from all threads
+    
+    private HashSet<String> servers = new HashSet<>();
 
 	public ServerNetwork(String ip, int port) {
 		this.port=port;
@@ -65,6 +68,14 @@ public class ServerNetwork implements Runnable{
 	                String ip_port = removeSlash(in_ip.toString()+Integer.toString(in_port));
 	                System.out.println("Got a connection from " + ip_port);
 	                client_to_socket.put(ip_port,inSocket);
+	                
+	               for(int i=0; i< InitializeServerCluster.ips.length; i++) {
+	            	   if(InitializeServerCluster.ips[i].equals(in_ip) && InitializeServerCluster.ports[i] == in_port ) {
+	            		   servers.add(ip_port);
+	            	   }
+	               }
+	                	
+	                
 
 	            } catch (IOException e) {
 	                if(isStopped()) {
@@ -156,6 +167,16 @@ public class ServerNetwork implements Runnable{
 				}
 			 
 		 }
+	 }
+	 
+	 /**
+	  * Checks if the specified ip and port are a server
+	  * @param ip
+	  * @param port
+	  * @return
+	  */
+	 public boolean isServer(String ip, int port) {
+		 return servers.contains(ip+Integer.toString(port));
 	 }
 
 	 /**
