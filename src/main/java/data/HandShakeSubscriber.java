@@ -57,7 +57,7 @@ public class HandShakeSubscriber {
 
 		String type = serialized[0];
 		String obj_from = serialized[1];
-		this.id = Integer.parseInt(obj_from);
+		this.id = Integer.parseInt(obj_from.split(":")[0]);
 
 		int ka = Integer.parseInt(serialized[2]);
 		Double token = Double.parseDouble(serialized[3]);
