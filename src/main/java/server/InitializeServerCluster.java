@@ -23,6 +23,7 @@ public class InitializeServerCluster {
     public static ServerNetwork server;
     public static Integer id;
     public static Integer LeaderId;
+    public static int timeout=20;
     public static final Integer offset = 20;
     public static boolean[] offsetted = {false, false, false};
 
@@ -121,29 +122,33 @@ public class InitializeServerCluster {
         }
 
         String responses[] = new String[2];
-        responses[0] = server.recieveNextMessage();
-        responses[1] = server.recieveNextMessage();
+        responses[0] = server.receiveNextMessageWithTimeout(timeout);
+        responses[1] = server.receiveNextMessageWithTimeout(timeout);
 
         HandShakeSubscriber HsDecoded1 = new HandShakeSubscriber();
         HandShakeSubscriber HsDecoded2 = new HandShakeSubscriber();
-
-        HsDecoded1.parseHandShake(responses[0]);
-        HsDecoded2.parseHandShake(responses[1]);
-
-        double[] vals = new double[3];
-        vals[id] = this_token;
-        vals[HsDecoded1.getID()] = HsDecoded1.getToken();
-        vals[HsDecoded2.getID()] = HsDecoded2.getToken();
         
-        System.out.println("------ Vals: -----");
-        for(double d: vals){
-            System.out.println(d);
+        if (responses[0]!=null && responses[1]!=null) {
+        	HsDecoded1.parseHandShake(responses[0]);
+        	HsDecoded2.parseHandShake(responses[1]);
+
+        	double[] vals = new double[3];
+        	vals[id] = this_token;
+        	vals[HsDecoded1.getID()] = HsDecoded1.getToken();
+        	vals[HsDecoded2.getID()] = HsDecoded2.getToken();
+        
+        	System.out.println("------ Vals: -----");
+        	for(double d: vals){
+        		System.out.println(d);
+        	}
+
+
+        	double max = findMax(vals);
+        	int winner = findWinnerID(vals, max);
+        	return winner;
         }
-
-
-        double max = findMax(vals);
-        int winner = findWinnerID(vals, max);
-        return winner;
+        System.out.println("Timed out during election.");
+        return -2;
         
     }
 

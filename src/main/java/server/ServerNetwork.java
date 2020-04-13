@@ -162,6 +162,24 @@ public class ServerNetwork implements Runnable{
 
 		return MessageQueue.poll();
 	 }
+	
+	/**
+	 * Gets the next message on the queue, blocks until a message or timeout appears on the queue
+	 * @return
+	 * @param seconds to keep trying 
+	 */
+	public String receiveNextMessageWithTimeout(int timeout) {
+		long startTime = System.currentTimeMillis();
+		while(MessageQueue.isEmpty()) {
+			long endTime = System.currentTimeMillis();
+			long duration = (endTime - startTime)/1000;
+			if ((int) duration>timeout) {
+				return null;
+			}
+		}
+
+		return MessageQueue.poll();
+	 }
 
 	 /**
 	 * Peek without pulling message to verify it is yours 
