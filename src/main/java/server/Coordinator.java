@@ -32,7 +32,7 @@ public class Coordinator {
 		String task="type:goal upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit;
 		// Send tasks to other servers
 		try {
-			server.sendServers(task);
+			server.sendServers(task, id);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

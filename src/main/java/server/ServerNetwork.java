@@ -143,9 +143,11 @@ public class ServerNetwork implements Runnable{
 	  * @param msg
 	 * @throws Exception
 	  */
-	 public void sendServers(String msg) throws Exception {
+	 public void sendServers(String msg, int id) throws Exception {
 		 for (Socket i: client_to_socket.values()) {
-			 try {
+			 int port=i.getPort();
+			 
+			 try {  if((port==InitializeServerCluster.ports[0]|| port==InitializeServerCluster.ports[1]||port==InitializeServerCluster.ports[2]) &&port!=InitializeServerCluster.ports[id])
 					out = new DataOutputStream(i.getOutputStream());
 					NetworkMessage.send(out, msg);
 				} catch (IOException e) {
