@@ -52,6 +52,8 @@ public class MessageDecoder {
 			s.update(space[1]);
 			return true;
 		}
+		else if(type.equals("WorkerHandshake")) {
+		}
 		else if(type.equals("initialElection")) {
 			//TODO: Initial Election Messages 
 			return true; 
