@@ -22,20 +22,20 @@ public class ServerNetwork implements Runnable{
     private ServerSocket serverSocket;
     private boolean isStopped;
     private Thread runningThread;
-    private Socket socket; 
-    
+    private Socket socket;
+
     private DataOutputStream out;
-    
+
     private HashMap<String, Socket> client_to_socket;
-    
+
     private BlockingQueue<String> MessageQueue = new LinkedBlockingDeque<String>(); //Message queue for all messages recieved from all threads
-	
+
 	public ServerNetwork(String ip, int port) {
 		this.port=port;
 		client_to_socket = new HashMap<>();
 	}
-	
-	
+
+
 	 public void run(){
 	        synchronized(this){
 	            this.runningThread = Thread.currentThread();
@@ -45,10 +45,10 @@ public class ServerNetwork implements Runnable{
 	            Socket inSocket = null;
 	            try {
 	            	inSocket = this.serverSocket.accept();
-	            	
+
 	            	InetAddress in_ip=inSocket.getInetAddress();
 	                int in_port=inSocket.getPort();
-	                
+
 	                String ip_port = removeSlash(in_ip.toString()+Integer.toString(in_port));
 	                System.out.println("Got a connection from " + ip_port);
 	                client_to_socket.put(ip_port,inSocket);
@@ -60,12 +60,12 @@ public class ServerNetwork implements Runnable{
 	                }
 	                throw new RuntimeException("Error accepting client connection", e);
 	            }
-	            
+
 
 	            new Thread(new ConnectionHandler(inSocket, this)).start();
-	            
-	            
-	            
+
+
+
 	        }
 	        System.out.println("Server Stopped.") ;
 	    }
@@ -79,37 +79,37 @@ public class ServerNetwork implements Runnable{
 				System.out.println(ip_port);
 			}
 	 }
-	 
+
 	 private String removeSlash(String ip_port) {
 		 StringBuilder s = new StringBuilder();
 		 if(ip_port.charAt(0) == '/') {
 			 for(int i = 1; i < ip_port.length(); i++) {
 				 s.append(ip_port.charAt(i));
 			 }
-			 return s.toString(); 
+			 return s.toString();
 		 } else {
-			 return ip_port; 
+			 return ip_port;
 		 }
 	 }
-	 
-	 
+
+
 	 /**
 	  * Sends a message to the specified IP and port number that corresponds to an entity, blocks until the message is sent
 	  * @param IP
 	  * @param port
 	  * @param msg
-	 * @throws Exception 
+	 * @throws Exception
 	  */
 	 public void send(String IP, int port, String msg) throws Exception {
-		 
-		 
+
+
 		 String key = IP+Integer.toString(port);
-		 
+
 		 //Check if IP/port combination is registered in this server
 		 if(!client_to_socket.containsKey(key)) {
 			 throw new Exception("The specified IP/port number combination is not registered in this server");
 		 }
-		 
+
 		 //The key has been found
 		 Socket target = client_to_socket.get(key);
 		 try {
@@ -118,40 +118,40 @@ public class ServerNetwork implements Runnable{
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
-			 
-		 
-		 
+		}
+
+
+
 	 }
-	 
+
 	 /**
-	  * Opens up a TCP connection 
+	  * Opens up a TCP connection
 	  * @param IP
 	  * @param port
-	 * @throws Exception 
+	 * @throws Exception
 	  */
 	 public Socket startConnection(String IP, int port) throws Exception {
-		 
+
 		 Socket socket_server = new Socket(IP, port);
 		 if(socket_server.isConnected()) {
 			 client_to_socket.put(IP.toString()+Integer.toString(port),socket_server);
-			 return socket_server; 
+			 return socket_server;
 		 }
-		 return null; 
-		 
+		 return null;
+
 	 }
-	 
+
 	 /**
 	 * Gets the next message on the queue, blocks until a message appears on the queue
 	 * @return
 	 */
 	public String recieveNextMessage() {
 		while(MessageQueue.isEmpty()) {}
-		
+
 		return MessageQueue.poll();
 	 }
-	 
-	 
+
+
 	/**
 	 * Adds the next message to queue
 	 * @param msg - msg to be added
@@ -159,13 +159,13 @@ public class ServerNetwork implements Runnable{
 	public synchronized void addToMessageQueue(String msg) {
 		MessageQueue.add(msg);
 	 }
-	 
-	
-	 
+
+
+
 	private synchronized boolean isStopped() {
 	    return this.isStopped;
 	}
-	
+
 	public synchronized void stop(){
 	    this.isStopped = true;
 	    try {
@@ -174,7 +174,7 @@ public class ServerNetwork implements Runnable{
 	        throw new RuntimeException("Error closing server", e);
 	    }
 	}
-	
+
 	private void openServerSocket() {
 	    try {
 	        this.serverSocket = new ServerSocket(this.port);
@@ -182,7 +182,7 @@ public class ServerNetwork implements Runnable{
 	        throw new RuntimeException("Cannot open port 8080", e);
 	    }
 	}
-	
+
 	public int getPort() {
 		return port;
 	}
@@ -232,6 +232,9 @@ public class ServerNetwork implements Runnable{
 		this.out = out;
 	}
 
+  public boolean hasKey_client_to_socket(String s){
+		return client_to_socket.containsKey(s);
+	}
 
 	public HashMap<String, Socket> getClient_to_socket() {
 		return client_to_socket;
@@ -256,7 +259,7 @@ public class ServerNetwork implements Runnable{
 	public void setStopped(boolean isStopped) {
 		this.isStopped = isStopped;
 	}
-	    
-	    
-	
+
+
+
 }
