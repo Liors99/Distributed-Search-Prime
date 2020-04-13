@@ -174,6 +174,19 @@ public class ServerNetwork implements Runnable{
 		 return null;
 
 	 }
+	 
+	 
+	 /**
+	  * Removes the specified ip and port number from the list of active connections
+	  * @param inetAddress
+	  * @param port
+	  */
+	 public void removeFromMap(InetAddress inetAddress, int port) {
+		 String key = inetAddress + Integer.toString(port);
+		 if(client_to_socket.containsKey(key)) {
+			 client_to_socket.remove(key);
+		 }
+	 }
 
 	 /**
 	 * Gets the next message on the queue, blocks until a message appears on the queue

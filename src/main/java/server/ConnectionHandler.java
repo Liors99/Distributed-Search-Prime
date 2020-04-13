@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import data.NetworkMessage;
+import exceptions.TimoutException;
 
 public class ConnectionHandler implements Runnable{
 	
@@ -34,24 +35,27 @@ public class ConnectionHandler implements Runnable{
 
     public void run() {
     	while(isConnected) {
-    		receive();
+    		try {
+				receive();
+			} catch (TimoutException e) {
+				this.server.removeFromMap(this.clientSocket.getLocalAddress(), this.clientSocket.getLocalPort());
+				
+			}
     	}
     	
     }
     
 
-	public void receive()  {
+	public void receive()  throws TimoutException{
     	try {
     		if(in.available()>0) {
     			
     			String next_msg = NetworkMessage.receive(in);
         		this.server.addToMessageQueue(next_msg);
     		}
-    		
-			//return next_msg;
 		} catch (IOException e) {
 			isConnected=false; //We dropped a connection if we get an error recieving
-			e.printStackTrace();
+			throw new TimoutException("A connection has dropped from " + this.clientSocket.getInetAddress() + "/ " + this.clientSocket.getLocalPort());
 		}
     }
     

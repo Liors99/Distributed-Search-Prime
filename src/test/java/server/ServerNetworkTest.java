@@ -100,18 +100,21 @@ public class ServerNetworkTest {
 
 
 
-	}
 
 	@Test
 	void testConnect() throws Exception {
 
 		int port = 9100;
+		int port2= 9102;
 
 		System.out.println("Started");
 		ServerNetwork server = new ServerNetwork("localhost", port);
 		new Thread(server).start();
+		
+		ServerNetwork server2= new ServerNetwork("localhost", port2);
+		new Thread(server2).start();
 
-		server.startConnection("localhost", port);
+		server2.startConnection("localhost", port, "localhost", port2+1);
 
 		//Socket client = new Socket("localhost", port);
 
@@ -119,7 +122,7 @@ public class ServerNetworkTest {
 
         //client.close();
 	}
-*/
+
 
 	@Test
 	void testCommunicate() throws Exception {
@@ -154,7 +157,7 @@ public class ServerNetworkTest {
 				//e.printStackTrace();
 			}
 		//}
-        System.out.println(server2.recieveNextMessage());
+        System.out.println(server2.receiveNextMessage());
 
 
         server.stop();
