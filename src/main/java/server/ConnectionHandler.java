@@ -78,6 +78,10 @@ public class ConnectionHandler implements Runnable{
 				
 			}
     		
+    		catch (Exception e) {
+    			
+    		}
+    		
     	}
     	
     }

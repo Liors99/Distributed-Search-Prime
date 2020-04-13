@@ -133,7 +133,7 @@ public class ServerNetwork implements Runnable{
 			NetworkMessage.send(out, msg);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 

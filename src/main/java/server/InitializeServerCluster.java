@@ -20,6 +20,7 @@ public class InitializeServerCluster {
     public static List<ServerNetwork> ServerNetworkConnections;
     public static final String[] ips = {"127.0.0.1","127.0.0.1","127.0.0.1"};
     public static final Integer[] ports = {port, port+1, port+2};
+    public static long[] down_time= {0,0,0};
     public static ServerNetwork server;
     public static Integer id;
     public static Integer LeaderId;
