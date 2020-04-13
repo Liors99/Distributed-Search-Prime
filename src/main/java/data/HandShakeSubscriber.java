@@ -57,7 +57,13 @@ public class HandShakeSubscriber {
 
 		String type = serialized[0];
 		String obj_from = serialized[1];
-		this.id = Integer.parseInt(obj_from.split(":")[0]);
+		try {
+			setID(Integer.parseInt(obj_from.split(":")[0]));
+			}
+		catch (Exception e) {
+			System.out.println("Error converting ID");
+		}
+		//this.id = Integer.parseInt(obj_from.split(":")[0]);
 
 		int ka = Integer.parseInt(serialized[2]);
 		Double token = Double.parseDouble(serialized[3]);
