@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.net.*;
 import java.util.*;
 
+import data.BigInt;
 import data.MessageDecoder;
 import data.NetworkMessage;
 import worker.Networking.ConnectionInfo;
@@ -47,14 +48,12 @@ public class WorkerRunner extends Thread{
 			e.printStackTrace();
 		}
 		findCoordinator();
-		String task = getTask();
-		Map<String, String> assignMap = MessageDecoder.createmap(task);
-		String lower = assignMap.get("lower");
-		String upper = assignMap.get("upper");
-		String tested = assignMap.get("tested");
-		System.out.println("I got assigned: lower:"+lower+" upper:"+upper+" tested number:"+ tested);
-		PrimeSearch ps = new PrimeSearch(new BigInteger(lower), new BigInteger(upper), new BigInteger(tested));
-		ps.run();
+		
+		while(!killswitch) {
+			doWork();
+		}
+		
+		
 	}
 	
 	
@@ -71,6 +70,42 @@ public class WorkerRunner extends Thread{
 		}
 		return task;
 		
+	}
+	
+	public void doWork() {
+		String task = getTask();
+		Map<String, String> assignMap = MessageDecoder.createmap(task);
+		String lower = assignMap.get("lower");
+		String upper = assignMap.get("upper");
+		String tested = assignMap.get("tested");
+		System.out.println("I got assigned: lower:"+lower+" upper:"+upper+" tested number:"+ tested);
+		PrimeSearch ps = new PrimeSearch(new BigInteger(lower), new BigInteger(upper), new BigInteger(tested));
+		ps.run();
+		while (ps.isAlive()) {
+			
+		}
+		BigInt result = new BigInt(ps.result);
+		String taskReport = "type:SearchResult tested:"+ps.subject+" divisor:"+result;
+		sendResult(taskReport);
+	}
+	
+	public void sendResult(String result) {
+		Socket coordSocket = connections[currentCoordinator].sock;
+		DataOutputStream coordDataStream = null;
+
+		boolean resultSent = false;
+
+		while(!killswitch && !resultSent) {
+			try {
+				coordDataStream = new DataOutputStream (connections[currentCoordinator].sock.getOutputStream());
+
+				coordSocket.setSoTimeout(5000);
+				NetworkMessage.send(coordDataStream, result);
+				resultSent = true;
+			} catch (Exception e) {
+
+			}
+		}
 	}
 	
 	public void findCoordinator() {
