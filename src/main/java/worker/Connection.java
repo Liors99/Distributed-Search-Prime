@@ -13,6 +13,7 @@ public class Connection extends Thread{
 	public Socket sock;
 	public DataInputStream sockIn;
 	public DataOutputStream sockOut;
+	private boolean killswitch = false;
 	
 	public Connection(String hostname, int port) {
 		this.hostname = hostname;
@@ -24,11 +25,8 @@ public class Connection extends Thread{
 		connect();
 		sendInitialHandshake();
 		connect();
-		try {
-			String assignment = NetworkMessage.receive(sockIn);
-			System.out.println(assignment);
-		} catch (IOException e) {
-			e.printStackTrace();
+		while(!killswitch) {
+			
 		}
 	}
 	
@@ -48,18 +46,31 @@ public class Connection extends Thread{
 	
 	void sendInitialHandshake() {
 		try {
+			Thread.sleep(2000);
+
 			NetworkMessage.send(sockOut, "type:WorkerHandshake");
 			String response = NetworkMessage.receive(sockIn);
 			System.out.println("Received:"+ response);
 			Map<String,String> responseMap = MessageDecoder.createmap(response);
 			sock.close();
-			hostname = responseMap.get("address");
 			port = Integer.parseInt(responseMap.get("port"));			
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public void kill() {
+		try {
+			sockIn.close();
+			sockOut.close();
+			sock.close();
+			killswitch = true;
+		}
+		catch(Exception e) {
+			
+		}
 	}
 }

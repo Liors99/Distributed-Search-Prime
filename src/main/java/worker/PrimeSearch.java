@@ -8,8 +8,10 @@ public class PrimeSearch extends Thread{
 	BigInteger lower;
 	BigInteger upper;
 	BigInteger subject;
+	BigInteger result;
 	
 	public PrimeSearch(BigInteger lowerLimit, BigInteger upperLimit, BigInteger testedNumber) {
+		result = BigInteger.ZERO;
 		if (lowerLimit.mod(BigInteger.TWO) == BigInteger.ZERO) {
 			lower = lowerLimit.subtract(BigInteger.ONE);
 		}
@@ -26,7 +28,7 @@ public class PrimeSearch extends Thread{
 	}
 	
 	public void run() {
-		BigInteger result = search();
+		result = search();
 		
 		if (result.equals(BigInteger.ZERO)){
 			System.out.println("The number "+subject+ " is not divisible by anything in the range");
