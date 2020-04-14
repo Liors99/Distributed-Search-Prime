@@ -1,11 +1,14 @@
 package server;
 
+import data.BigInt;
 import data.HandShakeSubscriber;
 import data.MessageDecoder;
 
 import java.net.BindException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,10 +35,12 @@ public class InitializeServerCluster {
     private static int listenerPort;
     public static Store Storage = new Store("STORAGE");
     public static WorkerDatabase wdb;
+    public static HashSet<BigInt> Primes;
     
     public static void main(String args[]) throws Exception {
         //Keep track of server connections
         id = 0;
+        Primes = new HashSet<BigInt>();
         //ServerNetworkConnections = new LinkedList<ServerNetwork>();
 
         if (args.length > 0) {
@@ -66,7 +71,10 @@ public class InitializeServerCluster {
             LeaderId = initial_election();
         }
 
-
+        if(LeaderId == -2) {
+        	//you are recovering!
+        	//recoverData();
+        }
 		
 		
 		if (id == 0) {
@@ -85,6 +93,13 @@ public class InitializeServerCluster {
 
     }
     
+    public static void recoverData() {
+    	
+    	ArrayList<String> As = Storage.getLines();
+    	for(String s : As) {
+    		System.out.println(s);
+    	}
+    }
     
     public static void assignRole(int listenerPort) {
     	System.out.println("Leader selected:"+LeaderId);

@@ -35,7 +35,7 @@ public class TaskScheduler extends Thread {
         ActiveWorkers = new HashMap<Integer, Boolean>();
         this.doneWorkers = 0;
         this.target = target;
-        this.primes = new HashSet<BigInt>();
+        this.primes = InitializeServerCluster.Primes; //pass a param later
         this.lower=lower;
         this.upper=upper;
         this.WorkingWorkers = new LinkedList<WorkerRecord>();

@@ -17,6 +17,7 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.ArrayList;
 
 public class Store {
 	
@@ -109,6 +110,22 @@ public class Store {
 	        out.close();
 	        Files.move(temp.getAbsoluteFile().toPath(), f.getAbsoluteFile().toPath(), REPLACE_EXISTING);     
 	        out = new RandomAccessFile("output.txt", "rw");
+	    }
+	    
+	    public ArrayList<String> getLines() {
+	    	ArrayList<String> As = new ArrayList<String>();
+	    	synchronized(lock) {
+
+			    try {
+			    	while(true) {
+			    		String l = out.readLine();
+			    		As.add(l);
+			    	}
+			    }catch(Exception e) {
+			    	
+			    }
+	    	}
+	    	return As;
 	    }
 	    
 	   public static String get() {
