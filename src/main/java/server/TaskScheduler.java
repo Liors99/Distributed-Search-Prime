@@ -8,18 +8,23 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.PriorityBlockingQueue;
 
-public class TaskScheduler {
-    private PriorityQueue<WorkerRecord> WorkerQueue;
+public class TaskScheduler extends Thread {
+    private PriorityBlockingQueue<WorkerRecord> WorkerQueue;
     private HashMap<Integer, Boolean> ActiveWorkers; //checks if worker with wid is working or not. Working only if true. If not on list/or set to false not working.
     private BigInt totalScore;
     private int doneWorkers;
 
-    TaskScheduler(){
+    private BigInt lower, upper;
+    TaskScheduler(BigInt lower, BigInt upper) {
 
-        WorkerQueue = new PriorityQueue<WorkerRecord>();
+        WorkerQueue = new PriorityBlockingQueue<WorkerRecord>();
         ActiveWorkers = new HashMap<Integer, Boolean>();
         this.doneWorkers = 0;
+        
+        this.lower=lower;
+        this.upper=upper;
     }
 
     /**
@@ -62,7 +67,7 @@ public class TaskScheduler {
      *  called once finalized range; assigns work to workers while they are in queue
      * @return if done
      */
-    public boolean scheduleTask(BigInt lower, BigInt upper){
+    public boolean scheduleTask(){
         BigInt current = lower;
         BigInt currentLower = new BigInt("3");
         if(current.mod(new BigInteger("2")).equals(BigInteger.ZERO)){
@@ -135,11 +140,11 @@ public class TaskScheduler {
         return true;
     }
 
-    public PriorityQueue<WorkerRecord> getWorkerQueue() {
+    public PriorityBlockingQueue<WorkerRecord> getWorkerQueue() {
         return WorkerQueue;
     }
 
-    public void setWorkerQueue(PriorityQueue<WorkerRecord> workerQueue) {
+    public void setWorkerQueue(PriorityBlockingQueue<WorkerRecord> workerQueue) {
         WorkerQueue = workerQueue;
     }
 
@@ -173,4 +178,10 @@ public class TaskScheduler {
     public void setActiveWorkers(HashMap<Integer, Boolean> activeWorkers) {
         ActiveWorkers = activeWorkers;
     }
+
+	@Override
+	public void run() {
+		scheduleTask();
+		
+	}
 }

@@ -63,19 +63,25 @@ public class InitializeServerCluster {
             LeaderId = initial_election();
         }
 
-        System.out.println("Leader selected:"+LeaderId);
-        if(LeaderId==id) {
+        
+        assignRole();
+        
+        while(true) {}
+
+    }
+    
+    
+    public static void assignRole() {
+    	System.out.println("Leader selected:"+LeaderId);
+    	if(LeaderId==id) {
         	Coordinator c = new Coordinator(id, ServerNetworkConnections, server);
         	c.notMain();
         }
         else {
         	Subscriber s = new Subscriber(id, LeaderId, server);
-        	System.out.println(server.receiveNextMessage());
         	
-        } 
-        
-        while(true) {}
-
+        }
+    	
     }
 
     //Check hash table to verify all connections made
@@ -224,39 +230,34 @@ public class InitializeServerCluster {
         	 String responses[] = new String[2];
         	 
         	 Thread.sleep(2000);
-        	 
-        	 System.out.println("Current config: ");
-        	 
-        	 for(boolean i: isAlive) {
-        		 System.out.print(i +" ");
-        	 }
-        	 System.out.println();
-        	 
-        	 
-        	 System.out.println("------------ Before loop");
+        	  
         	 while(!MessageDecoder.findMessageType(server.peekNextMessage()).contentEquals("HSS")) {}
         	 
-        	 System.out.println("------------------------------------------------ Next message is HSS");
+
              responses[0] = server.receiveNextMessage();
              
 
              HandShakeSubscriber HsDecoded1 = new HandShakeSubscriber();
              
              if (responses[0]!=null) {		 
-            	 System.out.println("----------- Response is not nul");
             	 HsDecoded1.parseHandShake(responses[0]);
             	 if(HsDecoded1.getToken() > up_time) {
             		 System.out.println("Server " + id + ", I'm the leader");
-            		 return id;
+            		 LeaderId=id;
             	 }
             	 else {
             		 System.out.println("Server " + HsDecoded1.getID() + ", is the leader");
-            		 return HsDecoded1.getID();
+            		 LeaderId=HsDecoded1.getID();
             	 }        
              }
          }
+         else {
+        	 LeaderId=id;
+        	 System.out.println("Server " + id + ", I'm the leader");
+         }
          
-         return id;
+         assignRole();
+         return LeaderId;
     }
     
     
