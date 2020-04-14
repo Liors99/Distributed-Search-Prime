@@ -19,20 +19,32 @@ public class ConnectionListener extends Thread{
 	DataOutputStream out;
 	WorkerDatabase wdb;
 	private boolean killswitch = false;
+	private boolean isCoordinator = false;
 	
+	
+	public int sampleWID = 0;
+	public boolean ready = false;
+
 	private TaskScheduler ts;
-	public ConnectionListener(WorkerDatabase wdb, int port, TaskScheduler ts) {
+	public ConnectionListener(WorkerDatabase wdb, int port, TaskScheduler ts, boolean isCoord) {
 		this.wdb = wdb;
 		this.port = port;
 		this.ts=ts;
+		
+		isCoordinator = isCoord;
 	}
-	
-	public ConnectionListener(WorkerDatabase wdb, int port) {
+
+	/*
+	public ConnectionListener(WorkerDatabase wdb, int port, boolean isCoord) {
 		this.wdb = wdb;
 		this.port = port;
 		
 		this.ts=null;
+
+		isCoordinator = isCoord;
+
 	}
+	*/
 
 	public void run() {
 		while (!killswitch) {
@@ -44,12 +56,12 @@ public class ConnectionListener extends Thread{
 				in = new DataInputStream(sock.getInputStream());
 				out = new DataOutputStream(sock.getOutputStream());
 				System.out.println("initiated connection with:" + sock.getInetAddress() + ":" + sock.getPort());
-				WorkerConnection con = new WorkerConnection();
+				WorkerConnection con = new WorkerConnection(isCoordinator);
 				int id = wdb.generateID();
 				WorkerRecord rec = new WorkerRecord(sock.getInetAddress().toString(),sock.getPort(), id, 100, new Timestamp(System.currentTimeMillis()), con);
 				wdb.addWorker(id, rec, con);
 				
-				if(ts!=null) {
+				if(this.isCoordinator) {
 					ts.addToWorkerQueue(rec);
 				}
 				
@@ -69,7 +81,9 @@ public class ConnectionListener extends Thread{
 					}
 				}
 			
-				
+				sampleWID = id;
+				System.out.println("Sample id: "+sampleWID);
+				ready = true;
 				sock.close();
 				serv.close();
 			} catch (SocketException e) {
@@ -82,9 +96,23 @@ public class ConnectionListener extends Thread{
 		}
 	}
 	
-	public void sendTask(WorkerConnection con) {
-		con.sendMessage("type:handshake");
-		con.sendMessage("lower:101 upper:201 tested:1098");
+
+	public void sendWorkerMessage(int wid, String message) {
+		WorkerConnection con = wdb.workerConnections.get(wid);
+		while (true) {
+			try {
+				NetworkMessage.send(con.sockOut, message);
+				break;
+			}
+			catch(Exception e) {
+				
+			}
+		}
+		
+	}
+	
+	public boolean isReady() {
+		return ready;
 	}
 	
 	
