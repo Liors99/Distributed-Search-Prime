@@ -23,15 +23,17 @@ public class Store {
 	RandomAccessFile out;
 	static File f;
 	private final static Object lock = new Object();
+	String Filename;
 	
 	
 	//only initialize once 
-	public Store() {
+	public Store(String Filename) {
 		try {
+			this.Filename=Filename;
 			//empty file
-			new PrintWriter("output.txt").close();
-			f=new File("output.txt");
-			out = new RandomAccessFile("output.txt", "rw");
+			new PrintWriter(Filename).close();
+			f=new File(Filename);
+			out = new RandomAccessFile(Filename, "rw");
 		}
 		 catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -109,7 +111,7 @@ public class Store {
 	        out = new RandomAccessFile("output.txt", "rw");
 	    }
 	    
-	   public static void send(Socket s) {
+	   public static String get() {
 		   synchronized(lock) {
 			      String head="type:file ";
 			      byte [] header=head.getBytes();
@@ -123,13 +125,10 @@ public class Store {
 						mybytearray[i]=header[i];
 					}
 			        bis.read(mybytearray,head.length(),(int) f.length());
-			        OutputStream os = s.getOutputStream();
-			        System.out.println("Sending " + f + "(" + mybytearray.length + " bytes)");
-			        os.write(mybytearray,0,mybytearray.length);
-			        os.flush();
-			        System.out.println(f+" sent");
+			        
 			        if (fis != null) bis.close();
 			        if (bis != null) bis.close();
+			        return mybytearray.toString();
 			        //if (os != null) os.close();
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
@@ -139,12 +138,13 @@ public class Store {
 					e.printStackTrace();
 				}
 		   }
+		return null;
 	   }
 	    
 	   public void update(String data) {
 		   synchronized(lock) {
 		   try {
-			    PrintWriter out = new PrintWriter("output.txt");
+			    PrintWriter out = new PrintWriter(Filename);
 			    out.print(data);
 			    out.close();
 		     } catch (FileNotFoundException e) {
