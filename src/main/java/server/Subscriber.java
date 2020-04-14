@@ -18,8 +18,8 @@ public class Subscriber {
 	public void notMain(int listenerPort) {
 		//WorkerDatabase wdb = new WorkerDatabase();
 
-//		WorkerDatabase wdb = new WorkerDatabase();
-//		ConnectionListener listener = new ConnectionListener(wdb, listenerPort, null ,false);
-//		listener.start();
+		WorkerDatabase wdb = new WorkerDatabase();
+		ConnectionListener listener = new ConnectionListener(wdb, listenerPort, null ,false);
+		listener.start();
 	}
 }
