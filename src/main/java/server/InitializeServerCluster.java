@@ -30,7 +30,7 @@ public class InitializeServerCluster {
     public static boolean[] offsetted = {false, false, false};
     public static boolean[] isAlive= {true, true, true};
     private static int listenerPort;
-    
+    public static ConnectionListener listener;
     public static WorkerDatabase wdb;
     
     public static void main(String args[]) throws Exception {
@@ -79,6 +79,9 @@ public class InitializeServerCluster {
 			listenerPort = 8002;
 		}
 		wdb= new WorkerDatabase();
+		//WorkerDatabase wdb = new WorkerDatabase();
+		ConnectionListener listener = new ConnectionListener(wdb, listenerPort, null ,false);
+		listener.start();
         assignRole(listenerPort);
         
         while(true) {}
@@ -92,7 +95,7 @@ public class InitializeServerCluster {
     	
         if(LeaderId==id) {
         	Coordinator c = new Coordinator(id, ServerNetworkConnections, server, wdb);
-        	c.notMain(listenerPort);
+        	c.notMain(listenerPort, listener);
         }
         else {
         	Subscriber s = new Subscriber(id, LeaderId, server, wdb);

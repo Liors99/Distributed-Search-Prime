@@ -87,15 +87,23 @@ public class ConnectionListener extends Thread{
 				sock.close();
 				serv.close();
 			} catch (SocketException e) {
-				System.out.println("sock exception");
+//				System.out.println("sock exception");
 
 			} catch (IOException e) {
-				System.out.println("io exception");
+//				System.out.println("io exception");
 
 			}
 		}
 	}
 	
+
+	public TaskScheduler getTs() {
+		return ts;
+	}
+
+	public void setTs(TaskScheduler ts) {
+		this.ts = ts;
+	}
 
 	public void sendWorkerMessage(int wid, String message) {
 		WorkerConnection con = wdb.workerConnections.get(wid);
