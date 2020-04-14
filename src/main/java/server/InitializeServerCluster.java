@@ -30,7 +30,7 @@ public class InitializeServerCluster {
     public static boolean[] offsetted = {false, false, false};
     public static boolean[] isAlive= {true, true, true};
     private static int listenerPort;
-    
+    public static Store Storage = new Store("STORAGE");
     public static WorkerDatabase wdb;
     
     public static void main(String args[]) throws Exception {

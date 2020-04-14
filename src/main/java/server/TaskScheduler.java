@@ -132,6 +132,7 @@ public class TaskScheduler extends Thread {
 				//System.out.println("reading from worker"+ msg );
 //				System.out.println("3");
 				Map<String, String> m = MessageDecoder.createmap(msg);
+				InitializeServerCluster.Storage.writeResult(msg);
 //				System.out.println("4");
 				String result = m.get("divisor");
 				if (result.equals("0")){
