@@ -43,11 +43,11 @@ public class WorkerRunner extends Thread{
 			connections[i].start();
 		}
 		try {
-			Thread.sleep(5000);
+			Thread.sleep(10000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		findCoordinator();
+//		findCoordinator();
 		
 		while(!killswitch) {
 			doWork();
@@ -114,13 +114,13 @@ public class WorkerRunner extends Thread{
 			try {
 //				connections[i].sock.setSoTimeout(5000);
 				handshake = NetworkMessage.receive(connections[i].sockIn);
+				System.out.println(handshake);
 			} catch (Exception e) {
 
 			}
 			if (handshake != null) {
 				System.out.println("Received handshake:"+handshake);
 				currentCoordinator = i;
-				break;
 			}
 		}
 	}
@@ -129,6 +129,7 @@ public class WorkerRunner extends Thread{
 		String userIn;
 		int choice;
 		//TODO @mark: add input checking
+		//TODO @mark: remove hardcoded servers
 		while (true) {
 			console.println("Please choose from the following:\n" + "1.Start working\n" + "2.Exit");
 			userIn = input.nextLine();
@@ -143,9 +144,11 @@ public class WorkerRunner extends Thread{
 					
 					for (int i = 0; i< Networking.NUMBER_OF_SERVERS; i++) {
 						console.println("Please enter the hostname of server #"+i+": ");
-						hostnames[i] = input.nextLine();
+//						hostnames[i] = input.nextLine();
+						hostnames[i] = "localhost";
 						console.println("Please enter the port of server #"+i+": ");
-						ports[i] = Integer.parseInt(input.nextLine());
+//						ports[i] = Integer.parseInt(input.nextLine());
+						ports[i] = 8000+i;
 					}
 					console.println("All server info has been received");
 					break;

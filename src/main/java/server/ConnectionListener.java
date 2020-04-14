@@ -32,6 +32,7 @@ public class ConnectionListener extends Thread{
 			try {
 				serv = new ServerSocket(port);
 				serv.setReuseAddress(true);
+				System.out.println("Started listening on port "+port);
 				sock = serv.accept();
 				in = new DataInputStream(sock.getInputStream());
 				out = new DataOutputStream(sock.getOutputStream());
@@ -43,11 +44,12 @@ public class ConnectionListener extends Thread{
 				
 				con.start();
 				
+				System.out.println("Sending: "+con.createHandshakeResponse());
 				NetworkMessage.send(out, con.createHandshakeResponse());
 
 				while(true) {
 					try {
-						sendTask(con);
+//						sendTask(con);
 						break;
 					} catch (Exception e) {
 					}
@@ -57,8 +59,10 @@ public class ConnectionListener extends Thread{
 				sock.close();
 				serv.close();
 			} catch (SocketException e) {
+				System.out.println("sock exception");
 
 			} catch (IOException e) {
+				System.out.println("io exception");
 
 			}
 		}

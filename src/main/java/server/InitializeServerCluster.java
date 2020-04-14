@@ -64,13 +64,24 @@ public class InitializeServerCluster {
         }
 
         System.out.println("Leader selected:"+LeaderId);
+        int listenerPort;
+        if (id == 0) {
+        	listenerPort = 8000;
+        }
+        else if(id == 1) {
+        	listenerPort = 8001;
+        }
+        else {
+        	listenerPort = 8002;
+        }
         if(LeaderId==id) {
         	Coordinator c = new Coordinator(id, ServerNetworkConnections, server);
-        	c.notMain();
+        	c.notMain(listenerPort);
         }
         else {
         	Subscriber s = new Subscriber(id, LeaderId, server);
         	System.out.println(server.receiveNextMessage());
+        	s.notMain(listenerPort);
         	
         } 
         

@@ -24,7 +24,7 @@ public class Coordinator {
 	/**
 	 * Run as a coordinator 
 	 */
-	public void notMain() {
+	public void notMain(int listenerPort) {
 		//Get user input
 		CoordConsole.console();
 		lowerBound=CoordConsole.lowerBound;
@@ -38,6 +38,10 @@ public class Coordinator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		WorkerDatabase wdb = new WorkerDatabase();
+		ConnectionListener listener = new ConnectionListener(wdb, listenerPort);
+		listener.start();
+
 
     }
 

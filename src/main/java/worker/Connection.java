@@ -26,12 +26,11 @@ public class Connection extends Thread{
 		while (true) {
 			try {
 				connect();
-				Thread.sleep(2000);
 				sendInitialHandshake();				
 				break;
 			}
 			catch (Exception e) {
-				
+				System.out.println("A");
 			}
 		}
 		
@@ -41,6 +40,7 @@ public class Connection extends Thread{
 				break;
 			}
 			catch (Exception e) {
+				System.out.println("B");
 				
 			}
 		}
@@ -64,19 +64,21 @@ public class Connection extends Thread{
 	}
 	
 	void sendInitialHandshake() {
-		try {
-			Thread.sleep(2000);
-
-			NetworkMessage.send(sockOut, "type:WorkerHandshake");
-			String response = NetworkMessage.receive(sockIn);
-			System.out.println("Received:"+ response);
-			Map<String,String> responseMap = MessageDecoder.createmap(response);
-			sock.close();
-			port = Integer.parseInt(responseMap.get("port"));			
-			
-		} catch (Exception e) {
-
+		while(true) {
+			try {
+//				NetworkMessage.send(sockOut, "type:WorkerHandshake");
+				String response = NetworkMessage.receive(sockIn);
+				System.out.println("Received:"+ response);
+				Map<String,String> responseMap = MessageDecoder.createmap(response);
+				sock.close();
+				port = Integer.parseInt(responseMap.get("port"));
+				break;
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
+		
 		
 	}
 	

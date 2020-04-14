@@ -2,7 +2,7 @@ package worker;
 import java.net.*;
 
 public class Networking {
-	public static final int NUMBER_OF_SERVERS = 1;
+	public static final int NUMBER_OF_SERVERS = 3;
 	
 	public class ConnectionInfo{
 		String hostname;
@@ -19,7 +19,7 @@ public class Networking {
 		}
 	}
 	
-	private ConnectionInfo[] connections;
+	ConnectionInfo[] connections;
 	
 	public Networking() {
 		connections = new ConnectionInfo[NUMBER_OF_SERVERS];
