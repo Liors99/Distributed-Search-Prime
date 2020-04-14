@@ -28,7 +28,7 @@ public class Coordinator {
 	/**
 	 * Run as a coordinator 
 	 */
-	public void notMain() {
+	public void notMain(int listenerPort) {
 		//Get user input
 		CoordConsole.console();
 		lowerBound=new BigInt(CoordConsole.lowerBound);
@@ -42,15 +42,15 @@ public class Coordinator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 		
 		TaskScheduler ts = new TaskScheduler(lowerBound, upperBound);
 		ts.start();
 
-		
-		WorkerDatabase db = new WorkerDatabase();
-		int port = 8080;
-		ConnectionListener cs = new ConnectionListener(db,port);
-		cs.start();
+		WorkerDatabase wdb = new WorkerDatabase();
+		ConnectionListener listener = new ConnectionListener(wdb, listenerPort);
+		listener.start();
+
 		
 		
     }

@@ -63,22 +63,37 @@ public class InitializeServerCluster {
             LeaderId = initial_election();
         }
 
+
+		System.out.println("Leader selected:"+LeaderId);
+		int listenerPort;
+		if (id == 0) {
+			listenerPort = 8000;
+		}
+		else if(id == 1) {
+			listenerPort = 8001;
+		}
+		else {
+			listenerPort = 8002;
+		}
         
-        assignRole();
+        assignRole(listenerPort);
         
         while(true) {}
 
     }
     
     
-    public static void assignRole() {
+    public static void assignRole(int listenerPort) {
     	System.out.println("Leader selected:"+LeaderId);
-    	if(LeaderId==id) {
+
+        if(LeaderId==id) {
         	Coordinator c = new Coordinator(id, ServerNetworkConnections, server);
-        	c.notMain();
+        	c.notMain(listenerPort);
         }
         else {
         	Subscriber s = new Subscriber(id, LeaderId, server);
+        	s.notMain(listenerPort);
+
         	
         }
     	
