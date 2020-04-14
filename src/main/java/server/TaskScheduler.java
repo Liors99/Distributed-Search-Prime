@@ -30,7 +30,7 @@ public class TaskScheduler extends Thread {
         this.lower=lower;
         this.upper=upper;
         
-        totalScore= new BigInt("100");
+        totalScore= new BigInt("0");
     }
 
     /**
@@ -45,23 +45,37 @@ public class TaskScheduler extends Thread {
         
         //score multiplier -> calculation : range[i] = lower + totalNums*(score[i]/totalScore)
         BigInt size = new BigInt(curNum.subtract(new BigInt("3")).add(new BigInteger("1"))); //Get total numbers in the range
-        BigInteger fraction = size.divide(totalScore); //get totalNums/totalScore
-       
-        //get totalNums*(score[i]/totalScore)
-        BigInteger delta = fraction.multiply(new BigInt(Integer.toString(wR.getScore()))); 
-        BigInt dt = new BigInt(delta);
         
-        //Set bounds
-        bound[0] = currentLower;
-        bound[1] = new BigInt(currentLower.add(dt));
-        if (bound[1].gt(curNum)){
-            bound[1] = curNum;
+        if(size.gt(totalScore)) {
+        	BigInteger fraction = size.divide(totalScore); //get totalNums/totalScore
+            
+            System.out.println("--Fraction=" +fraction);
+           
+            //get totalNums*(score[i]/totalScore)
+            BigInteger delta = fraction.multiply(new BigInt(Integer.toString(wR.getScore()))); 
+            BigInt dt = new BigInt(delta);
+            
+            //Set bounds
+            bound[0] = currentLower;
+            bound[1] = new BigInt(currentLower.add(dt));
+            if (bound[1].gt(curNum)){
+                bound[1] = curNum;
+            }
+            
+           
+            if(dt.gt(max_work)) {
+            	bound[1] = new BigInt(bound[0].add(max_work));
+            }
+        }
+        else {
+        	bound[0] = currentLower;
+            bound[1] = new BigInt(curNum.subtract(new BigInteger("2")));
         }
         
-       
-        if(dt.gt(max_work)) {
-        	bound[1] = new BigInt(bound[0].add(max_work));
-        }
+        
+        System.out.println("--- max_work="+max_work);
+        System.out.println("--- bound[0]="+bound[0]);
+        System.out.println("--- bound[1]="+bound[0]);
         return bound;
     }
 
@@ -73,7 +87,16 @@ public class TaskScheduler extends Thread {
         
         ActiveWorkers.put(wR.getWID(),true);
         System.out.println("Sending "+ serializeWorkRange(range, current)+ " to worker");
-        wR.getWc().sendMessage(serializeWorkRange(range, current));
+        while(true) {
+        	try {
+        		wR.getWc().sendMessage(serializeWorkRange(range, current));
+        		break;
+        	}
+        	catch(Exception e) {
+        		
+        	}
+        }
+        
         return false;
     }
     
@@ -95,22 +118,28 @@ public class TaskScheduler extends Thread {
         if(current.mod(new BigInteger("2")).equals(BigInteger.ZERO)){
             current = new BigInt(current.add(new BigInt(("1"))).toString(10));
         }
+        
+        upper= new BigInt(upper.sqrt().add(BigInt.ONE));
         while(current.le(upper)){ //less or equal to upperbound
             //we will need to do something so it does not loop in idle
+        	BigInt[] range = new BigInt[] {new BigInt(BigInt.ZERO), new BigInt(BigInt.ZERO)};
         	
-        	while(getWorkerQueue().isEmpty()) {} //Wait for worker
         	
             int workerPoolSize = getWorkerQueue().size();
-            while(getWorkerQueue().size() != 0 && doneWorkers < workerPoolSize){
-                System.out.println(currentLower.toString(10));
-                WorkerRecord wR = pollFromQueue();
-                BigInt[] range = deriveRange(wR, current, currentLower);
+            while((doneWorkers < workerPoolSize) || range[1].lt(current.subtract(BigInt.TWO))){
+                //System.out.println(currentLower.toString(10));
+            	while(getWorkerQueue().isEmpty()) {} //Wait for worker
+                WorkerRecord wR = WorkerQueue.peek();
+                range = deriveRange(wR, current, currentLower);
+                wR = pollFromQueue();
                 wR.setWorkrange(range);
                 wR.setCurrent(current);
                 sendRange(wR, range, current); //send range to worker
                 currentLower = new BigInt (range[1].add(new BigInt("1")).toString(10)); //get max value of the range
-                System.out.println(range[1].toString(10));
+                //System.out.println(range[1].toString(10));
             }
+            
+            currentLower = new BigInt("3");
             current = new BigInt(current.add(new BigInt("2")).toString(10));
 
         }

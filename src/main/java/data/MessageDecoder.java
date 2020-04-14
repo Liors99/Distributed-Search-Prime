@@ -11,7 +11,7 @@ import server.Store;
 //Message format assisting 
 public class MessageDecoder {
 	
-	static Store s=new Store();
+	//static Store s=new Store();
 	
 	
 	public static String findMessageType(String message) {
@@ -63,8 +63,8 @@ public class MessageDecoder {
 			return true;	
 		}
 		else if (type.equals("file")) {
-			s=new Store(); //empty old file
-			s.update(space[1]);
+			//s=new Store(); //empty old file
+			//s.update(space[1]);
 			return true;
 		}
 		else if(type.equals("WorkerHandshake")) {
