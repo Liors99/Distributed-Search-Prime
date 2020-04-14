@@ -14,6 +14,7 @@ public class Connection extends Thread{
 	public DataInputStream sockIn;
 	public DataOutputStream sockOut;
 	private boolean killswitch = false;
+	private boolean isCoordinator = false;
 	
 	public Connection(String hostname, int port) {
 		this.hostname = hostname;
@@ -72,6 +73,9 @@ public class Connection extends Thread{
 				Map<String,String> responseMap = MessageDecoder.createmap(response);
 				sock.close();
 				port = Integer.parseInt(responseMap.get("port"));
+				if (responseMap.get("ServerType").equals("coord")) {
+					isCoordinator = true;
+				}
 				break;
 				
 			} catch (Exception e) {
@@ -80,6 +84,10 @@ public class Connection extends Thread{
 		}
 		
 		
+	}
+	
+	public boolean isCoordinator() {
+		return isCoordinator;
 	}
 	
 	public void kill() {

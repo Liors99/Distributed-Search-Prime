@@ -39,8 +39,12 @@ public class Coordinator {
 			e.printStackTrace();
 		}
 		WorkerDatabase wdb = new WorkerDatabase();
-		ConnectionListener listener = new ConnectionListener(wdb, listenerPort);
+		ConnectionListener listener = new ConnectionListener(wdb, listenerPort, true);
 		listener.start();
+		while (!listener.isReady()) {
+		}
+		System.out.println("Sending lower:101 upper:201 tested:1098 to worker #"+listener.sampleWID);
+		listener.sendWorkerMessage(listener.sampleWID, "lower:101 upper:201 tested:1098");
 
 
     }
