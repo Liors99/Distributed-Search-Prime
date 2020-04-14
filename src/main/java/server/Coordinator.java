@@ -32,7 +32,7 @@ public class Coordinator {
 	/**
 	 * Run as a coordinator 
 	 */
-	public void notMain(int listenerPort, ConnectionListener listener) {
+	public void notMain(int listenerPort) {
 		//Get user input
 		CoordConsole.console();
 		lowerBound=new BigInt(CoordConsole.lowerBound);
@@ -49,20 +49,20 @@ public class Coordinator {
 
 		
 		TaskScheduler ts = new TaskScheduler(lowerBound, upperBound, primeLimit);
-		listener.setTs(ts);
 		ts.start();
 	
 		
-//		WorkerDatabase wdb = new WorkerDatabase();
+		WorkerDatabase wdb = new WorkerDatabase();
 //
-//		ConnectionListener listener = new ConnectionListener(wdb, listenerPort, ts, true);
-
-
+		ConnectionListener listener = new ConnectionListener(wdb, listenerPort, ts, true);
 		listener.start();
+
 		while (!listener.isReady()) {
 		}
-		System.out.println("Sending lower:101 upper:201 tested:1098 to worker #"+listener.sampleWID);
-		listener.sendWorkerMessage(listener.sampleWID, "lower:101 upper:201 tested:1098");
+		
+		//System.out.println("Next message: "+server.receiveNextMessage());
+		//System.out.println("Sending lower:101 upper:201 tested:1098 to worker #"+listener.sampleWID);
+		//listener.sendWorkerMessage(listener.sampleWID, "lower:101 upper:201 tested:1098");
 
 //		System.out.println("i am gonna get roasted "+server.peekNextMessage());
 
