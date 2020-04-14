@@ -15,10 +15,12 @@ public class WorkerConnection extends Thread {
 	public DataInputStream sockIn;
 	public boolean ready = false;
 	private boolean killswitch = false;
+	private boolean isCoordinator = false;
 	
-	public WorkerConnection() throws IOException{
+	public WorkerConnection(boolean isCoordinator) throws IOException{
 		
 		servSock = new ServerSocket(0);
+		this.isCoordinator = isCoordinator;
 
 	}
 	
@@ -72,6 +74,13 @@ public class WorkerConnection extends Thread {
 	
 	public String createHandshakeResponse() {
 		
-		return "type:HandshakeResponse hostname:"+servSock.getInetAddress()+" port:"+servSock.getLocalPort();
+		String message = "type:HandshakeResponse hostname:"+servSock.getInetAddress()+" port:"+servSock.getLocalPort();
+		if (isCoordinator) {
+			message += " ServerType:coord";
+		}
+		else {
+			message += " ServerType:sub";
+		}
+		return message;
 	}
 }

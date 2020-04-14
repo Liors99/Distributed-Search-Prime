@@ -47,7 +47,7 @@ public class WorkerRunner extends Thread{
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-//		findCoordinator();
+		findCoordinator();
 		
 		while(!killswitch) {
 			doWork();
@@ -109,18 +109,9 @@ public class WorkerRunner extends Thread{
 	}
 	
 	public void findCoordinator() {
-		String handshake = null;
 		for(int i = 0; i<Networking.NUMBER_OF_SERVERS; i++) {
-			try {
-//				connections[i].sock.setSoTimeout(5000);
-				handshake = NetworkMessage.receive(connections[i].sockIn);
-				System.out.println(handshake);
-			} catch (Exception e) {
-
-			}
-			if (handshake != null) {
-				System.out.println("Received handshake:"+handshake);
-				currentCoordinator = i;
+				if (connections[i].isCoordinator()) {				
+					currentCoordinator = i;
 			}
 		}
 	}
