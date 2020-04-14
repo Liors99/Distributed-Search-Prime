@@ -1,6 +1,7 @@
 package server;
 
 import data.HandShakeSubscriber;
+import data.MessageDecoder;
 
 import java.net.BindException;
 import java.net.Socket;
@@ -20,14 +21,15 @@ public class InitializeServerCluster {
     public static List<ServerNetwork> ServerNetworkConnections;
     public static final String[] ips = {"127.0.0.1","127.0.0.1","127.0.0.1"};
     public static final Integer[] ports = {port, port+1, port+2};
-    public static long[] down_time= {0,0,0};
+    public static long up_time = 0;
     public static ServerNetwork server;
     public static Integer id;
     public static Integer LeaderId;
     public static int timeout=20;
     public static final Integer offset = 20;
     public static boolean[] offsetted = {false, false, false};
-
+    public static boolean[] isAlive= {true, true, true};
+    
     public static void main(String args[]) throws Exception {
         //Keep track of server connections
         id = 0;
@@ -45,6 +47,8 @@ public class InitializeServerCluster {
                 System.exit(1);
             }
         }
+        
+        up_time = System.currentTimeMillis();
         server = new ServerNetwork(ips[id], ports[id]);//?
         new Thread(server).start();
         //If not initialized, then start
@@ -193,9 +197,68 @@ public class InitializeServerCluster {
         }
         return max;
     }
+    
+ 
+    
 
 
-    public static Integer reelection(){
-        return 1;
+    public static Integer reelection() throws Exception{
+    		
+    	 HandShakeSubscriber Hs = new HandShakeSubscriber(10, id, up_time);
+         String serializedToken = Hs.serializeHandShake(Integer.toString(id));
+         double this_token = Hs.getToken();
+         System.out.println(" THIS SERVERS UP TIME: "+ this_token);
+         
+         //notify everyone of our #
+         for (int i=0;i<3;i++){
+             if (i==id || !isAlive[i]){
+                 continue;
+             }
+             //check if in hashtable or +20
+             int p = (offsetted[i])?ports[i]+offset*i:ports[i];
+             server.printConnections();
+             server.send(ips[i], p, serializedToken);
+         }
+         
+         if(isAlive[(id+1)%3] || isAlive[(id+2)%3]) {
+        	 String responses[] = new String[2];
+        	 
+        	 Thread.sleep(2000);
+        	 
+        	 System.out.println("Current config: ");
+        	 
+        	 for(boolean i: isAlive) {
+        		 System.out.print(i +" ");
+        	 }
+        	 System.out.println();
+        	 
+        	 
+        	 System.out.println("------------ Before loop");
+        	 while(!MessageDecoder.findMessageType(server.peekNextMessage()).contentEquals("HSS")) {}
+        	 
+        	 System.out.println("------------------------------------------------ Next message is HSS");
+             responses[0] = server.receiveNextMessage();
+             
+
+             HandShakeSubscriber HsDecoded1 = new HandShakeSubscriber();
+             
+             if (responses[0]!=null) {		 
+            	 System.out.println("----------- Response is not nul");
+            	 HsDecoded1.parseHandShake(responses[0]);
+            	 if(HsDecoded1.getToken() > up_time) {
+            		 System.out.println("Server " + id + ", I'm the leader");
+            		 return id;
+            	 }
+            	 else {
+            		 System.out.println("Server " + HsDecoded1.getID() + ", is the leader");
+            		 return HsDecoded1.getID();
+            	 }        
+             }
+         }
+         
+         return id;
     }
+    
+    
+    
 }

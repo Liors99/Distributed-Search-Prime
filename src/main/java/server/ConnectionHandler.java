@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import data.MessageDecoder;
 import data.NetworkMessage;
 import exceptions.TimoutException;
 
@@ -63,11 +64,23 @@ public class ConnectionHandler implements Runnable{
 							if(this.clientSocket.getPort() == InitializeServerCluster.ports[InitializeServerCluster.LeaderId] + InitializeServerCluster.offset*(i+1) 
 									|| this.clientSocket.getPort() == InitializeServerCluster.ports[InitializeServerCluster.LeaderId]) {
 								System.out.println("A leader has crashed");
+								InitializeServerCluster.isAlive[InitializeServerCluster.LeaderId]=false;
+								try {
+									InitializeServerCluster.reelection();
+								} catch (Exception e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
 								break;
 							}
 						}
 					}
 					else {
+						for(int i=0; i<3 ;i++) {
+							if(!(InitializeServerCluster.LeaderId == i) && !(InitializeServerCluster.id == i)) {
+								InitializeServerCluster.isAlive[i]=false;
+							}
+						}
 						System.out.println("A subscriber has crashed");
 					}
 				}
@@ -95,7 +108,6 @@ public class ConnectionHandler implements Runnable{
 		long duration = (endTime - startTime_ka)/1000;
 		
 		if ((int) duration> interval ) {
-			System.out.println("Sending KA");
 			//out.write("type:A".getBytes());
 			
 			int port = InitializeServerCluster.ports[0]+(clientSocket.getPort()%10);
@@ -113,11 +125,13 @@ public class ConnectionHandler implements Runnable{
 	public void receive()  throws TimoutException{
     	try {
     		if(in.available()>0) {
-    			System.out.println("Got a message");
-    			
+
     			String next_msg = NetworkMessage.receive(in);
-        		this.server.addToMessageQueue(next_msg);
-        		System.out.println("Got a message: "+ next_msg);
+        		
+        		if(!MessageDecoder.findMessageType(next_msg).equals("A")) {
+        			System.out.println("Got a message: "+ next_msg);
+        			this.server.addToMessageQueue(next_msg);
+        		}
         		this.startTime = System.currentTimeMillis();
         		
         		

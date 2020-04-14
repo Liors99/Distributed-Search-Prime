@@ -18,6 +18,12 @@ public class HandShakeSubscriber {
 		this();
 		setKA(ka);
 	}
+	
+	public HandShakeSubscriber(int ka, int id, long up_time) {
+		setToken(up_time);
+		setKA(ka);
+		this.id=id;
+	}
 
 
 	/**
