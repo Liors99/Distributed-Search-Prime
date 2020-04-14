@@ -1,5 +1,7 @@
 package server;
 
+import java.net.Socket;
+
 public class Subscriber {
 	
 	private int id;
@@ -21,5 +23,9 @@ public class Subscriber {
 		WorkerDatabase wdb = new WorkerDatabase();
 		ConnectionListener listener = new ConnectionListener(wdb, listenerPort, null ,false);
 		listener.start();
+		
+		/* try to catch incoming messages forwarding results*/
+			
+		
 	}
 }

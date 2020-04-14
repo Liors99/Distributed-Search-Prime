@@ -5,9 +5,12 @@ import data.MessageDecoder;
 import data.NetworkMessage;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -138,6 +141,12 @@ public class TaskScheduler extends Thread {
 				if (result.equals("0")){
 					System.out.println(wR.getCurrent()+ " prime? divisor " + result);
 					primes.add(wR.getCurrent());
+					/*
+					Collection<Socket> sockets =InitializeServerCluster.server.getClient_to_socket().values();
+					for(Socket sk : sockets) {
+						NetworkMessage.send(new DataOutputStream(sk.getOutputStream()),msg);
+					}
+					*/    //tries to send result to all subs
 				}else {
 					System.out.println(wR.getCurrent()+" divided by "+ result + " reported by "+ wR.getWID());
 				}
@@ -145,6 +154,8 @@ public class TaskScheduler extends Thread {
 				System.out.println("5 adding to worker queue");
 				addToWorkerQueue(wR);
 				System.out.println("6 added to worker queue");
+				//see some recent commits in Vlad for ideas on how to catch dropouts.
+//				we do need legit intervals too big and problems as connection will timeout unless keepalive
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				//e.printStackTrace();
@@ -177,7 +188,7 @@ public class TaskScheduler extends Thread {
         	
         	
         	
-        	while(getWorkerQueue().isEmpty()) {} //Wait for worker
+        	while(getWorkerQueue().isEmpty()) {} //Wait for worker //when dealing with worker dropouts/timeouts and have empty queue you might end up here
         	
         	WorkerRecord wR = WorkerQueue.peek();
         	System.out.println("Scheduling "+Integer.toString((wR.getWID())));
