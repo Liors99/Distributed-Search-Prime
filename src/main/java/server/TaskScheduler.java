@@ -41,6 +41,47 @@ public class TaskScheduler extends Thread {
         this.WorkingWorkers = new LinkedList<WorkerRecord>();
         totalScore= new BigInt("0");
     }
+    
+    
+    public int getTarget() {
+		return target;
+	}
+
+
+	public void setTarget(int target) {
+		this.target = target;
+	}
+
+
+	public BigInt getLower() {
+		return lower;
+	}
+
+
+	public void setLower(BigInt lower) {
+		this.lower = lower;
+	}
+
+
+	public BigInt getUpper() {
+		return upper;
+	}
+
+
+	public void setUpper(BigInt upper) {
+		this.upper = upper;
+	}
+
+
+	TaskScheduler() {    	
+    	//max_work = new BigInt(upper.subtract(lower).divide(new BigInteger("10")));
+        WorkerQueue = new PriorityBlockingQueue<WorkerRecord>();
+        ActiveWorkers = new HashMap<Integer, Boolean>();
+        this.doneWorkers = 0;
+        this.primes = new HashSet<BigInt>();
+        this.WorkingWorkers = new LinkedList<WorkerRecord>();
+        totalScore= new BigInt("0");
+    }
 
     /**
      * Derives the range for a given worker

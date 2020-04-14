@@ -15,11 +15,14 @@ public class Subscriber {
 		this.wdb=wdb;
 	}
 	
-	public void notMain(int listenerPort) {
+	public void notMain(int listenerPort, ConnectionListener listener) {
+		listener.start();
 		//WorkerDatabase wdb = new WorkerDatabase();
-
+		
+		/*
 		WorkerDatabase wdb = new WorkerDatabase();
 		ConnectionListener listener = new ConnectionListener(wdb, listenerPort, null ,false);
 		listener.start();
+		*/
 	}
 }

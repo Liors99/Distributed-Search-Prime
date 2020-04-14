@@ -80,7 +80,7 @@ public class InitializeServerCluster {
 		}
 		wdb= new WorkerDatabase();
 		//WorkerDatabase wdb = new WorkerDatabase();
-		//listener = new ConnectionListener(wdb, listenerPort, null ,false);
+		listener = new ConnectionListener(wdb, listenerPort, null ,false);
 		//listener.start();
         assignRole(listenerPort);
         
@@ -95,11 +95,11 @@ public class InitializeServerCluster {
     	
         if(LeaderId==id) {
         	Coordinator c = new Coordinator(id, ServerNetworkConnections, server, wdb);
-        	c.notMain(listenerPort);
+        	c.notMain(listenerPort, listener);
         }
         else {
         	Subscriber s = new Subscriber(id, LeaderId, server, wdb);
-        	s.notMain(listenerPort);
+        	s.notMain(listenerPort, listener);
 
         	
         }
@@ -123,7 +123,6 @@ public class InitializeServerCluster {
                 try{
                     Sk = server.startConnection(ips[i],ports[i], ips[id], ports[id]+(offset*(i+1)));
                     System.out.println("Initiated Connection to " + ips[i] + " "+ Integer.toString(ports[i]));
-                    System.out.println((!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]+offset))));
                     offsetted[i] = false; 
                     
                     server.addServer(ips[i], ports[i]);
