@@ -46,6 +46,8 @@ public class ConnectionListener extends Thread{
 	}
 	*/
 
+	
+
 	public void run() {
 		while (!killswitch) {
 			try {
@@ -103,6 +105,14 @@ public class ConnectionListener extends Thread{
 
 	public void setTs(TaskScheduler ts) {
 		this.ts = ts;
+	}
+	
+	public boolean isCoordinator() {
+		return isCoordinator;
+	}
+
+	public void setCoordinator(boolean isCoordinator) {
+		this.isCoordinator = isCoordinator;
 	}
 
 	public void sendWorkerMessage(int wid, String message) {

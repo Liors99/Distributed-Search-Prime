@@ -32,7 +32,13 @@ public class Coordinator {
 	/**
 	 * Run as a coordinator 
 	 */
-	public void notMain(int listenerPort) {
+	public void notMain(int listenerPort, ConnectionListener listener) {
+		
+		TaskScheduler ts = new TaskScheduler();
+		listener.setTs(ts);
+		listener.setCoordinator(true);
+		listener.start();
+		
 		//Get user input
 		CoordConsole.console();
 		lowerBound=new BigInt(CoordConsole.lowerBound);
@@ -48,14 +54,18 @@ public class Coordinator {
 		}
 
 		
-		TaskScheduler ts = new TaskScheduler(lowerBound, upperBound, primeLimit);
+		
+		ts.setLower(lowerBound);
+		ts.setUpper(upperBound);
+		ts.setTarget(primeLimit);
+		//TaskScheduler ts = new TaskScheduler(lowerBound, upperBound, primeLimit);
 		ts.start();
 	
 		
 		WorkerDatabase wdb = new WorkerDatabase();
 //
-		ConnectionListener listener = new ConnectionListener(wdb, listenerPort, ts, true);
-		listener.start();
+		//ConnectionListener listener = new ConnectionListener(wdb, listenerPort, ts, true);
+		
 
 		while (!listener.isReady()) {
 		}
