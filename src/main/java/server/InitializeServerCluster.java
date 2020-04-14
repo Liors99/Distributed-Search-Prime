@@ -29,6 +29,9 @@ public class InitializeServerCluster {
     public static final Integer offset = 20;
     public static boolean[] offsetted = {false, false, false};
     public static boolean[] isAlive= {true, true, true};
+    private static int listenerPort;
+    
+    public static WorkerDatabase wdb;
     
     public static void main(String args[]) throws Exception {
         //Keep track of server connections
@@ -63,30 +66,41 @@ public class InitializeServerCluster {
             LeaderId = initial_election();
         }
 
-        System.out.println("Leader selected:"+LeaderId);
-        int listenerPort;
-        if (id == 0) {
-        	listenerPort = 8000;
-        }
-        else if(id == 1) {
-        	listenerPort = 8001;
-        }
-        else {
-        	listenerPort = 8002;
-        }
-        if(LeaderId==id) {
-        	Coordinator c = new Coordinator(id, ServerNetworkConnections, server);
-        	c.notMain(listenerPort);
-        }
-        else {
-        	Subscriber s = new Subscriber(id, LeaderId, server);
-        	System.out.println(server.receiveNextMessage());
-        	s.notMain(listenerPort);
-        	
-        } 
+
+		
+		
+		if (id == 0) {
+			listenerPort = 8000;
+		}
+		else if(id == 1) {
+			listenerPort = 8001;
+		}
+		else {
+			listenerPort = 8002;
+		}
+		wdb= new WorkerDatabase();
+        assignRole(listenerPort);
         
         while(true) {}
 
+    }
+    
+    
+    public static void assignRole(int listenerPort) {
+    	System.out.println("Leader selected:"+LeaderId);
+    	
+    	
+        if(LeaderId==id) {
+        	Coordinator c = new Coordinator(id, ServerNetworkConnections, server, wdb);
+        	c.notMain(listenerPort);
+        }
+        else {
+        	Subscriber s = new Subscriber(id, LeaderId, server, wdb);
+        	s.notMain(listenerPort);
+
+        	
+        }
+    	
     }
 
     //Check hash table to verify all connections made
@@ -235,39 +249,34 @@ public class InitializeServerCluster {
         	 String responses[] = new String[2];
         	 
         	 Thread.sleep(2000);
-        	 
-        	 System.out.println("Current config: ");
-        	 
-        	 for(boolean i: isAlive) {
-        		 System.out.print(i +" ");
-        	 }
-        	 System.out.println();
-        	 
-        	 
-        	 System.out.println("------------ Before loop");
+        	  
         	 while(!MessageDecoder.findMessageType(server.peekNextMessage()).contentEquals("HSS")) {}
         	 
-        	 System.out.println("------------------------------------------------ Next message is HSS");
+
              responses[0] = server.receiveNextMessage();
              
 
              HandShakeSubscriber HsDecoded1 = new HandShakeSubscriber();
              
              if (responses[0]!=null) {		 
-            	 System.out.println("----------- Response is not nul");
             	 HsDecoded1.parseHandShake(responses[0]);
             	 if(HsDecoded1.getToken() > up_time) {
             		 System.out.println("Server " + id + ", I'm the leader");
-            		 return id;
+            		 LeaderId=id;
             	 }
             	 else {
             		 System.out.println("Server " + HsDecoded1.getID() + ", is the leader");
-            		 return HsDecoded1.getID();
+            		 LeaderId=HsDecoded1.getID();
             	 }        
              }
          }
+         else {
+        	 LeaderId=id;
+        	 System.out.println("Server " + id + ", I'm the leader");
+         }
          
-         return id;
+         assignRole(listenerPort);
+         return LeaderId;
     }
     
     

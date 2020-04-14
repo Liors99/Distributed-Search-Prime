@@ -1,25 +1,45 @@
 package server;
 
 import data.BigInt;
+import data.MessageDecoder;
+import data.NetworkMessage;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.math.BigInteger;
-
+import java.net.SocketException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.PriorityBlockingQueue;
 
-public class TaskScheduler {
-    private PriorityQueue<WorkerRecord> WorkerQueue;
+public class TaskScheduler extends Thread {
+    private PriorityBlockingQueue<WorkerRecord> WorkerQueue;
+    private LinkedList<WorkerRecord> WorkingWorkers;
+    private HashSet<BigInt> primes;
     private HashMap<Integer, Boolean> ActiveWorkers; //checks if worker with wid is working or not. Working only if true. If not on list/or set to false not working.
     private BigInt totalScore;
     private int doneWorkers;
-
-    TaskScheduler(){
-
-        WorkerQueue = new PriorityQueue<WorkerRecord>();
+    
+    private BigInt max_work; 
+    private int target;
+    private BigInt lower, upper;
+    TaskScheduler(BigInt lower, BigInt upper, int target) {
+    	
+    	//max_work = new BigInt(upper.subtract(lower).divide(new BigInteger("10")));
+    	
+        WorkerQueue = new PriorityBlockingQueue<WorkerRecord>();
         ActiveWorkers = new HashMap<Integer, Boolean>();
         this.doneWorkers = 0;
+        this.target = target;
+        this.primes = new HashSet<BigInt>();
+        this.lower=lower;
+        this.upper=upper;
+        this.WorkingWorkers = new LinkedList<WorkerRecord>();
+        totalScore= new BigInt("0");
     }
 
     /**
@@ -29,59 +49,222 @@ public class TaskScheduler {
      * @param currentLower - the current lower bound for the range
      * @return - returns a tuple, where bound[0] = lower bound and bound[1] = upper bound
      */
+    /*
     public BigInt[] deriveRange(WorkerRecord wR, BigInt curNum, BigInt currentLower){
         BigInt[] bound = new BigInt[2];
         
         //score multiplier -> calculation : range[i] = lower + totalNums*(score[i]/totalScore)
         BigInt size = new BigInt(curNum.subtract(new BigInt("3")).add(new BigInteger("1"))); //Get total numbers in the range
-        BigInteger fraction = size.divide(totalScore); //get totalNums/totalScore
-       
-        //get totalNums*(score[i]/totalScore)
-        BigInteger delta = fraction.multiply(new BigInt(Integer.toString(wR.getScore()))); 
-        BigInt dt = new BigInt(delta);
+        max_work = new BigInt(curNum.subtract(currentLower));
         
-        //Set bounds
-        bound[0] = currentLower;
-        bound[1] = new BigInt(currentLower.add(dt));
-        if (bound[1].gt(curNum)){
-            bound[1] = curNum;
+        if(size.gt(totalScore)) {
+        	BigInteger fraction = size.divide(totalScore); //get totalNums/totalScore
+            
+            System.out.println("--Fraction=" +fraction);
+           
+            //get totalNums*(score[i]/totalScore)
+            BigInteger delta = fraction.multiply(new BigInt(Integer.toString(wR.getScore()))); 
+            BigInt dt = new BigInt(delta);
+            
+            //Set bounds
+            bound[0] = currentLower;
+            bound[1] = new BigInt(currentLower.add(dt));
+            if (bound[1].gt(curNum)){
+                bound[1] = curNum;
+            }
+            
+           
+            if(dt.gt(max_work)) {
+            	bound[1] = new BigInt(bound[0].add(max_work));
+            }
         }
+        else {
+        	bound[0] = currentLower;
+            bound[1] = new BigInt(curNum.subtract(new BigInteger("2")));
+        }
+        
+        
+        System.out.println("--- max_work="+max_work);
+        System.out.println("--- bound[0]="+bound[0]);
+        System.out.println("--- bound[1]="+bound[0]);
         return bound;
     }
-
-    private boolean sendRange(WorkerRecord wR, BigInt[] range){
+*/
+    private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boolean concurrent){
+    	
         wR.setWorkrange(range);
         wR.startWork();
         //send range
+        
         ActiveWorkers.put(wR.getWID(),true);
+        System.out.println("Sending "+ serializeWorkRange(range, current)+ " to worker");
+        while(true) {
+        	try {
+        		wR.getWc().sendMessage(serializeWorkRange(range, current));
+        		
+        		if (!concurrent) {
+        			WorkingWorkers.add(wR);
+        		}
+        		break;
+        	}
+        	catch(Exception e) {
+        		
+        	}
+        }
+        
         return false;
     }
+    
+private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current){
+    	
+        wR.setWorkrange(range);
+        wR.startWork();
+        //send range
+        
+        ActiveWorkers.put(wR.getWID(),true);
+        System.out.println("Sending "+ serializeWorkRange(range, current)+ " to worker");
+        while(true) {
+        	try {
+        		wR.getWc().sendMessage(serializeWorkRange(range, current));
+        		
+        		break;
+        	}
+        	catch(Exception e) {
+        		
+        	}
+        }
+        
+        return false;
+    }
+    
+    private String serializeWorkRange(BigInt[] range, BigInt current) {
+    	StringBuilder s = new StringBuilder();
+    	s.append("type:sendTask upper:"+range[1]+" lower:"+range[0]+" tested:"+current);
+    	
+    	return s.toString();
+    }
 
+    public void iterateWorkingWorkers() {
+    	System.out.println("Checking for incoming messages");
+    	LinkedList<WorkerRecord> DeadRecords  = new LinkedList<WorkerRecord>();
+    	LinkedList<WorkerRecord> ReplacementRecords  = new LinkedList<WorkerRecord>();
+    	for (WorkerRecord wR : WorkingWorkers) {
+    		
+    		System.out.println("in loop: wid "+ Integer.toString(wR.getWID()));
+    		try {
+//    			System.out.println("1");
+				DataInputStream dis = wR.getWc().sockIn;
+				wR.getWc().servSock.setSoTimeout(20000);
+//				System.out.println("2");
+				String msg = NetworkMessage.receive(dis);
+				//System.out.println("reading from worker"+ msg );
+//				System.out.println("3");
+				Map<String, String> m = MessageDecoder.createmap(msg);
+//				System.out.println("4");
+				String result = m.get("divisor");
+				if (result.equals("0")){
+					System.out.println(wR.getCurrent()+ " prime? divisor " + result);
+					primes.add(wR.getCurrent());
+				}else {
+					System.out.println(wR.getCurrent()+" divided by "+ result + " reported by "+ wR.getWID());
+				}
+				DeadRecords.add(wR);
+//				System.out.println("5 adding to worker queue");
+				addToWorkerQueue(wR);
+//				System.out.println("6 added to worker queue");
+    		}catch(SocketException e) {
+    			System.out.println("socket is dead");
+            	while(getWorkerQueue().isEmpty()) {} //Wait for worker
+            	
+            	WorkerRecord wR1 = WorkerQueue.peek();
+            	System.out.println("Rescheduling "+Integer.toString((wR.getWID())));
+            	wR1 = pollFromQueue();
+                wR1.setWorkrange(wR.getWorkrange());
+                wR1.setCurrent(wR.getCurrent());
+            	sendRange(wR1, wR1.getWorkrange(), wR1.getCurrent(), true );
+            	ReplacementRecords.add(wR1);
+            	
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+				
+				System.out.println("hi this is iter over working workers");
+			}
+    	
+    	}
+    	for(WorkerRecord dead : DeadRecords) {
+    		WorkingWorkers.remove(dead);
+    	}
+    	for(WorkerRecord replace : ReplacementRecords) {
+    		WorkingWorkers.add(replace);
+    	}
+    	
+    	System.out.println("finished iterating");
+    }
     /**
      * to be run in a separate thread
      *  called once finalized range; assigns work to workers while they are in queue
      * @return if done
      */
-    public boolean scheduleTask(BigInt lower, BigInt upper){
+    public boolean scheduleTask(){
         BigInt current = lower;
         BigInt currentLower = new BigInt("3");
         if(current.mod(new BigInteger("2")).equals(BigInteger.ZERO)){
             current = new BigInt(current.add(new BigInt(("1"))).toString(10));
         }
-        while(current.le(upper)){ //less or equal to upperbound
+        
+        
+        //upper= new BigInt(upper.sqrt().add(BigInt.ONE));
+        while(current.le(upper) || (primes.size()<target)){ //less or equal to upperbound
             //we will need to do something so it does not loop in idle
-            int workerPoolSize = getWorkerQueue().size();
-            while(getWorkerQueue().size() != 0 && doneWorkers < workerPoolSize){
-                System.out.println(currentLower.toString(10));
-                WorkerRecord wR = getWorkerQueue().poll();
-                BigInt[] range = deriveRange(wR, current, currentLower);
+        	BigInt[] range = new BigInt[] {new BigInt(BigInt.ZERO), new BigInt(BigInt.ZERO)};
+        	
+        	range[0] = new BigInt("3");
+        	range[1] = new BigInt(current.sqrt());
+        	
+        	
+        	
+        	if(!getWorkerQueue().isEmpty()) { //Wait for worker
+        	
+	        	WorkerRecord wR = WorkerQueue.peek();
+	        	System.out.println("Scheduling "+Integer.toString((wR.getWID())));
+	        	wR = pollFromQueue();
+	            wR.setWorkrange(range);
+	            wR.setCurrent(current);
+	        	sendRange(wR, range, current);
+	        	current = new BigInt(current.add(new BigInt("2")).toString(10));
+        	}
+        	
+        	iterateWorkingWorkers();
+        	
+           // int workerPoolSize = getWorkerQueue().size();
+//           while((doneWorkers < workerPoolSize) || range[1].lt(new BigInt(current.sqrt().subtract(BigInt.TWO)))){
+                //System.out.println(currentLower.toString(10));
+/*				System.out.println("before");
+            	while(getWorkerQueue().isEmpty()) {} //Wait for worker
+            	System.out.println("after");
+                WorkerRecord wR = WorkerQueue.peek();
+                range = deriveRange(wR, current, currentLower);
+                wR = pollFromQueue();
                 wR.setWorkrange(range);
-                sendRange(wR, range); //send range to worker
+                wR.setCurrent(current);
+                sendRange(wR, range, current); //send range to worker
                 currentLower = new BigInt (range[1].add(new BigInt("1")).toString(10)); //get max value of the range
-                System.out.println(range[1].toString(10));
-            }
-            current = new BigInt(current.add(new BigInt("2")).toString(10));
+                //System.out.println(range[1].toString(10));*/
+//            }
+          
+            //currentLower = new BigInt("3");
+            
 
+        }  
+        System.out.println("Finished Scheduling; Primes Found:");
+        int counter =0;
+        for (BigInt prime : primes) {
+        	if (counter == target) {break;
+        	
+        	}
+        	counter++;
+        	System.out.println(prime.toString(10));
         }
         return true;
     }
@@ -96,12 +279,16 @@ public class TaskScheduler {
     public boolean reschedule(WorkerRecord oldWR, WorkerRecord wR){
         int i=0;
         while(getWorkerQueue().size() == 0){i++;}
-        wR = getWorkerQueue().poll();
+        wR = pollFromQueue();
         BigInt[] range = oldWR.getWorkrange();
+        
         ActiveWorkers.put(oldWR.getWID(),false);
         ActiveWorkers.put(wR.getWID(),true);
-        sendRange(wR, range); //send range to worker
         wR.setWorkrange(range);
+        wR.setCurrent(oldWR.getCurrent());
+        sendRange(wR, range, wR.getCurrent()); //send range to worker
+        
+        
         return true;
     }
 
@@ -135,16 +322,25 @@ public class TaskScheduler {
         return true;
     }
 
-    public PriorityQueue<WorkerRecord> getWorkerQueue() {
+    public PriorityBlockingQueue<WorkerRecord> getWorkerQueue() {
         return WorkerQueue;
     }
 
-    public void setWorkerQueue(PriorityQueue<WorkerRecord> workerQueue) {
+    public void setWorkerQueue(PriorityBlockingQueue<WorkerRecord> workerQueue) {
         WorkerQueue = workerQueue;
+    }
+    
+    public  WorkerRecord pollFromQueue() {
+    	WorkerRecord wR = this.WorkerQueue.poll();
+//    	setTotalScore(new BigInt(getTotalScore().subtract(new BigInt(Integer.toString(wR.getScore())))));
+    	
+    	return wR;
     }
 
     public void addToWorkerQueue(WorkerRecord wR){
+    	//setTotalScore(new BigInt(getTotalScore().add(new BigInt(Integer.toString(wR.getScore())))));
         this.WorkerQueue.add(wR);
+        
     }
 
 
@@ -173,4 +369,10 @@ public class TaskScheduler {
     public void setActiveWorkers(HashMap<Integer, Boolean> activeWorkers) {
         ActiveWorkers = activeWorkers;
     }
+
+	@Override
+	public void run() {
+		scheduleTask();
+		
+	}
 }

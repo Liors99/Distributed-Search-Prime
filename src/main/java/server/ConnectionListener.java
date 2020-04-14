@@ -21,17 +21,31 @@ public class ConnectionListener extends Thread{
 	private boolean killswitch = false;
 	private boolean isCoordinator = false;
 	
+	
 	public int sampleWID = 0;
 	public boolean ready = false;
-	
-	
+
+	private TaskScheduler ts;
+	public ConnectionListener(WorkerDatabase wdb, int port, TaskScheduler ts, boolean isCoord) {
+		this.wdb = wdb;
+		this.port = port;
+		this.ts=ts;
+		
+		isCoordinator = isCoord;
+	}
+
+	/*
 	public ConnectionListener(WorkerDatabase wdb, int port, boolean isCoord) {
 		this.wdb = wdb;
 		this.port = port;
+		
+		this.ts=null;
+
 		isCoordinator = isCoord;
+
 	}
-	
-	
+	*/
+
 	public void run() {
 		while (!killswitch) {
 			try {
@@ -44,8 +58,15 @@ public class ConnectionListener extends Thread{
 				System.out.println("initiated connection with:" + sock.getInetAddress() + ":" + sock.getPort());
 				WorkerConnection con = new WorkerConnection(isCoordinator);
 				int id = wdb.generateID();
-				WorkerRecord rec = new WorkerRecord(sock.getInetAddress().toString(),sock.getPort(), id, 100, new Timestamp(System.currentTimeMillis()));
+				WorkerRecord rec = new WorkerRecord(sock.getInetAddress().toString(),sock.getPort(), id, 100, new Timestamp(System.currentTimeMillis()), con);
 				wdb.addWorker(id, rec, con);
+				
+				if(this.isCoordinator) {
+					ts.addToWorkerQueue(rec);
+				}
+				
+				
+				//TODO: Replicate worker record to subscribers
 				
 				con.start();
 				
