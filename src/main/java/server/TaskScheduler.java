@@ -15,16 +15,22 @@ public class TaskScheduler extends Thread {
     private HashMap<Integer, Boolean> ActiveWorkers; //checks if worker with wid is working or not. Working only if true. If not on list/or set to false not working.
     private BigInt totalScore;
     private int doneWorkers;
+    
+    private BigInt max_work; 
 
     private BigInt lower, upper;
     TaskScheduler(BigInt lower, BigInt upper) {
-
+    	
+    	max_work = new BigInt(upper.subtract(lower).divide(new BigInteger("10")));
+    	
         WorkerQueue = new PriorityBlockingQueue<WorkerRecord>();
         ActiveWorkers = new HashMap<Integer, Boolean>();
         this.doneWorkers = 0;
         
         this.lower=lower;
         this.upper=upper;
+        
+        totalScore= new BigInt("100");
     }
 
     /**
@@ -51,15 +57,31 @@ public class TaskScheduler extends Thread {
         if (bound[1].gt(curNum)){
             bound[1] = curNum;
         }
+        
+       
+        if(dt.gt(max_work)) {
+        	bound[1] = new BigInt(bound[0].add(max_work));
+        }
         return bound;
     }
 
-    private boolean sendRange(WorkerRecord wR, BigInt[] range){
+    private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current){
+    	
         wR.setWorkrange(range);
         wR.startWork();
         //send range
+        
         ActiveWorkers.put(wR.getWID(),true);
+        System.out.println("Sending "+ serializeWorkRange(range, current)+ " to worker");
+        wR.getWc().sendMessage(serializeWorkRange(range, current));
         return false;
+    }
+    
+    private String serializeWorkRange(BigInt[] range, BigInt current) {
+    	StringBuilder s = new StringBuilder();
+    	s.append("type:sendTask upper:"+range[1]+" lower:"+range[0]+" tested:"+current);
+    	
+    	return s.toString();
     }
 
     /**
@@ -75,13 +97,17 @@ public class TaskScheduler extends Thread {
         }
         while(current.le(upper)){ //less or equal to upperbound
             //we will need to do something so it does not loop in idle
+        	
+        	while(getWorkerQueue().isEmpty()) {} //Wait for worker
+        	
             int workerPoolSize = getWorkerQueue().size();
             while(getWorkerQueue().size() != 0 && doneWorkers < workerPoolSize){
                 System.out.println(currentLower.toString(10));
-                WorkerRecord wR = getWorkerQueue().poll();
+                WorkerRecord wR = pollFromQueue();
                 BigInt[] range = deriveRange(wR, current, currentLower);
                 wR.setWorkrange(range);
-                sendRange(wR, range); //send range to worker
+                wR.setCurrent(current);
+                sendRange(wR, range, current); //send range to worker
                 currentLower = new BigInt (range[1].add(new BigInt("1")).toString(10)); //get max value of the range
                 System.out.println(range[1].toString(10));
             }
@@ -101,12 +127,16 @@ public class TaskScheduler extends Thread {
     public boolean reschedule(WorkerRecord oldWR, WorkerRecord wR){
         int i=0;
         while(getWorkerQueue().size() == 0){i++;}
-        wR = getWorkerQueue().poll();
+        wR = pollFromQueue();
         BigInt[] range = oldWR.getWorkrange();
+        
         ActiveWorkers.put(oldWR.getWID(),false);
         ActiveWorkers.put(wR.getWID(),true);
-        sendRange(wR, range); //send range to worker
         wR.setWorkrange(range);
+        wR.setCurrent(oldWR.getCurrent());
+        sendRange(wR, range, wR.getCurrent()); //send range to worker
+        
+        
         return true;
     }
 
@@ -147,9 +177,18 @@ public class TaskScheduler extends Thread {
     public void setWorkerQueue(PriorityBlockingQueue<WorkerRecord> workerQueue) {
         WorkerQueue = workerQueue;
     }
+    
+    public synchronized WorkerRecord pollFromQueue() {
+    	WorkerRecord wR = this.WorkerQueue.poll();
+    	setTotalScore(new BigInt(getTotalScore().subtract(new BigInt(Integer.toString(wR.getScore())))));
+    	
+    	return wR;
+    }
 
-    public void addToWorkerQueue(WorkerRecord wR){
+    public synchronized void addToWorkerQueue(WorkerRecord wR){
+    	setTotalScore(new BigInt(getTotalScore().add(new BigInt(Integer.toString(wR.getScore())))));
         this.WorkerQueue.add(wR);
+        
     }
 
 

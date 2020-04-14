@@ -29,6 +29,9 @@ public class InitializeServerCluster {
     public static final Integer offset = 20;
     public static boolean[] offsetted = {false, false, false};
     public static boolean[] isAlive= {true, true, true};
+    private static int listenerPort;
+    
+    public static WorkerDatabase wdb;
     
     public static void main(String args[]) throws Exception {
         //Keep track of server connections
@@ -64,8 +67,8 @@ public class InitializeServerCluster {
         }
 
 
-		System.out.println("Leader selected:"+LeaderId);
-		int listenerPort;
+		
+		
 		if (id == 0) {
 			listenerPort = 8000;
 		}
@@ -75,7 +78,7 @@ public class InitializeServerCluster {
 		else {
 			listenerPort = 8002;
 		}
-        
+		wdb= new WorkerDatabase();
         assignRole(listenerPort);
         
         while(true) {}
@@ -85,13 +88,14 @@ public class InitializeServerCluster {
     
     public static void assignRole(int listenerPort) {
     	System.out.println("Leader selected:"+LeaderId);
-
+    	
+    	
         if(LeaderId==id) {
-        	Coordinator c = new Coordinator(id, ServerNetworkConnections, server);
+        	Coordinator c = new Coordinator(id, ServerNetworkConnections, server, wdb);
         	c.notMain(listenerPort);
         }
         else {
-        	Subscriber s = new Subscriber(id, LeaderId, server);
+        	Subscriber s = new Subscriber(id, LeaderId, server, wdb);
         	s.notMain(listenerPort);
 
         	
@@ -271,7 +275,7 @@ public class InitializeServerCluster {
         	 System.out.println("Server " + id + ", I'm the leader");
          }
          
-         assignRole();
+         assignRole(listenerPort);
          return LeaderId;
     }
     

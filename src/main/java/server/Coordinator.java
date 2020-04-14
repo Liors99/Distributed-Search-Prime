@@ -16,11 +16,15 @@ public class Coordinator {
     static BigInt lowerBound;
 	static BigInt upperBound;
 	static int primeLimit;
+	
+	private WorkerDatabase wdb;
     
-    public Coordinator(int id, List<ServerNetwork> ServerNetworkConnections, ServerNetwork server) {
+    public Coordinator(int id, List<ServerNetwork> ServerNetworkConnections, ServerNetwork server, WorkerDatabase wdb) {
     	this.id=id;
     	Coordinator.ServerNetworkConnections=ServerNetworkConnections;
     	this.server=server;
+    	
+    	this.wdb=wdb;
     	
     	
     }
@@ -48,7 +52,7 @@ public class Coordinator {
 		ts.start();
 
 		WorkerDatabase wdb = new WorkerDatabase();
-		ConnectionListener listener = new ConnectionListener(wdb, listenerPort);
+		ConnectionListener listener = new ConnectionListener(wdb, listenerPort, ts);
 		listener.start();
 
 		

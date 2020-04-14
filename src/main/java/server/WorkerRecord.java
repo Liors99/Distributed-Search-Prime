@@ -12,18 +12,34 @@ public class WorkerRecord extends Record implements Comparable<WorkerRecord>{
     private BigInt[] workrange;
     private Boolean isDone;
     static final double DEFAULTSCORE=100;
+    
+    private WorkerConnection wc;
+    private BigInt current;
 
     WorkerRecord(){super();}
 
     // you can use new Timestamp(System.currentTimeMillis());
-    WorkerRecord(String IP, int Port, int WID, int score, Timestamp timeout){
+    WorkerRecord(String IP, int Port, int WID, int score, Timestamp timeout, WorkerConnection wc, BigInt current){
         super(IP, Port, timeout);
         this.setScore(score);
         this.setWID(WID);
         this.isDone = true;
+        this.wc=wc;
+        this.current=current;
     }
     
-    WorkerRecord(String serial){
+    WorkerRecord(String IP, int Port, int WID, int score, Timestamp timeout, WorkerConnection wc){
+        super(IP, Port, timeout);
+        this.setScore(score);
+        this.setWID(WID);
+        this.isDone = true;
+        this.wc=wc;
+    }
+    
+    
+   
+
+	WorkerRecord(String serial){
     	super(serial.split(" super:")[1]);
     	String [] split=serial.split(" super:");
     	if (split[0].contains("Object:WorkerRecord{")) {
@@ -121,6 +137,22 @@ public class WorkerRecord extends Record implements Comparable<WorkerRecord>{
     public void setDone(Boolean done) {
         isDone = done;
     }
+    
+    public WorkerConnection getWc() {
+		return wc;
+	}
+
+	public void setWc(WorkerConnection wc) {
+		this.wc = wc;
+	}
+	
+	public BigInt getCurrent() {
+		return current;
+	}
+
+	public void setCurrent(BigInt current) {
+		this.current = current;
+	}
 
 	@Override
 	public int compareTo(WorkerRecord o) {

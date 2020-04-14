@@ -20,13 +20,20 @@ public class ConnectionListener extends Thread{
 	WorkerDatabase wdb;
 	private boolean killswitch = false;
 	
+	private TaskScheduler ts;
+	public ConnectionListener(WorkerDatabase wdb, int port, TaskScheduler ts) {
+		this.wdb = wdb;
+		this.port = port;
+		this.ts=ts;
+	}
 	
 	public ConnectionListener(WorkerDatabase wdb, int port) {
 		this.wdb = wdb;
 		this.port = port;
+		
+		this.ts=null;
 	}
-	
-	
+
 	public void run() {
 		while (!killswitch) {
 			try {
@@ -39,8 +46,15 @@ public class ConnectionListener extends Thread{
 				System.out.println("initiated connection with:" + sock.getInetAddress() + ":" + sock.getPort());
 				WorkerConnection con = new WorkerConnection();
 				int id = wdb.generateID();
-				WorkerRecord rec = new WorkerRecord(sock.getInetAddress().toString(),sock.getPort(), id, 100, new Timestamp(System.currentTimeMillis()));
+				WorkerRecord rec = new WorkerRecord(sock.getInetAddress().toString(),sock.getPort(), id, 100, new Timestamp(System.currentTimeMillis()), con);
 				wdb.addWorker(id, rec, con);
+				
+				if(ts!=null) {
+					ts.addToWorkerQueue(rec);
+				}
+				
+				
+				//TODO: Replicate worker record to subscribers
 				
 				con.start();
 				
