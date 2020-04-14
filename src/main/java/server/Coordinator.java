@@ -48,9 +48,10 @@ public class Coordinator {
 		}
 
 		
-		TaskScheduler ts = new TaskScheduler(lowerBound, upperBound);
+		TaskScheduler ts = new TaskScheduler(lowerBound, upperBound, primeLimit);
 		ts.start();
-
+	
+		
 		WorkerDatabase wdb = new WorkerDatabase();
 
 		ConnectionListener listener = new ConnectionListener(wdb, listenerPort, ts, true);
@@ -62,7 +63,8 @@ public class Coordinator {
 		System.out.println("Sending lower:101 upper:201 tested:1098 to worker #"+listener.sampleWID);
 		listener.sendWorkerMessage(listener.sampleWID, "lower:101 upper:201 tested:1098");
 
-		
+//		System.out.println("i am gonna get roasted "+server.peekNextMessage());
+
 		
     }
 

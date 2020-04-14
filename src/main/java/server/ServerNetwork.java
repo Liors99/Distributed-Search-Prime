@@ -255,7 +255,7 @@ public class ServerNetwork implements Runnable{
 	 */
 	public String peekNextMessage() {
 		while(MessageQueue.isEmpty()) {}
-		System.out.println("Peeked into next msg");
+		//System.out.println("Peeked into next msg");
 		return MessageQueue.peek(); 
 	}
 
