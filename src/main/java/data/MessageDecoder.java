@@ -12,6 +12,21 @@ import server.Store;
 public class MessageDecoder {
 	
 	static Store s=new Store();
+	
+	
+	public static String findMessageType(String message) {
+		String[] space=message.split(" ");
+		String type;
+		try {
+		  type=space[0].split(":")[1];
+		}
+		catch (Exception e){
+			System.out.println("Empty type");
+			return null;
+		}
+		
+		return type;
+	}
 
 	public static boolean parse(String message) {
 		//split into key value pairs

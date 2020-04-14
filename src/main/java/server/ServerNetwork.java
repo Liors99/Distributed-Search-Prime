@@ -92,6 +92,7 @@ public class ServerNetwork implements Runnable{
 	  * Prints all the connections that this server has (IP + port number)
 	  */
 	 public synchronized void printConnections() {
+		 System.out.println("---Server's connections:");
 		 for (String ip_port : client_to_socket.keySet()) {
 				System.out.println(ip_port);
 			}
@@ -253,6 +254,8 @@ public class ServerNetwork implements Runnable{
 	 * @return
 	 */
 	public String peekNextMessage() {
+		while(MessageQueue.isEmpty()) {}
+		System.out.println("Peeked into next msg");
 		return MessageQueue.peek(); 
 	}
 
