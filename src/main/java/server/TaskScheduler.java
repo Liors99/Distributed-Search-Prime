@@ -32,9 +32,13 @@ public class TaskScheduler extends Thread {
 
     
     private BlockingQueue<String> workerMessages;
+    BigInt current;
     
 
-    private Store st;
+    
+
+
+	private Store st;
 
 
     TaskScheduler(BigInt lower, BigInt upper, int target) {
@@ -97,6 +101,7 @@ public class TaskScheduler extends Thread {
         totalScore= new BigInt("0");
         
         workerMessages= new LinkedBlockingDeque<String>();
+        this.current= new BigInt(BigInt.ZERO);
         
 	}
 	
@@ -250,7 +255,7 @@ public class TaskScheduler extends Thread {
      * @return if done
      */
     public boolean scheduleTask(){
-        BigInt current = lower;
+        this.current = lower;
         BigInt currentLower = new BigInt("3");
         if(current.mod(new BigInteger("2")).equals(BigInteger.ZERO)){
             current = new BigInt(current.add(new BigInt(("1"))).toString(10));
@@ -415,6 +420,15 @@ public class TaskScheduler extends Thread {
     public void setActiveWorkers(HashMap<Integer, Boolean> activeWorkers) {
         ActiveWorkers = activeWorkers;
     }
+    
+    public BigInt getCurrent() {
+		return current;
+	}
+
+
+	public void setCurrent(BigInt current) {
+		this.current = current;
+	}
 
 	@Override
 	public void run() {
