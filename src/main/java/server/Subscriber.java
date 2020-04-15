@@ -56,7 +56,7 @@ public class Subscriber {
 	public void notMain() {
 		
 		
-		listener.start();
+		listener.ready=true;
 
 		
 		//Read from coordinator
@@ -91,8 +91,13 @@ public class Subscriber {
 					
 					//Add the message back for re-election to deal with it
 					while(!InitializeServerCluster.reelectionStarted) {
-						
-						System.out.println("Waiting for the reelection to finish....");
+						System.out.println("Waiting for re election to finish");
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 					InitializeServerCluster.ElectReelectionLeader(next_message);
 				}

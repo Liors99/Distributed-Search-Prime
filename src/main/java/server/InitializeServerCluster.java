@@ -61,6 +61,9 @@ public class InitializeServerCluster {
         new Thread(server).start();
         //If not initialized, then start
         System.out.println("ServerNetwork started!");
+        
+        
+		
         establishConnections();
         System.out.println("Connections Established!");
 
@@ -83,9 +86,12 @@ public class InitializeServerCluster {
 		else {
 			listenerPort = 8002;
 		}
+		
 		wdb= new WorkerDatabase();
 		listener = new ConnectionListener(wdb, listenerPort, null ,false);
+		listener.ready=false;
 		s = new Subscriber(id, LeaderId, server, listener, st);
+		
         assignRole(false);
         
         while(true) {}
@@ -314,7 +320,7 @@ public class InitializeServerCluster {
 			 }
 		 }
 		 reelectionStarted=false;
-	     //assignRole(true);
+	     assignRole(true);
 	     return LeaderId;
     }
     

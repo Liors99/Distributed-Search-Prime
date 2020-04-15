@@ -95,6 +95,12 @@ public class Coordinator {
 		
 		this.primes=s.getPrimes();
 		this.current_worked_on=s.getCurrent_worked_on();
+		
+		
+		this.ts.setLower(this.lowerBound);
+		this.ts.setUpper(this.upperBound);
+		this.ts.setTarget(this.primeLimit);
+
 	}
 	
 	
@@ -105,6 +111,12 @@ public class Coordinator {
 		upperBound=new BigInt(CoordConsole.upperBound);
 		primeLimit= CoordConsole.primeLimit;
 		String task="type:COR_GOAL upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit;
+		
+		ts.setLower(lowerBound);
+		ts.setUpper(upperBound);
+		ts.setTarget(primeLimit);
+		ts.setCurrent(lowerBound);
+		
 		// Send tasks to other servers
 		try {
 			server.sendServers(task, id);
@@ -115,18 +127,16 @@ public class Coordinator {
 
 		
 		
-		ts.setLower(lowerBound);
-		ts.setUpper(upperBound);
-		ts.setTarget(primeLimit);
+		
 	}
-    
+	
 	/**
 	 * Run as a coordinator 
 	 */
 	public void notMain() {
 		
 		
-		listener.start();
+		listener.ready=true;
 		
 		//If we haven't searched yet
 		if(primeLimit == 0) {
@@ -134,6 +144,7 @@ public class Coordinator {
 		}
 		
 		
+		ts.setCurrent(this.current_worked_on);
 		ts.setStore(st);
 		ts.start();
 	
@@ -190,6 +201,7 @@ public class Coordinator {
 			//Poll the current number
 			BigInt current= ts.getCurrent();
 			
+			
 			//If they are no the same, we need to update
 			if(!current.equals(current_worked_on)) {
 				current_worked_on=current;
@@ -203,6 +215,8 @@ public class Coordinator {
 				}
 				
 			}
+			
+			
 			
 			//Send worker information
 			
