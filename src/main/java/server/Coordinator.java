@@ -19,7 +19,6 @@ public class Coordinator {
     int id=-2;
 
 	private ServerNetwork server;
-    public static List<ServerNetwork> ServerNetworkConnections;
     private BigInt lowerBound;
 	private BigInt upperBound;
 	private int primeLimit;
@@ -30,19 +29,26 @@ public class Coordinator {
 	private BigInt current_worked_on;
 	
 	private ConnectionListener listener;
+	private TaskScheduler ts;
 	
 	
     
 
-    public Coordinator(int id, List<ServerNetwork> ServerNetworkConnections, ServerNetwork server, ConnectionListener listener, Store st) {
+    public Coordinator(int id, ServerNetwork server, ConnectionListener listener, Store st) {
     	this.id=id;
-    	Coordinator.ServerNetworkConnections=ServerNetworkConnections;
     	this.server=server;
     	this.listener=listener;
 		this.st=st;
 		
 		primes = new HashSet<>();
+		lowerBound= new BigInt(BigInt.ZERO);
+		upperBound= new BigInt(BigInt.ZERO);
+		primeLimit= 0;
 		current_worked_on= new BigInt(BigInt.ZERO);
+		
+		ts = new TaskScheduler();
+		this.listener.setTs(ts);
+		this.listener.setCoordinator(true);
     	
     }
     
@@ -80,18 +86,19 @@ public class Coordinator {
 	public void setCurrent_worked_on(BigInt current_worked_on) {
 		this.current_worked_on = current_worked_on;
 	}
-    
-	/**
-	 * Run as a coordinator 
-	 */
-	public void notMain(int listenerPort) {
+	
+	
+	public void loadFromSubscriber(Subscriber s) {
+		this.lowerBound=s.getLowerBound();
+		this.upperBound=s.getUpperBound();
+		this.primeLimit=s.getPrimeLimit();
 		
-		TaskScheduler ts = new TaskScheduler();
-		listener.setTs(ts);
-		listener.setCoordinator(true);
-		listener.start();
-		
-		
+		this.primes=s.getPrimes();
+		this.current_worked_on=s.getCurrent_worked_on();
+	}
+	
+	
+	public void getUserInput(TaskScheduler ts) {
 		//Get user input
 		CoordConsole.console();
 		lowerBound=new BigInt(CoordConsole.lowerBound);
@@ -111,18 +118,30 @@ public class Coordinator {
 		ts.setLower(lowerBound);
 		ts.setUpper(upperBound);
 		ts.setTarget(primeLimit);
-
-
-
+	}
+    
+	/**
+	 * Run as a coordinator 
+	 */
+	public void notMain() {
+		
+		
+		listener.start();
+		
+		//If we haven't searched yet
+		if(primeLimit == 0) {
+			getUserInput(ts);
+		}
+		
+		
 		ts.setStore(st);
 		ts.start();
 	
-
+		System.out.println("The system will try to find " + primeLimit +" primes in the range of " + lowerBound +" to "+ upperBound);
 		//while (!listener.isReady()) {} //TODO: check what this does
 		
+		
 		//Start getting messages
-		
-		
 		while(true) {
 			//Get message from workers
 			String next_message=null;
@@ -184,6 +203,9 @@ public class Coordinator {
 				}
 				
 			}
+			
+			//Send worker information
+			
 			
 		}
 		

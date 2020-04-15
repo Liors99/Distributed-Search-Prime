@@ -33,6 +33,9 @@ public class InitializeServerCluster {
     private static ConnectionListener listener;
     public static WorkerDatabase wdb;
     public static Store st;
+    private static Subscriber s;
+    
+    public static boolean reelectionStarted=false;
     
     public static void main(String args[]) throws Exception {
         //Keep track of server connections
@@ -82,25 +85,30 @@ public class InitializeServerCluster {
 		}
 		wdb= new WorkerDatabase();
 		listener = new ConnectionListener(wdb, listenerPort, null ,false);
-        assignRole(listenerPort);
+		s = new Subscriber(id, LeaderId, server, listener, st);
+        assignRole(false);
         
         while(true) {}
 
     }
     
     
-    public static void assignRole(int listenerPort) {
+    public static void assignRole(boolean isReelection) {
     	System.out.println("Leader selected:"+LeaderId);
     	
     	
         if(LeaderId==id) {
-
-        	Coordinator c = new Coordinator(id, ServerNetworkConnections, server, listener, st);
-        	c.notMain(listenerPort);
+        	
+        	
+        	Coordinator c = new Coordinator(id, server, listener, st);
+        	if(isReelection) {
+        		c.loadFromSubscriber(s);
+        	}
+        	c.notMain();
         }
         else {
-        	Subscriber s = new Subscriber(id, LeaderId, server, listener, st);
-        	s.notMain(listenerPort);
+        	//Subscriber s = new Subscriber(id, LeaderId, server, listener, st);
+        	s.notMain();
         }
 
     	
@@ -228,9 +236,11 @@ public class InitializeServerCluster {
     
 
 
-    public static void reelection() throws Exception{
+    public static void reelection(){
     		
+    	
     	listener.kill(); //Stop accepting any connections
+    	
     	 HandShakeSubscriber Hs = new HandShakeSubscriber(id, 10, up_time);
          String serializedToken = Hs.serializeHandShake();
          double this_token = Hs.getToken();
@@ -244,8 +254,18 @@ public class InitializeServerCluster {
              //check if in hashtable or +20
              int p = (offsetted[i])?ports[i]+offset*i:ports[i];
              server.printConnections();
-             server.send(ips[i], p, serializedToken);
+             try {
+            	 System.out.println("Tryign to send to "+p);
+				server.send(ips[i], p, serializedToken);
+				System.out.println("Send message to "+p);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				System.out.println("Failed sending to "+p);
+				continue;
+			}
          }
+         
+         System.out.println("Finished reelection");
          
         
     }
@@ -279,7 +299,7 @@ public class InitializeServerCluster {
 		 for(int i=0; i<3; i++) {
 			 if(i!=id && i!=id_recv) {
 				 System.out.println("Removing " + i+"'s connections");
-				 isAlive[i]=false;
+				 //isAlive[i]=false;
 				 
 				 //Remove the inbound connection from this server
 				 for(int j=0;j<3;j++) {
@@ -293,8 +313,8 @@ public class InitializeServerCluster {
 				 server.printConnections();
 			 }
 		 }
-	     
-	     //assignRole(listenerPort);
+		 reelectionStarted=false;
+	     //assignRole(true);
 	     return LeaderId;
     }
     
