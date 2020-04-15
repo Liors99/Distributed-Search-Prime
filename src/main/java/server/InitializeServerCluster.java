@@ -3,6 +3,7 @@ package server;
 import data.HandShakeSubscriber;
 import data.MessageDecoder;
 
+import java.io.IOException;
 import java.net.BindException;
 import java.net.Socket;
 import java.util.HashMap;
@@ -67,7 +68,22 @@ public class InitializeServerCluster {
             //DO initial election
             LeaderId = initial_election();
         }
-
+        if (LeaderId==-2) {
+        	//Enter Recovery mode
+        	destroyConnections();
+        	establishConnections();
+            //broadcast recovery
+            for (int i=0;i<3;i++){
+                if (i==id){
+                    continue;
+                }
+                //check if in hashtable or +20
+                int p = (offsetted[i])?ports[i]+offset*i:ports[i];
+                server.printConnections();
+                server.send(ips[i], p, "Type:Recovery");
+            }
+        	
+        }
 
 		
 		
@@ -146,7 +162,20 @@ public class InitializeServerCluster {
             e.printStackTrace();
         }
     }
-
+    
+   public static void destroyConnections(){
+	   HashMap<String, Socket> connections=server.getClient_to_socket();
+       for(Socket i:connections.values()) {
+    	  try {
+			i.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+       }
+       server.setClient_to_socket(new HashMap<String, Socket>());
+   }
+   
     /**
     * @return winner id or -1 if failed
     */

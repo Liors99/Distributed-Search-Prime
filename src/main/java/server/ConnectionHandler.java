@@ -86,7 +86,12 @@ public class ConnectionHandler implements Runnable{
 				}
 				
 				isConnected=false; //We dropped a connection if we get an error recieving
-				//this.server.removeFromMap(this.clientSocket.getLocalAddress(), this.clientSocket.getLocalPort());
+				try {
+					clientSocket.close();
+				} catch (IOException e1) {
+					
+				}
+				this.server.removeFromMap(this.clientSocket.getLocalAddress(), this.clientSocket.getLocalPort());
 				
 				
 			}

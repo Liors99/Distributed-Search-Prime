@@ -211,6 +211,7 @@ public class TaskScheduler extends Thread {
     				if (result.equals("0")){
     					System.out.println(wR.getCurrent()+ " is a prime? Divisor recieved is " + result);
     					primes.add(wR.getCurrent());
+    					st.writeResult("Prime: "+wR.getCurrent());
     				}else {
     					System.out.println(wR.getCurrent()+" divided by "+ result + " reported by "+ wR.getWID());
     				}
