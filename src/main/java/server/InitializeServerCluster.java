@@ -32,6 +32,7 @@ public class InitializeServerCluster {
     private static int listenerPort;
     private static ConnectionListener listener;
     public static WorkerDatabase wdb;
+    public static Store st;
     
     public static void main(String args[]) throws Exception {
         //Keep track of server connections
@@ -50,7 +51,8 @@ public class InitializeServerCluster {
                 System.exit(1);
             }
         }
-        
+        st=new Store("output"+id+".txt");
+        st.writeLast("Last checked: 0");
         up_time = System.currentTimeMillis();
         server = new ServerNetwork(ips[id], ports[id]);//?
         new Thread(server).start();
@@ -92,15 +94,15 @@ public class InitializeServerCluster {
     	
     	
         if(LeaderId==id) {
-        	Coordinator c = new Coordinator(id, ServerNetworkConnections, server, listener);
+
+        	Coordinator c = new Coordinator(id, ServerNetworkConnections, server, listener, st);
         	c.notMain(listenerPort);
         }
         else {
-        	Subscriber s = new Subscriber(id, LeaderId, server, listener);
+        	Subscriber s = new Subscriber(id, LeaderId, server, listener, st);
         	s.notMain(listenerPort);
-
-        	
         }
+
     	
     }
 

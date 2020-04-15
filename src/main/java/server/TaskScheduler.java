@@ -29,9 +29,14 @@ public class TaskScheduler extends Thread {
     private BigInt max_work; 
     private int target;
     private BigInt lower, upper;
+
     
     private BlockingQueue<String> workerMessages;
     
+
+    private Store st;
+
+
     TaskScheduler(BigInt lower, BigInt upper, int target) {
     	
     	//max_work = new BigInt(upper.subtract(lower).divide(new BigInteger("10")));
@@ -213,8 +218,7 @@ public class TaskScheduler extends Thread {
 					WorkingWorkers.remove(wR);
 					addToWorkerQueue(wR);
 				
-    			
-//    			
+    		
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				//e.printStackTrace();
@@ -273,6 +277,7 @@ public class TaskScheduler extends Thread {
             wR.setWorkrange(range);
             wR.setCurrent(current);
         	sendRange(wR, range, current);
+        	st.writeLast("Last checked:"+current.toString());
         	current = new BigInt(current.add(new BigInt("2")).toString(10));
         	
         	
@@ -414,6 +419,12 @@ public class TaskScheduler extends Thread {
 	@Override
 	public void run() {
 		scheduleTask();
+		
+	}
+
+
+	public void setStore(Store st) {
+		this.st=st;
 		
 	}
 }
