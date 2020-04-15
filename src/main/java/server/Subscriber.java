@@ -71,8 +71,9 @@ public class Subscriber {
 				}
 				else if(m.get("type").contentEquals("recover")) {
 					int sendto=Integer.parseInt(m.get("id"));
+					int p = (InitializeServerCluster.offsetted[sendto])?InitializeServerCluster.ports[sendto]+InitializeServerCluster.offset*sendto:InitializeServerCluster.ports[sendto];
 					try {
-						server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],"leader:"+InitializeServerCluster.LeaderId);
+						server.send(InitializeServerCluster.ips[sendto],p,"leader:"+InitializeServerCluster.LeaderId);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

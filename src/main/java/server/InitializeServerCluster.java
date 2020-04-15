@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class InitializeServerCluster {
 /*
@@ -82,6 +83,15 @@ public class InitializeServerCluster {
                 server.printConnections();
                 server.send(ips[i], p, "type:recover id:"+id);
             }
+            boolean recovering=true;
+            while(recovering) {
+            	if(server.viewNextMessage()!=null) {
+        			String next_message = server.receiveNextMessage();
+        			System.out.println("Recovery recieved:"+next_message);
+        		    Map<String, String> m=MessageDecoder.createmap(next_message);
+                }
+               }
+            
         	
         }
 
