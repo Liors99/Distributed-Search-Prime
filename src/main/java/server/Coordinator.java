@@ -1,12 +1,15 @@
 package server;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.util.LinkedList;
 import java.util.List;
 
 import data.BigInt;
+import data.NetworkMessage;
 
 public class Coordinator {
 	
@@ -18,26 +21,34 @@ public class Coordinator {
 	static int primeLimit;
 	
 	private WorkerDatabase wdb;
+	private ConnectionListener listener;
     
-    public Coordinator(int id, List<ServerNetwork> ServerNetworkConnections, ServerNetwork server, WorkerDatabase wdb) {
+    public Coordinator(int id, List<ServerNetwork> ServerNetworkConnections, ServerNetwork server, ConnectionListener listener) {
     	this.id=id;
     	Coordinator.ServerNetworkConnections=ServerNetworkConnections;
     	this.server=server;
     	
-    	this.wdb=wdb;
+    	this.listener=listener;
+	
     	
+    }
+    
+    
+    public String getWorkerMessage(TaskScheduler ts) {
     	
+    	return ts.getNextWorkerMessage();
     }
     
 	/**
 	 * Run as a coordinator 
 	 */
-	public void notMain(int listenerPort, ConnectionListener listener) {
+	public void notMain(int listenerPort) {
 		
 		TaskScheduler ts = new TaskScheduler();
 		listener.setTs(ts);
 		listener.setCoordinator(true);
 		listener.start();
+		
 		
 		//Get user input
 		CoordConsole.console();
@@ -58,24 +69,44 @@ public class Coordinator {
 		ts.setLower(lowerBound);
 		ts.setUpper(upperBound);
 		ts.setTarget(primeLimit);
-		//TaskScheduler ts = new TaskScheduler(lowerBound, upperBound, primeLimit);
+
 		ts.start();
 	
 		
 		WorkerDatabase wdb = new WorkerDatabase();
-//
-		//ConnectionListener listener = new ConnectionListener(wdb, listenerPort, ts, true);
+
 		
 
-		while (!listener.isReady()) {
+		while (!listener.isReady()) {}
+		
+		//Start getting messages
+		
+		
+		while(true) {
+			//Get message from workers
+			String next_message=null;
+			
+			next_message = getWorkerMessage(ts);
+			if(next_message!=null) {
+				System.out.println("MESSAGE RECIEVED BY COORDINATOR : Got a message from worker: "+next_message);
+				
+				//Send the message to all subscribers
+				
+				try {
+					server.sendServers(next_message, id);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+			}
+			//Get message from subscribers
+			if(server.viewNextMessage()!=null) {
+				next_message = server.receiveNextMessage();
+			}
 		}
 		
-		//System.out.println("Next message: "+server.receiveNextMessage());
-		//System.out.println("Sending lower:101 upper:201 tested:1098 to worker #"+listener.sampleWID);
-		//listener.sendWorkerMessage(listener.sampleWID, "lower:101 upper:201 tested:1098");
-
-//		System.out.println("i am gonna get roasted "+server.peekNextMessage());
-
 		
     }
 

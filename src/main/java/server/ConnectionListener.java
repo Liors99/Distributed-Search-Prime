@@ -48,6 +48,14 @@ public class ConnectionListener extends Thread{
 
 	
 
+	public WorkerDatabase getWdb() {
+		return wdb;
+	}
+
+	public void setWdb(WorkerDatabase wdb) {
+		this.wdb = wdb;
+	}
+
 	public void run() {
 		while (!killswitch) {
 			try {

@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.PriorityBlockingQueue;
 
 public class TaskScheduler extends Thread {
@@ -27,6 +29,9 @@ public class TaskScheduler extends Thread {
     private BigInt max_work; 
     private int target;
     private BigInt lower, upper;
+    
+    private BlockingQueue<String> workerMessages;
+    
     TaskScheduler(BigInt lower, BigInt upper, int target) {
     	
     	//max_work = new BigInt(upper.subtract(lower).divide(new BigInteger("10")));
@@ -40,6 +45,10 @@ public class TaskScheduler extends Thread {
         this.upper=upper;
         this.WorkingWorkers = new LinkedList<WorkerRecord>();
         totalScore= new BigInt("0");
+        
+        workerMessages= new LinkedBlockingDeque<String>();
+        
+
     }
     
     
@@ -81,9 +90,27 @@ public class TaskScheduler extends Thread {
         this.primes = new HashSet<BigInt>();
         this.WorkingWorkers = new LinkedList<WorkerRecord>();
         totalScore= new BigInt("0");
-    }
+        
+        workerMessages= new LinkedBlockingDeque<String>();
+        
+	}
+	
+	
+	public String getNextWorkerMessage() {
+		if(!this.workerMessages.isEmpty()) {
+			return this.workerMessages.poll();
+		}
+		
+		return null;
+	}
+	
+	
+	public void addWorkerMessage(String s) {
+		this.workerMessages.add(s);
+	}
 
-    /**
+
+	/**
      * Derives the range for a given worker
      * @param wR - the worker's record
      * @param curNum - the current number being worked on, i.e. the global upper bound
@@ -160,31 +187,34 @@ public class TaskScheduler extends Thread {
     	return s.toString();
     }
 
+    
     public void iterateWorkingWorkers() {
-    	System.out.println("Checking for incoming messages");
+    	System.out.println("Checking for incoming messages from workers...");
     	for (WorkerRecord wR : WorkingWorkers) {
-    		
-    		System.out.println("in loop: wid "+ Integer.toString(wR.getWID()));
     		try {
-//    			System.out.println("1");
-				DataInputStream dis = wR.getWc().sockIn;
-//				System.out.println("2");
-				String msg = NetworkMessage.receive(dis);
-				//System.out.println("reading from worker"+ msg );
-//				System.out.println("3");
-				Map<String, String> m = MessageDecoder.createmap(msg);
-//				System.out.println("4");
-				String result = m.get("divisor");
-				if (result.equals("0")){
-					System.out.println(wR.getCurrent()+ " prime? divisor " + result);
-					primes.add(wR.getCurrent());
-				}else {
-					System.out.println(wR.getCurrent()+" divided by "+ result + " reported by "+ wR.getWID());
-				}
-				WorkingWorkers.remove(wR);
-				System.out.println("5 adding to worker queue");
-				addToWorkerQueue(wR);
-				System.out.println("6 added to worker queue");
+
+    				DataInputStream dis = wR.getWc().sockIn;
+//    				System.out.println("2");
+    				String msg = NetworkMessage.receive(dis);
+    				
+    				addWorkerMessage(msg);
+    				//System.out.println("reading from worker"+ msg );
+//    				System.out.println("3");
+    				Map<String, String> m = MessageDecoder.createmap(msg);
+//    				System.out.println("4");
+    				String result = m.get("divisor");
+    				if (result.equals("0")){
+    					System.out.println(wR.getCurrent()+ " is a prime? Divisor recieved is " + result);
+    					primes.add(wR.getCurrent());
+    				}else {
+    					System.out.println(wR.getCurrent()+" divided by "+ result + " reported by "+ wR.getWID());
+    				}
+    				
+					WorkingWorkers.remove(wR);
+					addToWorkerQueue(wR);
+				
+    			
+//    			
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				//e.printStackTrace();
@@ -194,7 +224,23 @@ public class TaskScheduler extends Thread {
     	}
     	System.out.println("finished iterating");
     }
-    /**
+    
+    
+    public LinkedList<WorkerRecord> getWorkingWorkers() {
+		return WorkingWorkers;
+	}
+
+
+	public void setWorkingWorkers(LinkedList<WorkerRecord> workingWorkers) {
+		WorkingWorkers = workingWorkers;
+	}
+	
+	public void removeFromWorkingWorkers(WorkerRecord wR) {
+		WorkingWorkers.remove(wR);
+	}
+
+
+	/**
      * to be run in a separate thread
      *  called once finalized range; assigns work to workers while they are in queue
      * @return if done
@@ -220,6 +266,8 @@ public class TaskScheduler extends Thread {
         	while(getWorkerQueue().isEmpty()) {} //Wait for worker
         	
         	WorkerRecord wR = WorkerQueue.peek();
+        	
+        	
         	System.out.println("Scheduling "+Integer.toString((wR.getWID())));
         	wR = pollFromQueue();
             wR.setWorkrange(range);

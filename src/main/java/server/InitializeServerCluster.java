@@ -79,9 +79,7 @@ public class InitializeServerCluster {
 			listenerPort = 8002;
 		}
 		wdb= new WorkerDatabase();
-		//WorkerDatabase wdb = new WorkerDatabase();
 		listener = new ConnectionListener(wdb, listenerPort, null ,false);
-		//listener.start();
         assignRole(listenerPort);
         
         while(true) {}
@@ -94,12 +92,12 @@ public class InitializeServerCluster {
     	
     	
         if(LeaderId==id) {
-        	Coordinator c = new Coordinator(id, ServerNetworkConnections, server, wdb);
-        	c.notMain(listenerPort, listener);
+        	Coordinator c = new Coordinator(id, ServerNetworkConnections, server, listener);
+        	c.notMain(listenerPort);
         }
         else {
-        	Subscriber s = new Subscriber(id, LeaderId, server, wdb);
-        	s.notMain(listenerPort, listener);
+        	Subscriber s = new Subscriber(id, LeaderId, server, listener);
+        	s.notMain(listenerPort);
 
         	
         }
@@ -164,7 +162,6 @@ public class InitializeServerCluster {
             //check if in hashtable or +20
             int p = (offsetted[i])?ports[i]+offset*i:ports[i];
             server.printConnections();
-            System.out.println(p);
             server.send(ips[i], p, serializedToken);
         }
 
@@ -231,6 +228,7 @@ public class InitializeServerCluster {
 
     public static Integer reelection() throws Exception{
     		
+    	listener.kill(); //Stop accepting any connections
     	 HandShakeSubscriber Hs = new HandShakeSubscriber(10, id, up_time);
          String serializedToken = Hs.serializeHandShake(Integer.toString(id));
          double this_token = Hs.getToken();
