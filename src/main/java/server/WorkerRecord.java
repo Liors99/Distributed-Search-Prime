@@ -12,8 +12,16 @@ public class WorkerRecord extends Record implements Comparable<WorkerRecord>{
     private BigInt[] workrange;
     private Boolean isDone;
     static final double DEFAULTSCORE=100;
+    private long workerTimeout;
     
-    private WorkerConnection wc;
+    public long getworkerTimeout() {
+		return workerTimeout;
+	}
+
+	public void setworkerTimeout(long timeout) {
+		this.workerTimeout = timeout;
+	}
+	private WorkerConnection wc;
     private BigInt current;
 
     WorkerRecord(){super();}
