@@ -69,6 +69,11 @@ public class Subscriber {
 					this.upperBound = new BigInt(m.get("upper"));
 					this.primeLimit = Integer.parseInt(m.get("limit"));
 				}
+				else if(m.get("type").contentEquals("HSS")) {
+					
+					//Add the message back for re-election to deal with it
+					InitializeServerCluster.ElectReelectionLeader(next_message);
+				}
 			}
 		}
 	}

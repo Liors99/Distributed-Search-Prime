@@ -151,8 +151,8 @@ public class InitializeServerCluster {
     * @return winner id or -1 if failed
     */
     public static Integer initial_election() throws Exception{
-        HandShakeSubscriber Hs = new HandShakeSubscriber(10000);
-        String serializedToken = Hs.serializeHandShake(Integer.toString(id));
+        HandShakeSubscriber Hs = new HandShakeSubscriber(id,10000);
+        String serializedToken = Hs.serializeHandShake();
         double this_token = Hs.getToken();
         System.out.println(id+ " "+ this_token);
         
@@ -228,11 +228,11 @@ public class InitializeServerCluster {
     
 
 
-    public static Integer reelection() throws Exception{
+    public static void reelection() throws Exception{
     		
     	listener.kill(); //Stop accepting any connections
-    	 HandShakeSubscriber Hs = new HandShakeSubscriber(10, id, up_time);
-         String serializedToken = Hs.serializeHandShake(Integer.toString(id));
+    	 HandShakeSubscriber Hs = new HandShakeSubscriber(id, 10, up_time);
+         String serializedToken = Hs.serializeHandShake();
          double this_token = Hs.getToken();
          System.out.println(" THIS SERVERS UP TIME: "+ this_token);
          
@@ -247,38 +247,36 @@ public class InitializeServerCluster {
              server.send(ips[i], p, serializedToken);
          }
          
-         if(isAlive[(id+1)%3] || isAlive[(id+2)%3]) {
-        	 String responses[] = new String[2];
-        	 
-        	 Thread.sleep(2000);
-        	  
-        	 while(!MessageDecoder.findMessageType(server.peekNextMessage()).contentEquals("HSS")) {}
-        	 
-
-             responses[0] = server.receiveNextMessage();
-             
-
-             HandShakeSubscriber HsDecoded1 = new HandShakeSubscriber();
-             
-             if (responses[0]!=null) {		 
-            	 HsDecoded1.parseHandShake(responses[0]);
-            	 if(HsDecoded1.getToken() > up_time) {
-            		 System.out.println("Server " + id + ", I'm the leader");
-            		 LeaderId=id;
-            	 }
-            	 else {
-            		 System.out.println("Server " + HsDecoded1.getID() + ", is the leader");
-            		 LeaderId=HsDecoded1.getID();
-            	 }        
-             }
-         }
-         else {
-        	 LeaderId=id;
-        	 System.out.println("Server " + id + ", I'm the leader");
-         }
-         
-         assignRole(listenerPort);
-         return LeaderId;
+        
+    }
+    
+    
+    public static int ElectReelectionLeader(String response) {
+		 if(isAlive[(id+1)%3] || isAlive[(id+2)%3]) {
+	         HandShakeSubscriber HsDecoded1 = new HandShakeSubscriber();
+	         if (response!=null) {		 
+	        	 HsDecoded1.parseHandShake(response);
+	        	 if(HsDecoded1.getToken() > up_time) {
+	        		 System.out.println("Server " + id + ", I'm the leader");
+	        		 LeaderId=id;
+	        	 }
+	        	 else {
+	        		 System.out.println("Server " + HsDecoded1.getID() + ", is the leader");
+	        		 LeaderId=HsDecoded1.getID();
+	        	 }        
+	         }
+	         
+	     }
+	     else {
+	    	 LeaderId=id;
+	    	 System.out.println("Server " + id + ", I'm the leader");
+	     }
+		 
+		 //Clear the connections and deal with the process that died
+		 
+	     
+	     //assignRole(listenerPort);
+	     return LeaderId;
     }
     
     
