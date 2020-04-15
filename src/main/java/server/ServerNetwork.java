@@ -203,8 +203,10 @@ public class ServerNetwork implements Runnable{
 
 		 Socket socket_server = new Socket(InetAddress.getByName(IP), port,InetAddress.getByName(IP_from), port_from);
 		 if(socket_server.isConnected()) {
+			 
 			 client_to_socket.put(IP.toString()+Integer.toString(port),socket_server);
 			 return socket_server;
+			 
 		 }
 		 return null;
 

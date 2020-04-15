@@ -58,7 +58,7 @@ public class ConnectionHandler implements Runnable{
 					System.out.println("Server "+ Integer.toString(this.clientSocket.getPort()) + "Has disconnected");
 					
 					//Check if coordinator or subscriber
-					
+					if(InitializeServerCluster.LeaderId!=2) {
 					if(server.removeSlash(this.clientSocket.getInetAddress().toString()).equals(InitializeServerCluster.ips[InitializeServerCluster.LeaderId])) { //If the IP match
 						for(int i=0; i< InitializeServerCluster.ports.length; i++) {
 							if(this.clientSocket.getPort() == InitializeServerCluster.ports[InitializeServerCluster.LeaderId] + InitializeServerCluster.offset*(i+1) 
@@ -74,6 +74,7 @@ public class ConnectionHandler implements Runnable{
 								break;
 							}
 						}
+					}
 					}
 					else {
 						for(int i=0; i<3 ;i++) {

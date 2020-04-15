@@ -1,5 +1,6 @@
 package server;
 
+import java.net.Socket;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -70,7 +71,17 @@ public class Subscriber {
 					this.primeLimit = Integer.parseInt(m.get("limit"));
 				}
 				else if(m.get("type").contentEquals("recover")) {
+					
 					int sendto=Integer.parseInt(m.get("id"));
+					try {
+						Socket Sk = server.startConnection(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto], InitializeServerCluster.ips[sendto], InitializeServerCluster.ports[sendto]+(InitializeServerCluster.offset*(sendto+1)));
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				    InitializeServerCluster.offsetted[sendto] = false;
+                    server.addServer(InitializeServerCluster.ips[sendto], InitializeServerCluster.ports[sendto]);
+                    server.addServer(InitializeServerCluster.ips[id], InitializeServerCluster.ports[id]+(InitializeServerCluster.offset*(sendto+1)));
 					int p = (InitializeServerCluster.offsetted[sendto])?InitializeServerCluster.ports[sendto]+InitializeServerCluster.offset*sendto:InitializeServerCluster.ports[sendto];
 					try {
 						server.send(InitializeServerCluster.ips[sendto],p,"leader:"+InitializeServerCluster.LeaderId);
