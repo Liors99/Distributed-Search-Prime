@@ -16,16 +16,17 @@ public class Coordinator {
     static BigInt lowerBound;
 	static BigInt upperBound;
 	static int primeLimit;
+	static Store st;
 	
 	private WorkerDatabase wdb;
     
-    public Coordinator(int id, List<ServerNetwork> ServerNetworkConnections, ServerNetwork server, WorkerDatabase wdb) {
+    public Coordinator(int id, List<ServerNetwork> ServerNetworkConnections, ServerNetwork server, WorkerDatabase wdb, Store st) {
     	this.id=id;
     	Coordinator.ServerNetworkConnections=ServerNetworkConnections;
     	this.server=server;
     	
     	this.wdb=wdb;
-    	
+    	this.st=st;
     	
     }
     
@@ -58,6 +59,7 @@ public class Coordinator {
 		ts.setLower(lowerBound);
 		ts.setUpper(upperBound);
 		ts.setTarget(primeLimit);
+		ts.setStore(st);
 		//TaskScheduler ts = new TaskScheduler(lowerBound, upperBound, primeLimit);
 		ts.start();
 	

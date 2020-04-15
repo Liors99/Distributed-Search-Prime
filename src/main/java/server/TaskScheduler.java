@@ -27,6 +27,7 @@ public class TaskScheduler extends Thread {
     private BigInt max_work; 
     private int target;
     private BigInt lower, upper;
+    private Store st;
     TaskScheduler(BigInt lower, BigInt upper, int target) {
     	
     	//max_work = new BigInt(upper.subtract(lower).divide(new BigInteger("10")));
@@ -178,6 +179,7 @@ public class TaskScheduler extends Thread {
 				if (result.equals("0")){
 					System.out.println(wR.getCurrent()+ " prime? divisor " + result);
 					primes.add(wR.getCurrent());
+					st.writeResult("Prime: "+wR.getCurrent());
 				}else {
 					System.out.println(wR.getCurrent()+" divided by "+ result + " reported by "+ wR.getWID());
 				}
@@ -225,6 +227,7 @@ public class TaskScheduler extends Thread {
             wR.setWorkrange(range);
             wR.setCurrent(current);
         	sendRange(wR, range, current);
+        	st.writeLast("Last checked:"+current.toString());
         	current = new BigInt(current.add(new BigInt("2")).toString(10));
         	
         	
@@ -366,6 +369,12 @@ public class TaskScheduler extends Thread {
 	@Override
 	public void run() {
 		scheduleTask();
+		
+	}
+
+
+	public void setStore(Store st) {
+		this.st=st;
 		
 	}
 }
