@@ -32,6 +32,10 @@ public class InitializeServerCluster {
     private static int listenerPort;
     private static ConnectionListener listener;
     public static WorkerDatabase wdb;
+    public static Store st;
+    private static Subscriber s;
+    
+    public static boolean reelectionStarted=false;
     
     public static void main(String args[]) throws Exception {
         //Keep track of server connections
@@ -50,12 +54,16 @@ public class InitializeServerCluster {
                 System.exit(1);
             }
         }
-        
+        st=new Store("output"+id+".txt");
+        st.writeLast("Last checked: 0");
         up_time = System.currentTimeMillis();
         server = new ServerNetwork(ips[id], ports[id]);//?
         new Thread(server).start();
         //If not initialized, then start
         System.out.println("ServerNetwork started!");
+        
+        
+		
         establishConnections();
         System.out.println("Connections Established!");
 
@@ -78,31 +86,37 @@ public class InitializeServerCluster {
 		else {
 			listenerPort = 8002;
 		}
+		
 		wdb= new WorkerDatabase();
-		//WorkerDatabase wdb = new WorkerDatabase();
 		listener = new ConnectionListener(wdb, listenerPort, null ,false);
-		//listener.start();
-        assignRole(listenerPort);
+		listener.ready=false;
+		s = new Subscriber(id, LeaderId, server, listener, st);
+		
+        assignRole(false);
         
         while(true) {}
 
     }
     
     
-    public static void assignRole(int listenerPort) {
+    public static void assignRole(boolean isReelection) {
     	System.out.println("Leader selected:"+LeaderId);
     	
     	
         if(LeaderId==id) {
-        	Coordinator c = new Coordinator(id, ServerNetworkConnections, server, wdb);
-        	c.notMain(listenerPort, listener);
+        	
+        	
+        	Coordinator c = new Coordinator(id, server, listener, st);
+        	if(isReelection) {
+        		c.loadFromSubscriber(s);
+        	}
+        	c.notMain();
         }
         else {
-        	Subscriber s = new Subscriber(id, LeaderId, server, wdb);
-        	s.notMain(listenerPort, listener);
-
-        	
+        	//Subscriber s = new Subscriber(id, LeaderId, server, listener, st);
+        	s.notMain();
         }
+
     	
     }
 
@@ -151,8 +165,8 @@ public class InitializeServerCluster {
     * @return winner id or -1 if failed
     */
     public static Integer initial_election() throws Exception{
-        HandShakeSubscriber Hs = new HandShakeSubscriber(10000);
-        String serializedToken = Hs.serializeHandShake(Integer.toString(id));
+        HandShakeSubscriber Hs = new HandShakeSubscriber(id,10000);
+        String serializedToken = Hs.serializeHandShake();
         double this_token = Hs.getToken();
         System.out.println(id+ " "+ this_token);
         
@@ -164,7 +178,6 @@ public class InitializeServerCluster {
             //check if in hashtable or +20
             int p = (offsetted[i])?ports[i]+offset*i:ports[i];
             server.printConnections();
-            System.out.println(p);
             server.send(ips[i], p, serializedToken);
         }
 
@@ -229,10 +242,13 @@ public class InitializeServerCluster {
     
 
 
-    public static Integer reelection() throws Exception{
+    public static void reelection(){
     		
-    	 HandShakeSubscriber Hs = new HandShakeSubscriber(10, id, up_time);
-         String serializedToken = Hs.serializeHandShake(Integer.toString(id));
+    	
+    	listener.kill(); //Stop accepting any connections
+    	
+    	 HandShakeSubscriber Hs = new HandShakeSubscriber(id, 10, up_time);
+         String serializedToken = Hs.serializeHandShake();
          double this_token = Hs.getToken();
          System.out.println(" THIS SERVERS UP TIME: "+ this_token);
          
@@ -244,41 +260,68 @@ public class InitializeServerCluster {
              //check if in hashtable or +20
              int p = (offsetted[i])?ports[i]+offset*i:ports[i];
              server.printConnections();
-             server.send(ips[i], p, serializedToken);
+             try {
+            	 System.out.println("Tryign to send to "+p);
+				server.send(ips[i], p, serializedToken);
+				System.out.println("Send message to "+p);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				System.out.println("Failed sending to "+p);
+				continue;
+			}
          }
          
-         if(isAlive[(id+1)%3] || isAlive[(id+2)%3]) {
-        	 String responses[] = new String[2];
-        	 
-        	 Thread.sleep(2000);
-        	  
-        	 while(!MessageDecoder.findMessageType(server.peekNextMessage()).contentEquals("HSS")) {}
-        	 
-
-             responses[0] = server.receiveNextMessage();
-             
-
-             HandShakeSubscriber HsDecoded1 = new HandShakeSubscriber();
-             
-             if (responses[0]!=null) {		 
-            	 HsDecoded1.parseHandShake(responses[0]);
-            	 if(HsDecoded1.getToken() > up_time) {
-            		 System.out.println("Server " + id + ", I'm the leader");
-            		 LeaderId=id;
-            	 }
-            	 else {
-            		 System.out.println("Server " + HsDecoded1.getID() + ", is the leader");
-            		 LeaderId=HsDecoded1.getID();
-            	 }        
-             }
-         }
-         else {
-        	 LeaderId=id;
-        	 System.out.println("Server " + id + ", I'm the leader");
-         }
+         System.out.println("Finished reelection");
          
-         assignRole(listenerPort);
-         return LeaderId;
+        
+    }
+    
+    
+    public static int ElectReelectionLeader(String response) {
+    	int id_recv = -1;
+		 if(isAlive[(id+1)%3] || isAlive[(id+2)%3]) {
+			 
+	         HandShakeSubscriber HsDecoded1 = new HandShakeSubscriber();
+	         if (response!=null) {		 
+	        	 HsDecoded1.parseHandShake(response);
+	        	 id_recv= HsDecoded1.getID();
+	        	 if(HsDecoded1.getToken() > up_time) {
+	        		 System.out.println("Server " + id + ", I'm the leader");
+	        		 LeaderId=id;
+	        	 }
+	        	 else {
+	        		 System.out.println("Server " + HsDecoded1.getID() + ", is the leader");
+	        		 LeaderId=HsDecoded1.getID();
+	        	 }        
+	         }
+	         
+	     }
+	     else {
+	    	 LeaderId=id;
+	    	 System.out.println("Server " + id + ", I'm the leader");
+	     }
+		 
+		 //Clear the connections and deal with the process that died
+		 for(int i=0; i<3; i++) {
+			 if(i!=id && i!=id_recv) {
+				 System.out.println("Removing " + i+"'s connections");
+				 //isAlive[i]=false;
+				 
+				 //Remove the inbound connection from this server
+				 for(int j=0;j<3;j++) {
+					 System.out.println(ports[i]+offset*(j+1));
+					 server.removeFromMap(ips[i], ports[i]+offset*(j+1));
+				 }
+				 
+				 //Remove the outbound connection for this server
+				 server.removeFromMap(ips[i], ports[i]);
+				 
+				 server.printConnections();
+			 }
+		 }
+		 reelectionStarted=false;
+	     assignRole(true);
+	     return LeaderId;
     }
     
     

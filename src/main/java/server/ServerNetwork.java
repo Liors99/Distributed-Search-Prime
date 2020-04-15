@@ -133,6 +133,8 @@ public class ServerNetwork implements Runnable{
 			out = new DataOutputStream(target.getOutputStream());
 			NetworkMessage.send(out, msg);
 		} catch (IOException e) {
+			//throw new Exception("The specified IP/port number combination is not registered in this server");
+			
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
 		}
@@ -152,9 +154,11 @@ public class ServerNetwork implements Runnable{
 		 for (Socket i: client_to_socket.values()) {
 			 int port=i.getPort();
 			 
-			 try {  if((port==InitializeServerCluster.ports[0]|| port==InitializeServerCluster.ports[1]||port==InitializeServerCluster.ports[2]) &&port!=InitializeServerCluster.ports[id])
+			 try {  
+				 if((port==InitializeServerCluster.ports[0]|| port==InitializeServerCluster.ports[1]||port==InitializeServerCluster.ports[2]) &&port!=InitializeServerCluster.ports[id]) {
 					out = new DataOutputStream(i.getOutputStream());
 					NetworkMessage.send(out, msg);
+				 }
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -214,7 +218,7 @@ public class ServerNetwork implements Runnable{
 	  * @param inetAddress
 	  * @param port
 	  */
-	 public void removeFromMap(InetAddress inetAddress, int port) {
+	 public void removeFromMap(String inetAddress, int port) {
 		 String key = inetAddress + Integer.toString(port);
 		 if(client_to_socket.containsKey(key)) {
 			 client_to_socket.remove(key);
@@ -250,13 +254,21 @@ public class ServerNetwork implements Runnable{
 	 }
 
 	 /**
-	 * Peek without pulling message to verify it is yours 
+	 * Peek without pulling message to verify it is yours, while blocking
 	 * @return
 	 */
 	public String peekNextMessage() {
 		while(MessageQueue.isEmpty()) {}
 		//System.out.println("Peeked into next msg");
 		return MessageQueue.peek(); 
+	}
+	
+	/**
+	 * Peek without pulling message to verify it is yours, not blocking
+	 * @return
+	 */
+	public String viewNextMessage() {
+		return MessageQueue.peek();  
 	}
 
 

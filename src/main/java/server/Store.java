@@ -46,7 +46,7 @@ public class Store {
 		public void writeResult(String result) {
 			synchronized(lock) {
 				try {
-					result="\n"+result;
+					result=result+System.lineSeparator();
 					out.seek(out.length());
 					out.write(result.getBytes());
 				} catch (IOException e) {
@@ -58,6 +58,7 @@ public class Store {
 		
 	    public void writeLast(String last) {
 			synchronized(lock) {
+				//last=last+System.lineSeparator();
 				BufferedReader reader=null;
 				try { 
 					reader = new BufferedReader(new InputStreamReader( new FileInputStream(f), "UTF-8"));
@@ -108,7 +109,7 @@ public class Store {
 	        writer.close();
 	        out.close();
 	        Files.move(temp.getAbsoluteFile().toPath(), f.getAbsoluteFile().toPath(), REPLACE_EXISTING);     
-	        out = new RandomAccessFile("output.txt", "rw");
+	        out = new RandomAccessFile(Filename, "rw");
 	    }
 	    
 	   public static String get() {
