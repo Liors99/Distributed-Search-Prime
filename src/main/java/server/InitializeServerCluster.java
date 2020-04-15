@@ -252,10 +252,13 @@ public class InitializeServerCluster {
     
     
     public static int ElectReelectionLeader(String response) {
+    	int id_recv = -1;
 		 if(isAlive[(id+1)%3] || isAlive[(id+2)%3]) {
+			 
 	         HandShakeSubscriber HsDecoded1 = new HandShakeSubscriber();
 	         if (response!=null) {		 
 	        	 HsDecoded1.parseHandShake(response);
+	        	 id_recv= HsDecoded1.getID();
 	        	 if(HsDecoded1.getToken() > up_time) {
 	        		 System.out.println("Server " + id + ", I'm the leader");
 	        		 LeaderId=id;
@@ -273,7 +276,23 @@ public class InitializeServerCluster {
 	     }
 		 
 		 //Clear the connections and deal with the process that died
-		 
+		 for(int i=0; i<3; i++) {
+			 if(i!=id && i!=id_recv) {
+				 System.out.println("Removing " + i+"'s connections");
+				 isAlive[i]=false;
+				 
+				 //Remove the inbound connection from this server
+				 for(int j=0;j<3;j++) {
+					 System.out.println(ports[i]+offset*(j+1));
+					 server.removeFromMap(ips[i], ports[i]+offset*(j+1));
+				 }
+				 
+				 //Remove the outbound connection for this server
+				 server.removeFromMap(ips[i], ports[i]);
+				 
+				 server.printConnections();
+			 }
+		 }
 	     
 	     //assignRole(listenerPort);
 	     return LeaderId;

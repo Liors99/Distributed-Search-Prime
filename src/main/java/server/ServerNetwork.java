@@ -216,7 +216,7 @@ public class ServerNetwork implements Runnable{
 	  * @param inetAddress
 	  * @param port
 	  */
-	 public void removeFromMap(InetAddress inetAddress, int port) {
+	 public void removeFromMap(String inetAddress, int port) {
 		 String key = inetAddress + Integer.toString(port);
 		 if(client_to_socket.containsKey(key)) {
 			 client_to_socket.remove(key);
