@@ -136,6 +136,7 @@ public class ConnectionHandler implements Runnable{
         		if(!MessageDecoder.findMessageType(next_msg).equals("A")) {
         			System.out.println("Got a message: "+ next_msg);
         			this.server.addToMessageQueue(next_msg);
+        			
         		}
         		this.startTime = System.currentTimeMillis();
         		

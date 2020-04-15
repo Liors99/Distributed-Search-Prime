@@ -69,6 +69,15 @@ public class Subscriber {
 					this.upperBound = new BigInt(m.get("upper"));
 					this.primeLimit = Integer.parseInt(m.get("limit"));
 				}
+				else if(m.get("type").contentEquals("recover")) {
+					int sendto=Integer.parseInt(m.get("id"));
+					try {
+						server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],"leader:"+InitializeServerCluster.LeaderId);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
 		}
 	}

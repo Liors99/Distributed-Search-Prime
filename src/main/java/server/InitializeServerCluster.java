@@ -80,7 +80,7 @@ public class InitializeServerCluster {
                 //check if in hashtable or +20
                 int p = (offsetted[i])?ports[i]+offset*i:ports[i];
                 server.printConnections();
-                server.send(ips[i], p, "Type:Recovery");
+                server.send(ips[i], p, "type:recover id:"+id);
             }
         	
         }
