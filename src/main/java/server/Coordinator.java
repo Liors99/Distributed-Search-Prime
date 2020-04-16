@@ -103,6 +103,14 @@ public class Coordinator {
 
 	}
 	
+	public void addWorkersToTaskScheduler() {
+		WorkerDatabase wdb = this.listener.getWdb();
+		
+		for(int worker_id : wdb.workers.keySet()) {
+			ts.addToWorkerQueue(wdb.workers.get(worker_id));
+		}
+	}
+	
 	
 	public void getUserInput(TaskScheduler ts) {
 		//Get user input
@@ -136,8 +144,6 @@ public class Coordinator {
 	public void notMain() {
 		
 		
-		listener.ready=true;
-		
 		//If we haven't searched yet
 		if(primeLimit == 0) {
 			getUserInput(ts);
@@ -146,6 +152,9 @@ public class Coordinator {
 		
 		ts.setCurrent(this.current_worked_on);
 		ts.setStore(st);
+		
+		addWorkersToTaskScheduler();
+		
 		ts.start();
 	
 		System.out.println("The system will try to find " + primeLimit +" primes in the range of " + lowerBound +" to "+ upperBound);
