@@ -29,8 +29,7 @@ public class TaskScheduler extends Thread {
     private BigInt max_work; 
     private int target;
     private BigInt lower, upper;
-    private final long TIMEOUT = 20000; //worker will be expected to work for half of it. so if 20s timeout worker should report back every 10s
-    private final long defaultAssignment = 10;
+    private final long TIMEOUT = 20000;
     
     private BlockingQueue<String> workerMessages;
     private BigInt current;
@@ -226,6 +225,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
     	return s.toString();
     }
 
+
     private void modifyWorkerScore(WorkerRecord wR, long delta ) {
     	if(delta>TIMEOUT/4 && delta<TIMEOUT*3/4) {
     		
@@ -237,6 +237,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 
     	System.out.println("Score  of WID: "+wR.getScore() + " is: "+wR.getScore());
     }
+
     
     public void iterateWorkingWorkers() {
 //    	System.out.println("Checking for incoming messages from workers...");
@@ -264,14 +265,12 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 	    				}else {
 	    					System.out.println(wR.getCurrent()+" divided by "+ result + " reported by "+ wR.getWID());
 	    				}
-	    				wR.setResult(result);
-    					System.out.println("msg:" + msg);
-    					long delta = System.currentTimeMillis() - wR.getworkerTimeout();
-    					modifyWorkerScore(wR, delta);
-    					
-    					wR.setworkerTimeout(0);
-						deadRecords.add(wR);
-						addToWorkerQueue(wR);
+	    				if(msg.length()>0) {
+	    					System.out.println("msg:" + msg);
+	    					wR.setworkerTimeout(0);
+							deadRecords.add(wR);
+							addToWorkerQueue(wR);
+	    				}
 				
     				}
 			} catch (Exception e) {
@@ -324,22 +323,6 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 		WorkingWorkers.remove(wR);
 	}
 
-	private void assignRange(BigInt[] range) {
-		if(!getWorkerQueue().isEmpty()) { //Wait for worker
-		        	
-        	WorkerRecord wR = WorkerQueue.peek();
-        	
-        	
-        	System.out.println("Scheduling "+Integer.toString((wR.getWID())));
-        	wR = pollFromQueue();
-            wR.setWorkrange(range);
-            wR.setCurrent(current);
-        	sendRange(wR, range, current);
-        	st.writeLast("Last checked:"+current.toString());
-        	
-        	
-        }
-	}
 
 	/**
      * to be run in a separate thread
@@ -359,59 +342,29 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
         
         
         //upper= new BigInt(upper.sqrt().add(BigInt.ONE));
-        while(current.le(upper) && (primes.size()<target)){ //less or equal to upperbound
+        while(current.le(upper) || (primes.size()<target)){ //less or equal to upperbound
             //we will need to do something so it does not loop in idle
         	BigInt[] range = new BigInt[] {new BigInt(BigInt.ZERO), new BigInt(BigInt.ZERO)};
         	
         	range[0] = new BigInt("3");
         	range[1] = new BigInt(current.sqrt());
-        	if(!getWorkerQueue().isEmpty()) {
-	        	BigInt rangeSize = new BigInt(range[1].subtract(range[0]));
-	        	if(rangeSize.gt(new BigInt(Long.toString(defaultAssignment)))) {
-	        		//if one worker cannot do this by himself partition so it can
-	        		
-	        		System.out.println("range too big splitting! ");
-	        		System.out.print(" rSize "+rangeSize.toString(10));
-	        		System.out.print(" r0 "+range[0].toString(10));
-	        		System.out.print(" r9 "+range[1].toString(10));
-	        		System.out.println();
-	        		
-	        		
-	        		BigInt topRangeTarget = new BigInt(current.sqrt());
-	        		while(rangeSize.gt(new BigInt(Long.toString(defaultAssignment)))) {
-	        			if(!getWorkerQueue().isEmpty()) {
-	        				WorkerRecord wR = getWorkerQueue().peek();
-		        			BigInt curA = new BigInt(Long.toString(defaultAssignment));
-		        			BigInt curMod = new BigInt(Long.toString(wR.getScore()));
-		        			
-		        			BigInt curRange = curMod;
-		        			curA = curMod;
-		        			BigInt estEnd = new BigInt(curRange.add(range[0]));
-		        			System.out.println("current Assignment sz " + curA.toString(10));
-		        			System.out.println("current Assignment mod " + curMod.toString(10));
-		        			System.out.println("current Assignment range sz " + curRange.toString(10));
-		        			System.out.println("current Assignment estend " + estEnd.toString(10));
-		        			if(estEnd.gt(topRangeTarget)) {
-		        				estEnd = topRangeTarget;
-		        			}
-		        			range[1] = new BigInt(estEnd);
-		        			assignRange(range);
-		        			range[0] = new BigInt(estEnd.add(BigInt.TWO));
-		        			
-		        			rangeSize = new BigInt(topRangeTarget.subtract(range[0]));
-	        			
-		        			
-	        			}
-	        			range[1] = topRangeTarget;
-	            		iterateWorkingWorkers();
-	        		}
-	        	}
-	        	
-        		assignRange(range);
-        		
-        		current = new BigInt(current.add(new BigInt("2")).toString(10));
         	
+        	
+        	
+        	if(!getWorkerQueue().isEmpty()) { //Wait for worker
+        	
+        	WorkerRecord wR = WorkerQueue.peek();
+        	
+        	
+        	System.out.println("Scheduling "+Integer.toString((wR.getWID())));
+        	wR = pollFromQueue();
+            wR.setWorkrange(range);
+            wR.setCurrent(current);
+        	sendRange(wR, range, current);
+        	st.writeLast("Last checked:"+current.toString());
+        	current = new BigInt(current.add(new BigInt("2")).toString(10));
         	}
+        	
         	iterateWorkingWorkers();
         }  
            // int workerPoolSize = getWorkerQueue().size();
