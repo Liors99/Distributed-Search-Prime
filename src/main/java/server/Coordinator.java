@@ -194,41 +194,7 @@ public class Coordinator {
 				
 			}
 			
-			/*
-			next_message = getWorkerMessage(ts);
-			if(next_message!=null) {
-				Map<String, String> m = MessageDecoder.createmap(next_message);
-				System.out.println("MESSAGE RECIEVED BY COORDINATOR : "+next_message);
-				
-				//If message is of type result from worker
-				if(m.get("type").equals("SearchResult")) {
-					
-					//Send the message to all subscribers
-					String result = m.get("divisor");
-					String tested = m.get("tested");
-					if (result.equals("0")){ //Only send in prime numbers
-						BigInt prime_add = new BigInt(tested);
-						primes.add(prime_add);
-						
-						//Send to subscribers that this is a prime number
-						String send_msg= "type:COR_PRIME prime:"+tested;
-						try {
-							server.sendServers(send_msg, id);
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							System.out.println("Unable to send prime number to subscribers");
-							//e.printStackTrace();
-						}
-						
-						
-						
-					}
-				}
-				
-				
-				
-			}
-			*/
+			
 			
 			//Get message from subscribers
 			if(server.viewNextMessage()!=null) {
@@ -268,7 +234,6 @@ public class Coordinator {
 					    // Disconnected, Connectionhandler will handle 
 				     }
 			    }
-		}
 			}
 			
 			if(next_message!=null) {
