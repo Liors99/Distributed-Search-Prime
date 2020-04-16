@@ -99,6 +99,7 @@ public class Subscriber {
 				else if(m.get("type").contentEquals("recoverS")) {
 			    	
 				    int sendto=Integer.parseInt(m.get("id"));
+				    InitializeServerCluster.isAlive[sendto]=false;
 				    try {
 				    	int tries=0;
 				    	Socket Sk=null;
@@ -123,6 +124,7 @@ public class Subscriber {
 					      //server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],listener.wdb.workers());
 				        //Let know recover is complete
 					      server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],"type:RC-Done id:"+id);
+					      InitializeServerCluster.isAlive[sendto]=false;
 				    } catch (Exception e) {
 				    	
 					    // Disconnected, Connectionhandler will handle 
