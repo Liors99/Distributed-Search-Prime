@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +26,7 @@ public class Coordinator {
 	private int primeLimit;
 	static Store st;
 	
-	private HashSet<BigInt> primes;
+	private ArrayList<BigInt> primes;
 	
 	private BigInt current_worked_on;
 	
@@ -41,7 +42,7 @@ public class Coordinator {
     	this.listener=listener;
 		this.st=st;
 		
-		primes = new HashSet<>();
+		primes = new ArrayList<>();
 		lowerBound= new BigInt(BigInt.ZERO);
 		upperBound= new BigInt(BigInt.ZERO);
 		primeLimit= 0;
@@ -50,6 +51,8 @@ public class Coordinator {
 		ts = new TaskScheduler();
 		this.listener.setTs(ts);
 		this.listener.setCoordinator(true);
+		
+		addWorkersToTaskScheduler(); //Reschedule all the available workers
     	
     }
     
@@ -101,6 +104,8 @@ public class Coordinator {
 		this.ts.setLower(this.lowerBound);
 		this.ts.setUpper(this.upperBound);
 		this.ts.setTarget(this.primeLimit);
+		
+		
 
 	}
 	
@@ -121,10 +126,13 @@ public class Coordinator {
 		primeLimit= CoordConsole.primeLimit;
 		String task="type:COR_GOAL upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit;
 		
+		this.current_worked_on=lowerBound;
+		
 		ts.setLower(lowerBound);
 		ts.setUpper(upperBound);
 		ts.setTarget(primeLimit);
-		ts.setCurrent(lowerBound);
+		//ts.setCurrent(lowerBound);
+		
 		
 		// Send tasks to other servers
 		try {
@@ -154,7 +162,7 @@ public class Coordinator {
 		ts.setCurrent(this.current_worked_on);
 		ts.setStore(st);
 		
-		addWorkersToTaskScheduler();
+		
 		
 		ts.start();
 	
@@ -167,6 +175,26 @@ public class Coordinator {
 			//Get message from workers
 			String next_message=null;
 			
+			
+			//Poll the primes
+			
+			
+			for(int i=0; i<ts.getPrimes().size(); i++) {
+				BigInt p =ts.getPrimes().get(i);
+				if(!this.primes.contains(p)) {
+					this.primes.add(p);
+					String send_msg= "type:COR_PRIME prime:"+p;
+					try {
+						server.sendServers(send_msg, id);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+			}
+			
+			/*
 			next_message = getWorkerMessage(ts);
 			if(next_message!=null) {
 				Map<String, String> m = MessageDecoder.createmap(next_message);
@@ -200,6 +228,8 @@ public class Coordinator {
 				
 				
 			}
+			*/
+			
 			//Get message from subscribers
 			if(server.viewNextMessage()!=null) {
 				next_message = server.receiveNextMessage();
@@ -239,6 +269,11 @@ public class Coordinator {
 				     }
 			    }
 		}
+			}
+			
+			if(next_message!=null) {
+				Map<String, String> m = MessageDecoder.createmap(next_message);
+			}
 			
 			//Send messages to subscribers for backup purposes
 			

@@ -71,11 +71,11 @@ public class ConnectionListener extends Thread{
 				WorkerRecord rec = new WorkerRecord(sock.getInetAddress().toString(),sock.getPort(), id, 100, new Timestamp(System.currentTimeMillis()), con);
 				wdb.addWorker(id, rec, con);
 				
-				/*
+				//Schedule immedietly if you are the coordinator and recieve connections midway
 				if(this.isCoordinator) {
 					ts.addToWorkerQueue(rec);
 				}
-				*/
+				
 				
 				
 				//TODO: Replicate worker record to subscribers

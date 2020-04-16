@@ -2,7 +2,9 @@ package server;
 
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 
 import data.BigInt;
@@ -14,7 +16,7 @@ public class Subscriber {
 	private int id_cor;
 	private ServerNetwork server;
 	private static Store st;
-	private HashSet<BigInt> primes;
+	private ArrayList<BigInt> primes;
 	
 	private BigInt lowerBound;
 	private BigInt upperBound;
@@ -34,7 +36,7 @@ public class Subscriber {
 		this.listener=listener;
 		this.st=st;
 		
-		primes = new HashSet<>();
+		primes = new ArrayList<>();
 		lowerBound= new BigInt(BigInt.ZERO);
 		upperBound= new BigInt(BigInt.ZERO);
 		primeLimit= 0;
@@ -190,11 +192,11 @@ public class Subscriber {
 		this.id = id;
 	}
 
-	public HashSet<BigInt> getPrimes() {
+	public ArrayList<BigInt> getPrimes() {
 		return primes;
 	}
 
-	public void setPrimes(HashSet<BigInt> primes) {
+	public void setPrimes(ArrayList<BigInt> primes) {
 		this.primes = primes;
 	}
 
