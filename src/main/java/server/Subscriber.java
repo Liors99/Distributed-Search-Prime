@@ -81,7 +81,7 @@ public class Subscriber {
 					BigInt current = new BigInt(m.get("current"));
 					current_worked_on=current;
 					st.writeLast("Last checked: "+current);
-					System.out.println("Chagned current number to "+ current);
+					System.out.println("Changed current number to "+ current);
 					
 				}
 				else if(m.get("type").contentEquals("COR_GOAL")) {

@@ -362,6 +362,7 @@ public class InitializeServerCluster {
 	 //create role
 	wdb= new WorkerDatabase();
     listener = new ConnectionListener(wdb, listenerPort, null ,false);
+    listener.start();
    	Subscriber rs=new Subscriber(id, LeaderId, server, listener, st);
    	//Enter Recovery mode
    	destroyConnections();
