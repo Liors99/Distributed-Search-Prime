@@ -55,9 +55,7 @@ public class Subscriber {
 	
 	public void notMain() {
 		
-		
-		listener.ready=true;
-
+	
 		
 		//Read from coordinator
 		

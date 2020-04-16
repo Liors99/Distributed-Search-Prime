@@ -89,7 +89,7 @@ public class InitializeServerCluster {
 		
 		wdb= new WorkerDatabase();
 		listener = new ConnectionListener(wdb, listenerPort, null ,false);
-		listener.ready=false;
+		listener.start();
 		s = new Subscriber(id, LeaderId, server, listener, st);
 		
         assignRole(false);
@@ -243,9 +243,6 @@ public class InitializeServerCluster {
 
 
     public static void reelection(){
-    		
-    	
-    	listener.kill(); //Stop accepting any connections
     	
     	 HandShakeSubscriber Hs = new HandShakeSubscriber(id, 10, up_time);
          String serializedToken = Hs.serializeHandShake();

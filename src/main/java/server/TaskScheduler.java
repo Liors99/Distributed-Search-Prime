@@ -7,7 +7,7 @@ import data.NetworkMessage;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.SocketException;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -168,7 +168,7 @@ public class TaskScheduler extends Thread {
         return bound;
     }
 */
-    private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boolean concurrent){
+    private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current){
     	
         wR.setWorkrange(range);
         wR.startWork();
@@ -179,32 +179,7 @@ public class TaskScheduler extends Thread {
         while(true) {
         	try {
         		wR.getWc().sendMessage(serializeWorkRange(range, current));
-        		
-        		if (!concurrent) {
-        			WorkingWorkers.add(wR);
-        		}
-        		break;
-        	}
-        	catch(Exception e) {
-        		
-        	}
-        }
-        
-        return false;
-    }
-    
-private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current){
-    	
-        wR.setWorkrange(range);
-        wR.startWork();
-        //send range
-        
-        ActiveWorkers.put(wR.getWID(),true);
-        System.out.println("Sending "+ serializeWorkRange(range, current)+ " to worker");
-        while(true) {
-        	try {
-        		wR.getWc().sendMessage(serializeWorkRange(range, current));
-        		
+        		WorkingWorkers.add(wR);
         		break;
         	}
         	catch(Exception e) {
@@ -224,14 +199,9 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current){
 
     
     public void iterateWorkingWorkers() {
-
     	System.out.println("Checking for incoming messages from workers...");
-    	LinkedList<WorkerRecord> DeadRecords  = new LinkedList<WorkerRecord>();
-    	LinkedList<WorkerRecord> ReplacementRecords  = new LinkedList<WorkerRecord>();
-
     	for (WorkerRecord wR : WorkingWorkers) {
     		try {
-
 
     				DataInputStream dis = wR.getWc().sockIn;
 //    				System.out.println("2");
@@ -254,22 +224,13 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current){
 					addToWorkerQueue(wR);
 				
     		
-
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				//e.printStackTrace();
-				
 				System.out.println("hi this is iter over working workers");
 			}
     	
     	}
-    	for(WorkerRecord dead : DeadRecords) {
-    		WorkingWorkers.remove(dead);
-    	}
-    	for(WorkerRecord replace : ReplacementRecords) {
-    		WorkingWorkers.add(replace);
-    	}
-    	
     	System.out.println("finished iterating");
     }
     
@@ -311,7 +272,6 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current){
         	
         	
         	
-
         	while(getWorkerQueue().isEmpty()) {} //Wait for worker
         	
         	WorkerRecord wR = WorkerQueue.peek();
@@ -324,16 +284,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current){
         	sendRange(wR, range, current);
         	st.writeLast("Last checked:"+current.toString());
         	current = new BigInt(current.add(new BigInt("2")).toString(10));
-
         	
-	        	WorkerRecord wR = WorkerQueue.peek();
-	        	System.out.println("Scheduling "+Integer.toString((wR.getWID())));
-	        	wR = pollFromQueue();
-	            wR.setWorkrange(range);
-	            wR.setCurrent(current);
-	        	sendRange(wR, range, current);
-	        	current = new BigInt(current.add(new BigInt("2")).toString(10));
-        	}
         	
         	iterateWorkingWorkers();
         	
