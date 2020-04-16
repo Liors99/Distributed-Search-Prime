@@ -475,8 +475,12 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
             //currentLower = new BigInt("3");
             
 
-      
-        System.out.println("Finished Scheduling; Primes Found:");
+        if(primes.size()>1) {
+           System.out.println("Finished Scheduling; Primes Found:");
+        }
+        else {
+        	System.out.println("Finished Scheduling; Prime Found:");	
+        }
         int counter =0;
         for (BigInt prime : primes) {
         	if (counter == target) {break;

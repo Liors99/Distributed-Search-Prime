@@ -75,7 +75,7 @@ public class Subscriber {
 					BigInt prime_add = new BigInt(m.get("prime"));
 					primes.add(prime_add);
 					st.writeResult("Prime: "+prime_add);
-					System.out.println("Added "+ prime_add + " to the list");
+					System.out.println("Added "+ prime_add + " to the list of primes");
 				}
 				else if(m.get("type").contentEquals("COR_CURRENT")) {
 					BigInt current = new BigInt(m.get("current"));
