@@ -148,7 +148,8 @@ public class Subscriber {
 					    // Disconnected, Connectionhandler will handle 
 				     }
 			    }
-				else if(m.get("type").contentEquals("HSS")) {
+				else if(m.get("type").contentEquals("HSS")) { }
+				else if(m.get("type").contentEquals("HSSR")) {
 					
 					//Add the message back for re-election to deal with it
 					while(!InitializeServerCluster.reelectionStarted) {

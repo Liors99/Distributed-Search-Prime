@@ -272,6 +272,7 @@ public class InitializeServerCluster {
     public static void reelection(){
     	
     	 HandShakeSubscriber Hs = new HandShakeSubscriber(id, 10, up_time);
+    	 Hs.setReelection(true);
          String serializedToken = Hs.serializeHandShake();
          double this_token = Hs.getToken();
          System.out.println(" THIS SERVERS UP TIME: "+ this_token);

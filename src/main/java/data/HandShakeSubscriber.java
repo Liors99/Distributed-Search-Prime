@@ -7,6 +7,9 @@ public class HandShakeSubscriber {
 	private int ka;
 	private double token;
 	private int id;
+	private boolean isReelection;
+
+	
 
 	/**
 	 * Constructor, generates a random token when first set up
@@ -17,18 +20,21 @@ public class HandShakeSubscriber {
 		setKA(-1);
 		setToken(-1);
 		setID(-1);
+		isReelection=false;
 	}
 	
 	public HandShakeSubscriber(int id, int ka) {
 		setKA(ka);
 		this.id=id;
 		generateToken();
+		isReelection=false;
 	}
 	
 	public HandShakeSubscriber(int id, int token, double up_time) {
 		setToken(up_time);
 		setKA(token);
 		this.id=id;
+		isReelection=false;
 	}
 
 
@@ -47,7 +53,13 @@ public class HandShakeSubscriber {
 	 */
 	public String serializeHandShake() {
 		StringBuilder s = new StringBuilder();
-		s.append("type:HSS "+ "server:" +this.id +" ka:"+Integer.toString(getKA())+" token:"+Double.toString(getToken()));
+		if(isReelection) {
+			s.append("type:HSSR "+ "server:" +this.id +" ka:"+Integer.toString(getKA())+" token:"+Double.toString(getToken()));
+		}
+		else {
+			s.append("type:HSS "+ "server:" +this.id +" ka:"+Integer.toString(getKA())+" token:"+Double.toString(getToken()));
+		}
+		
 
 		return s.toString();
 	}
@@ -71,7 +83,7 @@ public class HandShakeSubscriber {
 	}
 
 
-	//Getters and setters for the ka and token
+	//Getters and setters
 	public void setKA(int ka) {
 		this.ka=ka;
 	}
@@ -94,5 +106,13 @@ public class HandShakeSubscriber {
 
 	public void setToken(double token) {
 		this.token = token;
+	}
+	
+	public boolean isReelection() {
+		return isReelection;
+	}
+
+	public void setReelection(boolean isReelection) {
+		this.isReelection = isReelection;
 	}
 }
