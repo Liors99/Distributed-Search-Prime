@@ -20,7 +20,6 @@ public class Coordinator {
     int id=-2;
 
 	private ServerNetwork server;
-    public static List<ServerNetwork> ServerNetworkConnections;
     private BigInt lowerBound;
 	private BigInt upperBound;
 	private int primeLimit;
@@ -31,19 +30,26 @@ public class Coordinator {
 	private BigInt current_worked_on;
 	
 	private ConnectionListener listener;
+	private TaskScheduler ts;
 	
 	
     
 
-    public Coordinator(int id, List<ServerNetwork> ServerNetworkConnections, ServerNetwork server, ConnectionListener listener, Store st) {
+    public Coordinator(int id, ServerNetwork server, ConnectionListener listener, Store st) {
     	this.id=id;
-    	Coordinator.ServerNetworkConnections=ServerNetworkConnections;
     	this.server=server;
     	this.listener=listener;
 		this.st=st;
 		
 		primes = new HashSet<>();
+		lowerBound= new BigInt(BigInt.ZERO);
+		upperBound= new BigInt(BigInt.ZERO);
+		primeLimit= 0;
 		current_worked_on= new BigInt(BigInt.ZERO);
+		
+		ts = new TaskScheduler();
+		this.listener.setTs(ts);
+		this.listener.setCoordinator(true);
     	
     }
     
@@ -81,24 +87,45 @@ public class Coordinator {
 	public void setCurrent_worked_on(BigInt current_worked_on) {
 		this.current_worked_on = current_worked_on;
 	}
-    
-	/**
-	 * Run as a coordinator 
-	 */
-	public void notMain(int listenerPort) {
+	
+	
+	public void loadFromSubscriber(Subscriber s) {
+		this.lowerBound=s.getLowerBound();
+		this.upperBound=s.getUpperBound();
+		this.primeLimit=s.getPrimeLimit();
 		
-		TaskScheduler ts = new TaskScheduler();
-		listener.setTs(ts);
-		listener.setCoordinator(true);
-		listener.start();
+		this.primes=s.getPrimes();
+		this.current_worked_on=s.getCurrent_worked_on();
 		
 		
+		this.ts.setLower(this.lowerBound);
+		this.ts.setUpper(this.upperBound);
+		this.ts.setTarget(this.primeLimit);
+
+	}
+	
+	public void addWorkersToTaskScheduler() {
+		WorkerDatabase wdb = this.listener.getWdb();
+		
+		for(int worker_id : wdb.workers.keySet()) {
+			ts.addToWorkerQueue(wdb.workers.get(worker_id));
+		}
+	}
+	
+	
+	public void getUserInput(TaskScheduler ts) {
 		//Get user input
 		CoordConsole.console();
 		lowerBound=new BigInt(CoordConsole.lowerBound);
 		upperBound=new BigInt(CoordConsole.upperBound);
 		primeLimit= CoordConsole.primeLimit;
 		String task="type:COR_GOAL upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit;
+		
+		ts.setLower(lowerBound);
+		ts.setUpper(upperBound);
+		ts.setTarget(primeLimit);
+		ts.setCurrent(lowerBound);
+		
 		// Send tasks to other servers
 		try {
 			server.sendServers(task, id);
@@ -109,21 +136,33 @@ public class Coordinator {
 
 		
 		
-		ts.setLower(lowerBound);
-		ts.setUpper(upperBound);
-		ts.setTarget(primeLimit);
-
-
-
+		
+	}
+	
+	/**
+	 * Run as a coordinator 
+	 */
+	public void notMain() {
+		
+		
+		//If we haven't searched yet
+		if(primeLimit == 0) {
+			getUserInput(ts);
+		}
+		
+		
+		ts.setCurrent(this.current_worked_on);
 		ts.setStore(st);
+		
+		addWorkersToTaskScheduler();
+		
 		ts.start();
 	
-
+		System.out.println("The system will try to find " + primeLimit +" primes in the range of " + lowerBound +" to "+ upperBound);
 		//while (!listener.isReady()) {} //TODO: check what this does
 		
+		
 		//Start getting messages
-		
-		
 		while(true) {
 			//Get message from workers
 			String next_message=null;
@@ -201,6 +240,7 @@ public class Coordinator {
 			//Poll the current number
 			BigInt current= ts.getCurrent();
 			
+			
 			//If they are no the same, we need to update
 			if(!current.equals(current_worked_on)) {
 				current_worked_on=current;
@@ -214,6 +254,11 @@ public class Coordinator {
 				}
 				
 			}
+			
+			
+			
+			//Send worker information
+			
 			
 		}
 		
