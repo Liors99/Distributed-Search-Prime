@@ -50,6 +50,8 @@ public class Coordinator {
 		ts = new TaskScheduler();
 		this.listener.setTs(ts);
 		this.listener.setCoordinator(true);
+		
+		addWorkersToTaskScheduler(); //Reschedule all the available workers
     	
     }
     
@@ -101,6 +103,8 @@ public class Coordinator {
 		this.ts.setLower(this.lowerBound);
 		this.ts.setUpper(this.upperBound);
 		this.ts.setTarget(this.primeLimit);
+		
+		
 
 	}
 	
@@ -121,10 +125,13 @@ public class Coordinator {
 		primeLimit= CoordConsole.primeLimit;
 		String task="type:COR_GOAL upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit;
 		
+		this.current_worked_on=lowerBound;
+		
 		ts.setLower(lowerBound);
 		ts.setUpper(upperBound);
 		ts.setTarget(primeLimit);
-		ts.setCurrent(lowerBound);
+		//ts.setCurrent(lowerBound);
+		
 		
 		// Send tasks to other servers
 		try {
@@ -154,7 +161,7 @@ public class Coordinator {
 		ts.setCurrent(this.current_worked_on);
 		ts.setStore(st);
 		
-		addWorkersToTaskScheduler();
+		
 		
 		ts.start();
 	
