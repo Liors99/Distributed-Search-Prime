@@ -35,6 +35,7 @@ public class InitializeServerCluster {
     private static ConnectionListener listener;
     public static WorkerDatabase wdb;
     public static Store st;
+    public static Boolean r=false;
     
     public static void main(String args[]) throws Exception {
         //Keep track of server connections
@@ -70,6 +71,8 @@ public class InitializeServerCluster {
             LeaderId = initial_election();
         }
         if (LeaderId==-2) {
+        	//create role
+        	Subscriber rs=new Subscriber(id, LeaderId, server, listener, st);
         	//Enter Recovery mode
         	destroyConnections();
         	establishConnections();
@@ -89,7 +92,16 @@ public class InitializeServerCluster {
         			String next_message = server.receiveNextMessage();
         			System.out.println("Recovery recieved:"+next_message);
         		    Map<String, String> m=MessageDecoder.createmap(next_message);
-                }
+        		    if(m.get("type").equals("COR_Goal")) {
+                	  rs.setGoal(m);	
+                	}
+        		    else if(m.get("type").equals("l")) {
+                		LeaderId=Integer.parseInt(m.get("leader"));
+                	}
+        		    else if(m.get("type").equals("store")) {
+        		    	rs.setStore(next_message.split("file:")[0]);
+        		    }
+            	}
                }
             
         	
@@ -108,7 +120,7 @@ public class InitializeServerCluster {
 		}
 		wdb= new WorkerDatabase();
 		listener = new ConnectionListener(wdb, listenerPort, null ,false);
-        assignRole(listenerPort);
+		assignRole(listenerPort);
         
         while(true) {}
 

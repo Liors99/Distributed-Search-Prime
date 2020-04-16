@@ -183,11 +183,11 @@ public class Coordinator {
 				    	 //Send the goal
 					      server.send(InitializeServerCluster.ips[sendto],p,"type:COR_GOAL upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit);
 				        //Send the store
-					      server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],"type:COR_GOAL upper:"+upperBound.toString()+st.get()); 
+					      server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],"type:Store "+st.get()); 
 					    //Send the worker database
-					      //TODO
+					      server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],listener.wdb.workers());
 				    } catch (Exception e) {
-				    	e.printStackTrace();
+				    	
 					    // Disconnected, Connectionhandler will handle 
 				     }
 			    }

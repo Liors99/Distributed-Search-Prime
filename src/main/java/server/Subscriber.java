@@ -1,6 +1,7 @@
 package server;
 
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -66,9 +67,7 @@ public class Subscriber {
 				else if(m.get("type").contentEquals("COR_GOAL")) {
 					
 					System.out.println("----- Setting initial parameters ----- ");
-					this.lowerBound=new BigInt(m.get("lower"));
-					this.upperBound = new BigInt(m.get("upper"));
-					this.primeLimit = Integer.parseInt(m.get("limit"));
+					setGoal(m);
 				}
 				else if(m.get("type").contentEquals("recover")) {
 					
@@ -76,15 +75,14 @@ public class Subscriber {
 					try {
 						Socket Sk = server.startConnection(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto], InitializeServerCluster.ips[sendto], InitializeServerCluster.ports[sendto]+(InitializeServerCluster.offset*(sendto+1)));
 					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						
 					}
 				    InitializeServerCluster.offsetted[sendto] = false;
                     server.addServer(InitializeServerCluster.ips[sendto], InitializeServerCluster.ports[sendto]);
                     server.addServer(InitializeServerCluster.ips[id], InitializeServerCluster.ports[id]+(InitializeServerCluster.offset*(sendto+1)));
 					int p = (InitializeServerCluster.offsetted[sendto])?InitializeServerCluster.ports[sendto]+InitializeServerCluster.offset*sendto:InitializeServerCluster.ports[sendto];
 					try {
-						server.send(InitializeServerCluster.ips[sendto],p,"leader:"+InitializeServerCluster.LeaderId);
+						server.send(InitializeServerCluster.ips[sendto],p,"type:l leader:"+InitializeServerCluster.LeaderId);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -92,5 +90,19 @@ public class Subscriber {
 				}
 			}
 		}
+	}
+	
+	public void setGoal(Map<String, String> m){
+		this.lowerBound=new BigInt(m.get("lower"));
+		this.upperBound = new BigInt(m.get("upper"));
+		this.primeLimit = Integer.parseInt(m.get("limit"));
+	}
+	
+	public void setStore(String file) {
+		st.writeResult(file);
+	}
+	
+	public void setWDB(String workers) {
+		listener.wdb.fromString(workers);
 	}
 }
