@@ -225,7 +225,6 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
     	return s.toString();
     }
 
-<<<<<<< HEAD
 
     private void modifyWorkerScore(WorkerRecord wR, long delta ) {
     	if(delta>TIMEOUT/4 && delta<TIMEOUT*3/4) {
@@ -239,8 +238,6 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
     	System.out.println("Score  of WID: "+wR.getScore() + " is: "+wR.getScore());
     }
 
-=======
->>>>>>> parent of 60201b9... scheduler and scoring seems to work
     
     public void iterateWorkingWorkers() {
 //    	System.out.println("Checking for incoming messages from workers...");
