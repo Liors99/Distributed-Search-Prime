@@ -42,11 +42,11 @@ public class WorkerRunner extends Thread{
 		for (int i = 0; i<Networking.NUMBER_OF_SERVERS; i++) {
 			connections[i].start();
 		}
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			Thread.sleep(10000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 		findCoordinator();
 		
 		while(!killswitch) {

@@ -12,6 +12,10 @@ public class BigInt extends BigInteger {
 		super(val);
 	}
 	
+	public BigInt(int val) {
+		this(Integer.toString(val));
+	}
+	
 	public BigInt(BigInteger val) {
 		super(val.toString());
 	}

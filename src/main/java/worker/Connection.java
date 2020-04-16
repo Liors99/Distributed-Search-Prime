@@ -67,7 +67,6 @@ public class Connection extends Thread{
 	void sendInitialHandshake() {
 		while(true) {
 			try {
-//				NetworkMessage.send(sockOut, "type:WorkerHandshake");
 				String response = NetworkMessage.receive(sockIn);
 				System.out.println("Received:"+ response);
 				Map<String,String> responseMap = MessageDecoder.createmap(response);
