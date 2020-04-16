@@ -181,7 +181,7 @@ public class Subscriber {
 	
 	public void setWDB(String workers) {
 		listener.wdb.fromString(workers);
-	}
+
 	public int getId() {
 		return id;
 	}

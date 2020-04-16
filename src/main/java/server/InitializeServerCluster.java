@@ -403,7 +403,7 @@ public class InitializeServerCluster {
    		    	}
    		        System.out.println("Recovery Complete!");
    		        server.sendServers("type:Notification Note:Recovered ID:"+id, id);
-   		        rs.notMain();
+   		        rs.notMain(listenerPort);
    		        recovering=false;
    		    }
        	}
@@ -455,7 +455,7 @@ public class InitializeServerCluster {
     	   		    	}
     	   		        System.out.println("Recovery Complete!");
     	   		        server.sendServers("type:Notification Note:Recovered ID:"+id, id);
-    	   		        rs.notMain();
+    	   		        rs.notMain(listenerPort);
     	   		        recovering=false;
     	   		    }
                 }
