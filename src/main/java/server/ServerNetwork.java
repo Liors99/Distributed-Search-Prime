@@ -80,7 +80,6 @@ public class ServerNetwork implements Runnable{
 
 
 	            new Thread(new ConnectionHandler(inSocket, this)).start();
-                System.out.println("Thread started");
 
 
 	        }

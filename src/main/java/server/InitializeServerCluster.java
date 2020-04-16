@@ -127,8 +127,8 @@ public class InitializeServerCluster {
             //(!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) 
             /*!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i])) ||*/
             int tries =0;
-            //try ten times
-            while(tries<10 && Sk == null && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]+offset)))){ //check for +20
+            //try 20 times (gotta be fast starting up)
+            while(tries<20 && Sk == null && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]+offset)))){ //check for +20
                 tries++;
             	try{
                     Sk = server.startConnection(ips[i],ports[i], ips[id], ports[id]+(offset*(i+1)));
