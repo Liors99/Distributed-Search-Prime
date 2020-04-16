@@ -93,8 +93,8 @@ public class ConnectionHandler implements Runnable{
 				} catch (IOException e1) {
 					
 				}
-				this.server.removeFromMap(this.clientSocket.getLocalAddress(), this.clientSocket.getLocalPort());
-				
+				this.server.removeFromMap(this.clientSocket.getInetAddress().toString(), this.clientSocket.getLocalPort());
+			
 				
 			}
     		
