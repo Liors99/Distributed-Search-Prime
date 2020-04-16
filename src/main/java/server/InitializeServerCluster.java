@@ -392,7 +392,7 @@ public class InitializeServerCluster {
    		    	}
    		        System.out.println("Recovery Complete!");
    		        server.sendServers("Type:Notification Note:Recovered ID:"+id, id);
-   		        rs.notMain();
+   		        rs.notMain(id);
    		        recovering=false;
    		    }
        	}
@@ -443,7 +443,7 @@ public class InitializeServerCluster {
     	   		    	}
     	   		        System.out.println("Recovery Complete!");
     	   		        server.sendServers("Type:Notification Note:Recovered ID:"+id, id);
-    	   		        rs.notMain();
+    	   		        rs.notMain(id);
     	   		        recovering=false;
     	   		    }
                 }
