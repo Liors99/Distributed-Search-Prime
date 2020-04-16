@@ -13,8 +13,17 @@ public class WorkerRecord extends Record implements Comparable<WorkerRecord>{
     private Boolean isDone;
     static final double DEFAULTSCORE=100;
     private long workerTimeout;
+    private String result;
     
-    public long getworkerTimeout() {
+    public String getResult() {
+		return result;
+	}
+
+	public void setResult(String result) {
+		this.result = result;
+	}
+
+	public long getworkerTimeout() {
 		return workerTimeout;
 	}
 
@@ -110,6 +119,7 @@ public class WorkerRecord extends Record implements Comparable<WorkerRecord>{
     public void setScore(int score) {
         this.score = score;
     }
+
 
     public void stopWork(){
         this.isDone = true;
