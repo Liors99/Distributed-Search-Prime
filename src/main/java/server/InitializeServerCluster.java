@@ -310,7 +310,18 @@ public class InitializeServerCluster {
     }
     
    public static void recover() throws Exception {
+	   if (id == 0) {
+			listenerPort = 8000;
+		}
+		else if(id == 1) {
+			listenerPort = 8001;
+		}
+		else {
+			listenerPort = 8002;
+		}
 	 //create role
+	wdb= new WorkerDatabase();
+    listener = new ConnectionListener(wdb, listenerPort, null ,false);
    	Subscriber rs=new Subscriber(id, LeaderId, server, listener, st);
    	//Enter Recovery mode
    	destroyConnections();
@@ -352,8 +363,8 @@ public class InitializeServerCluster {
    		    		LeaderId=Integer.parseInt(m.get("id"));
    		    	}
    		        System.out.println("Recovery Complete!");
-   		        server.sendServers("Type:Notification Note:Recovered ID:"+id, id);
-   		        rs.notMain(id);
+   		        server.sendServers("type:Notification Note:Recovered ID:"+id, id);
+   		        rs.notMain(listenerPort);
    		        recovering=false;
    		    }
        	}
@@ -378,7 +389,8 @@ public class InitializeServerCluster {
            int p = (offsetted[other])?ports[other]+offset*other:ports[other];
            server.printConnections();
            try {
-               server.send(ips[other], p, "type:recover id:"+id);
+        	   //Coordinator is too slow can you help me?
+               server.send(ips[other], p, "type:recoverS id:"+id);
            }
            catch(Exception e) {
         	   //Not sure who is active
@@ -403,8 +415,8 @@ public class InitializeServerCluster {
     	   		    		LeaderId=Integer.parseInt(m.get("id"));
     	   		    	}
     	   		        System.out.println("Recovery Complete!");
-    	   		        server.sendServers("Type:Notification Note:Recovered ID:"+id, id);
-    	   		        rs.notMain(id);
+    	   		        server.sendServers("type:Notification Note:Recovered ID:"+id, id);
+    	   		        rs.notMain(listenerPort);
     	   		        recovering=false;
     	   		    }
                 }
