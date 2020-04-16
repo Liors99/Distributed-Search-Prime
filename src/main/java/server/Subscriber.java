@@ -35,13 +35,29 @@ public class Subscriber {
 		this.st=st;
 		
 		primes = new HashSet<>();
+		lowerBound= new BigInt(BigInt.ZERO);
+		upperBound= new BigInt(BigInt.ZERO);
+		primeLimit= 0;
 		current_worked_on = new BigInt(BigInt.ZERO);
+		
+		this.listener.setTs(null);
+		this.listener.setCoordinator(false);
+	
 
 	}
 	
-	public void notMain(int listenerPort) {
-		listener.start();
-
+	public void loadFromSubscriber(Subscriber s) {
+		this.lowerBound=s.getLowerBound();
+		this.upperBound=s.getUpperBound();
+		this.primeLimit=s.getPrimeLimit();
+		
+		this.primes=s.getPrimes();
+		this.current_worked_on=s.getCurrent_worked_on();
+	}
+	
+	public void notMain() {
+		
+	
 		
 		//Read from coordinator
 		
@@ -130,6 +146,20 @@ public class Subscriber {
 					    // Disconnected, Connectionhandler will handle 
 				     }
 			    }
+				else if(m.get("type").contentEquals("HSS")) {
+					
+					//Add the message back for re-election to deal with it
+					while(!InitializeServerCluster.reelectionStarted) {
+						System.out.println("Waiting for re election to finish");
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					InitializeServerCluster.ElectReelectionLeader(next_message);
+				}
 			}
 		}
 	}
@@ -151,5 +181,52 @@ public class Subscriber {
 	
 	public void setWDB(String workers) {
 		listener.wdb.fromString(workers);
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public HashSet<BigInt> getPrimes() {
+		return primes;
+	}
+
+	public void setPrimes(HashSet<BigInt> primes) {
+		this.primes = primes;
+	}
+
+	public BigInt getLowerBound() {
+		return lowerBound;
+	}
+
+	public void setLowerBound(BigInt lowerBound) {
+		this.lowerBound = lowerBound;
+	}
+
+	public BigInt getUpperBound() {
+		return upperBound;
+	}
+
+	public void setUpperBound(BigInt upperBound) {
+		this.upperBound = upperBound;
+	}
+
+	public int getPrimeLimit() {
+		return primeLimit;
+	}
+
+	public void setPrimeLimit(int primeLimit) {
+		this.primeLimit = primeLimit;
+	}
+
+	public BigInt getCurrent_worked_on() {
+		return current_worked_on;
+	}
+
+	public void setCurrent_worked_on(BigInt current_worked_on) {
+		this.current_worked_on = current_worked_on;
 	}
 }
