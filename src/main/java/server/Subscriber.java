@@ -87,7 +87,7 @@ public class Subscriber {
 					this.upperBound = new BigInt(m.get("upper"));
 					this.primeLimit = Integer.parseInt(m.get("limit"));
 				}
-				else if(m.get("type").contentEquals("HSS")) {
+				else if(m.get("type").contentEquals("HSSR")) {
 					
 					//Add the message back for re-election to deal with it
 					while(!InitializeServerCluster.reelectionStarted) {
