@@ -333,8 +333,9 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
             wR.setWorkrange(range);
             wR.setCurrent(current);
         	sendRange(wR, range, current);
+        	try {
         	st.writeLast("Last checked:"+current.toString());
-        	
+        	}catch(Exception e) {}
         	
         }
 	}
