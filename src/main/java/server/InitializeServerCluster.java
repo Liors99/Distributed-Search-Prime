@@ -37,8 +37,6 @@ public class InitializeServerCluster {
     public static Store st;
     public static Boolean r=false;
     public static int recoverTimeout=5;
-    private static Subscriber s;
-    public static boolean reelectionStarted=false;
     
     public static void main(String args[]) throws Exception {
         //Keep track of server connections
@@ -64,9 +62,6 @@ public class InitializeServerCluster {
         new Thread(server).start();
         //If not initialized, then start
         System.out.println("ServerNetwork started!");
-        
-        
-		
         establishConnections();
         System.out.println("Connections Established!");
 
@@ -92,35 +87,27 @@ public class InitializeServerCluster {
 		else {
 			listenerPort = 8002;
 		}
-		
 		wdb= new WorkerDatabase();
 		listener = new ConnectionListener(wdb, listenerPort, null ,false);
-		listener.start();
-		s = new Subscriber(id, LeaderId, server, listener, st);
-		
-        assignRole(false);
+		assignRole(listenerPort);
         
         while(true) {}
 
     }
     
     
-    public static void assignRole(boolean isReelection) {
+    public static void assignRole(int listenerPort) {
     	System.out.println("Leader selected:"+LeaderId);
     	
     	
         if(LeaderId==id) {
-        	
-        	
-        	Coordinator c = new Coordinator(id, server, listener, st);
-        	if(isReelection) {
-        		c.loadFromSubscriber(s);
-        	}
-        	c.notMain();
+
+        	Coordinator c = new Coordinator(id, ServerNetworkConnections, server, listener, st);
+        	c.notMain(listenerPort);
         }
         else {
-        	//Subscriber s = new Subscriber(id, LeaderId, server, listener, st);
-        	s.notMain();
+        	Subscriber s = new Subscriber(id, LeaderId, server, listener, st);
+        	s.notMain(listenerPort);
         }
 
     	
@@ -187,8 +174,8 @@ public class InitializeServerCluster {
     * @return winner id or -1 if failed
     */
     public static Integer initial_election() throws Exception{
-        HandShakeSubscriber Hs = new HandShakeSubscriber(id,10000);
-        String serializedToken = Hs.serializeHandShake();
+        HandShakeSubscriber Hs = new HandShakeSubscriber(10000);
+        String serializedToken = Hs.serializeHandShake(Integer.toString(id));
         double this_token = Hs.getToken();
         System.out.println(id+ " "+ this_token);
         
@@ -269,10 +256,11 @@ public class InitializeServerCluster {
     
 
 
-    public static void reelection(){
-    	
-    	 HandShakeSubscriber Hs = new HandShakeSubscriber(id, 10, up_time);
-         String serializedToken = Hs.serializeHandShake();
+    public static Integer reelection() throws Exception{
+    		
+    	listener.kill(); //Stop accepting any connections
+    	 HandShakeSubscriber Hs = new HandShakeSubscriber(10, id, up_time);
+         String serializedToken = Hs.serializeHandShake(Integer.toString(id));
          double this_token = Hs.getToken();
          System.out.println(" THIS SERVERS UP TIME: "+ this_token);
          
@@ -284,68 +272,41 @@ public class InitializeServerCluster {
              //check if in hashtable or +20
              int p = (offsetted[i])?ports[i]+offset*i:ports[i];
              server.printConnections();
-             try {
-            	 System.out.println("Tryign to send to "+p);
-				server.send(ips[i], p, serializedToken);
-				System.out.println("Send message to "+p);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				System.out.println("Failed sending to "+p);
-				continue;
-			}
+             server.send(ips[i], p, serializedToken);
          }
          
-         System.out.println("Finished reelection");
+         if(isAlive[(id+1)%3] || isAlive[(id+2)%3]) {
+        	 String responses[] = new String[2];
+        	 
+        	 Thread.sleep(2000);
+        	  
+        	 while(!MessageDecoder.findMessageType(server.peekNextMessage()).contentEquals("HSS")) {}
+        	 
+
+             responses[0] = server.receiveNextMessage();
+             
+
+             HandShakeSubscriber HsDecoded1 = new HandShakeSubscriber();
+             
+             if (responses[0]!=null) {		 
+            	 HsDecoded1.parseHandShake(responses[0]);
+            	 if(HsDecoded1.getToken() > up_time) {
+            		 System.out.println("Server " + id + ", I'm the leader");
+            		 LeaderId=id;
+            	 }
+            	 else {
+            		 System.out.println("Server " + HsDecoded1.getID() + ", is the leader");
+            		 LeaderId=HsDecoded1.getID();
+            	 }        
+             }
+         }
+         else {
+        	 LeaderId=id;
+        	 System.out.println("Server " + id + ", I'm the leader");
+         }
          
-        
-    }
-    
-    
-    public static int ElectReelectionLeader(String response) {
-    	int id_recv = -1;
-		 if(isAlive[(id+1)%3] || isAlive[(id+2)%3]) {
-			 
-	         HandShakeSubscriber HsDecoded1 = new HandShakeSubscriber();
-	         if (response!=null) {		 
-	        	 HsDecoded1.parseHandShake(response);
-	        	 id_recv= HsDecoded1.getID();
-	        	 if(HsDecoded1.getToken() > up_time) {
-	        		 System.out.println("Server " + id + ", I'm the leader");
-	        		 LeaderId=id;
-	        	 }
-	        	 else {
-	        		 System.out.println("Server " + HsDecoded1.getID() + ", is the leader");
-	        		 LeaderId=HsDecoded1.getID();
-	        	 }        
-	         }
-	         
-	     }
-	     else {
-	    	 LeaderId=id;
-	    	 System.out.println("Server " + id + ", I'm the leader");
-	     }
-		 
-		 //Clear the connections and deal with the process that died
-		 for(int i=0; i<3; i++) {
-			 if(i!=id && i!=id_recv) {
-				 System.out.println("Removing " + i+"'s connections");
-				 //isAlive[i]=false;
-				 
-				 //Remove the inbound connection from this server
-				 for(int j=0;j<3;j++) {
-					 System.out.println(ports[i]+offset*(j+1));
-					 server.removeFromMap(ips[i], ports[i]+offset*(j+1));
-				 }
-				 
-				 //Remove the outbound connection for this server
-				 server.removeFromMap(ips[i], ports[i]);
-				 
-				 server.printConnections();
-			 }
-		 }
-		 reelectionStarted=false;
-	     assignRole(true);
-	     return LeaderId;
+         assignRole(listenerPort);
+         return LeaderId;
     }
     
    public static void recover() throws Exception {
