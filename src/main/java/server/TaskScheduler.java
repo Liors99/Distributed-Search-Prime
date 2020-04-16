@@ -231,7 +231,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
     		
     	}else if(delta>TIMEOUT*3/4) {
     		wR.setScore(wR.getScore()/2);
-    	}else if (wR.getScore()<1000){
+    	}else if (wR.getScore()<9001){
     		wR.setScore(wR.getScore()+100);
     	}
 
@@ -242,7 +242,9 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 //    	System.out.println("Checking for incoming messages from workers...");
     	LinkedList<WorkerRecord> deadRecords = new LinkedList<WorkerRecord>();
     	LinkedList<WorkerRecord> newRecords = new LinkedList<WorkerRecord>();
-    	for (WorkerRecord wR : WorkingWorkers) {
+//    	for (WorkerRecord wR : WorkingWorkers) {
+    	for(int i=0;i<WorkingWorkers.size();i++) {
+    		WorkerRecord wR = WorkingWorkers.get(i);
     		try {
 
     				DataInputStream dis = wR.getWc().sockIn;
