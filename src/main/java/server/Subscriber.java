@@ -164,7 +164,33 @@ public class Subscriber {
 					InitializeServerCluster.ElectReelectionLeader(next_message);
 				}
 			}
+			else {
+				if(checkOnlyAlive()) {
+					//Add the message back for re-election to deal with it
+					while(!InitializeServerCluster.reelectionStarted) {
+						System.out.println("Waiting for re election to finish");
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					InitializeServerCluster.ElectReelectionLeader(null);
+				}
+			}
 		}
+	}
+	
+	public boolean checkOnlyAlive() {
+		if(InitializeServerCluster.isAlive[(id+1)%3] || InitializeServerCluster.isAlive[(id+2)%3]) {
+			return false;
+		}
+		else {
+			return true;
+		}
+		
+		
 	}
 	
 	public void setGoal(Map<String, String> m){
