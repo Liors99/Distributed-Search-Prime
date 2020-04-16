@@ -49,10 +49,14 @@ public class Coordinator {
 		current_worked_on= new BigInt(BigInt.ZERO);
 		
 		ts = new TaskScheduler();
+		
+		addWorkersToTaskScheduler(); //Reschedule all the available workers
+		
+		//Set it to a coordinator on the listener
 		this.listener.setTs(ts);
 		this.listener.setCoordinator(true);
 		
-		addWorkersToTaskScheduler(); //Reschedule all the available workers
+		
     	
     }
     
