@@ -184,8 +184,10 @@ public class Coordinator {
 					      server.send(InitializeServerCluster.ips[sendto],p,"type:COR_GOAL upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit);
 				        //Send the store
 					      server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],"type:Store "+st.get()); 
-					    //Send the worker database
-					      server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],listener.wdb.workers());
+					    //Send the worker database (would prefer they reconnect)
+					      //server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],listener.wdb.workers());
+				        //Let know recover is complete
+					      server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],"type:RC-Done id:"+id);
 				    } catch (Exception e) {
 				    	
 					    // Disconnected, Connectionhandler will handle 

@@ -36,6 +36,7 @@ public class InitializeServerCluster {
     public static WorkerDatabase wdb;
     public static Store st;
     public static Boolean r=false;
+    public static int recoverTimeout=5;
     
     public static void main(String args[]) throws Exception {
         //Keep track of server connections
@@ -71,40 +72,8 @@ public class InitializeServerCluster {
             LeaderId = initial_election();
         }
         if (LeaderId==-2) {
-        	//create role
-        	Subscriber rs=new Subscriber(id, LeaderId, server, listener, st);
-        	//Enter Recovery mode
-        	destroyConnections();
-        	establishConnections();
-            //broadcast recovery
-            for (int i=0;i<3;i++){
-                if (i==id){
-                    continue;
-                }
-                //check if in hashtable or +20
-                int p = (offsetted[i])?ports[i]+offset*i:ports[i];
-                server.printConnections();
-                server.send(ips[i], p, "type:recover id:"+id);
-            }
-            boolean recovering=true;
-            while(recovering) {
-            	if(server.viewNextMessage()!=null) {
-        			String next_message = server.receiveNextMessage();
-        			System.out.println("Recovery recieved:"+next_message);
-        		    Map<String, String> m=MessageDecoder.createmap(next_message);
-        		    if(m.get("type").equals("COR_Goal")) {
-                	  rs.setGoal(m);	
-                	}
-        		    else if(m.get("type").equals("l")) {
-                		LeaderId=Integer.parseInt(m.get("leader"));
-                	}
-        		    else if(m.get("type").equals("store")) {
-        		    	rs.setStore(next_message.split("file:")[0]);
-        		    }
-            	}
-               }
-            
-        	
+        	recover();
+        	//If all goes well recover() does not return
         }
 
 		
@@ -157,8 +126,11 @@ public class InitializeServerCluster {
             Socket Sk = null;
             //(!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) 
             /*!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i])) ||*/
-            while(Sk == null && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]+offset)))){ //check for +20
-                try{
+            int tries =0;
+            //try ten times
+            while(tries<10 && Sk == null && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]+offset)))){ //check for +20
+                tries++;
+            	try{
                     Sk = server.startConnection(ips[i],ports[i], ips[id], ports[id]+(offset*(i+1)));
                     System.out.println("Initiated Connection to " + ips[i] + " "+ Integer.toString(ports[i]));
                     offsetted[i] = false; 
@@ -215,7 +187,12 @@ public class InitializeServerCluster {
             //check if in hashtable or +20
             int p = (offsetted[i])?ports[i]+offset*i:ports[i];
             server.printConnections();
-            server.send(ips[i], p, serializedToken);
+            try {
+                server.send(ips[i], p, serializedToken);
+            }
+            catch(Exception e) {
+            	//Someone died
+            }
         }
 
         String responses[] = new String[2];
@@ -332,6 +309,66 @@ public class InitializeServerCluster {
          return LeaderId;
     }
     
-    
+   public static void recover() throws Exception {
+	 //create role
+   	Subscriber rs=new Subscriber(id, LeaderId, server, listener, st);
+   	//Enter Recovery mode
+   	destroyConnections();
+   	establishConnections();
+       //broadcast recovery
+       for (int i=0;i<3;i++){
+           if (i==id){
+               continue;
+           }
+           //check if in hashtable or +20
+           int p = (offsetted[i])?ports[i]+offset*i:ports[i];
+           server.printConnections();
+           try {
+               server.send(ips[i], p, "type:recover id:"+id);
+           }
+           catch(Exception e) {
+        	   //Not sure who is active
+           }
+       }
+       boolean recovering=true;
+       long startTime=System.currentTimeMillis();
+       long duration=0;
+       while(recovering && duration<recoverTimeout) {
+       	if(server.viewNextMessage()!=null) {
+   			String next_message = server.receiveNextMessage();
+   			System.out.println("Recovery recieved:"+next_message);
+   		    Map<String, String> m=MessageDecoder.createmap(next_message);
+   		    if(m.get("type").equals("COR_Goal")) {
+           	  rs.setGoal(m);	
+           	}
+   		    else if(m.get("type").equals("l")) {
+           		LeaderId=Integer.parseInt(m.get("leader"));
+           	}
+   		    else if(m.get("type").equals("store")) {
+   		    	rs.setStore(next_message.split("file:")[0]);
+   		    }
+   		    else if(m.get("type").equals("RC-Done")) {
+   		    	if(LeaderId==-2) {
+   		    		LeaderId=Integer.parseInt(m.get("id"));
+   		    	}
+   		        System.out.println("Recovery Complete!");
+   		        server.sendServers("Type:Notification Note:Recovered ID:"+id, id);
+   		        rs.notMain(id);
+   		        recovering=false;
+   		    }
+       	}
+       	    long endTime = System.currentTimeMillis();
+		    duration = (endTime - startTime)/1000;
+       }
+       if(LeaderId==-2) {
+    	   System.out.println("The System has entered an unrecoverable state");
+    	   System.out.println("Shutting Down");
+    	   System.exit(-1);
+       }
+       else {
+    	   //Talk to other subscriber
+       }
+       
+   }
     
 }

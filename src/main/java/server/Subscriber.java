@@ -100,6 +100,11 @@ public class Subscriber {
 	
 	public void setStore(String file) {
 		st.writeResult(file);
+		String [] lines = file.split("\\r?\\n");
+		current_worked_on=new BigInt(file.split("Last checked: ")[0]);
+		for(int i=1; i<lines.length; i++) {
+			primes.add(new BigInt(lines[i].split("Prime: ")[0]));
+		}
 	}
 	
 	public void setWDB(String workers) {
