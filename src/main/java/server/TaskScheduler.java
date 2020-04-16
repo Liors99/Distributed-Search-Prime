@@ -300,6 +300,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 	    				//Check if all workers have finished work and add to primes if it is one
 	    				if(num_to_divisors.get(tested).equals(BigInt.ZERO) && num_to_workers.get(tested)==0) {
 	    					primes.add(tested);
+	    					st.writeResult("Prime: "+tested.toString());
 	    				}
 	    				
 	    				wR.setResult(result);
@@ -448,6 +449,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 	        	}
 	        	
         		assignRange(range);
+        		st.writeLast("Last checked: "+current);
         		
         		current = new BigInt(current.add(new BigInt("2")).toString(10));
         	

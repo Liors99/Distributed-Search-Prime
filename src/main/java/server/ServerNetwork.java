@@ -82,7 +82,6 @@ public class ServerNetwork implements Runnable{
 	            new Thread(new ConnectionHandler(inSocket, this)).start();
 
 
-
 	        }
 	        System.out.println("Server Stopped.") ;
 	    }
@@ -153,15 +152,14 @@ public class ServerNetwork implements Runnable{
 	 public void sendServers(String msg, int id) throws Exception {
 		 for (Socket i: client_to_socket.values()) {
 			 int port=i.getPort();
-			 
+	
 			 try {  
 				 if((port==InitializeServerCluster.ports[0]|| port==InitializeServerCluster.ports[1]||port==InitializeServerCluster.ports[2]) &&port!=InitializeServerCluster.ports[id]) {
 					out = new DataOutputStream(i.getOutputStream());
 					NetworkMessage.send(out, msg);
 				 }
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//Time out will handle
 				}
 			 
 		 }
@@ -205,8 +203,10 @@ public class ServerNetwork implements Runnable{
 
 		 Socket socket_server = new Socket(InetAddress.getByName(IP), port,InetAddress.getByName(IP_from), port_from);
 		 if(socket_server.isConnected()) {
+			 
 			 client_to_socket.put(IP.toString()+Integer.toString(port),socket_server);
 			 return socket_server;
+			 
 		 }
 		 return null;
 

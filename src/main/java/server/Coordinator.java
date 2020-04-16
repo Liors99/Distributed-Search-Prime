@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -197,50 +198,51 @@ public class Coordinator {
 				
 			}
 			
-			/*
-			next_message = getWorkerMessage(ts);
-			if(next_message!=null) {
-				Map<String, String> m = MessageDecoder.createmap(next_message);
-				System.out.println("MESSAGE RECIEVED BY COORDINATOR : "+next_message);
-				
-				//If message is of type result from worker
-				if(m.get("type").equals("SearchResult")) {
-					
-					//Send the message to all subscribers
-					String result = m.get("divisor");
-					String tested = m.get("tested");
-					if (result.equals("0")){ //Only send in prime numbers
-						BigInt prime_add = new BigInt(tested);
-						primes.add(prime_add);
-						
-						//Send to subscribers that this is a prime number
-						String send_msg= "type:COR_PRIME prime:"+tested;
-						try {
-							server.sendServers(send_msg, id);
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							System.out.println("Unable to send prime number to subscribers");
-							//e.printStackTrace();
-						}
-						
-						
-					}
-				}
-				
-				
-				
-			}
-			*/
+			
 			
 			//Get message from subscribers
 			if(server.viewNextMessage()!=null) {
 				next_message = server.receiveNextMessage();
+			    System.out.println("Coordinator recieved: "+next_message);
+				Map<String, String> m=MessageDecoder.createmap(next_message);
+			    if(m.get("type").contentEquals("recover")) {
+			    	
+				    int sendto=Integer.parseInt(m.get("id"));
+				    try {
+				    	int tries=0;
+				    	Socket Sk=null;
+				    	while(tries<10 && Sk==null) {
+						     Sk = server.startConnection(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto], InitializeServerCluster.ips[id], InitializeServerCluster.ports[id]+(InitializeServerCluster.offset*(id+1)));
+						     InitializeServerCluster.offsetted[sendto] = false;
+			                 server.addServer(InitializeServerCluster.ips[sendto], InitializeServerCluster.ports[sendto]);
+			                 server.addServer(InitializeServerCluster.ips[id], InitializeServerCluster.ports[id]+(InitializeServerCluster.offset*(sendto+1)));
+				    	     tries++;
+				    	}
+				    }	
+				     catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				    try {
+				    	int p = (InitializeServerCluster.offsetted[sendto])?InitializeServerCluster.ports[sendto]+InitializeServerCluster.offset*sendto:InitializeServerCluster.ports[sendto];
+				    	 //Send the goal
+					      server.send(InitializeServerCluster.ips[sendto],p,"type:COR_GOAL upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit);
+				        //Send the store
+					      server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],"type:Store "+st.get()); 
+					    //Send the worker database (would prefer they reconnect)
+					      //server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],listener.wdb.workers());
+				        //Let know recover is complete
+					      server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],"type:RC-Done id:"+id);
+				    } catch (Exception e) {
+				    	
+					    // Disconnected, Connectionhandler will handle 
+				     }
+			    }
 			}
 			
 			if(next_message!=null) {
 				Map<String, String> m = MessageDecoder.createmap(next_message);
 			}
-			
 			
 			//Send messages to subscribers for backup purposes
 			

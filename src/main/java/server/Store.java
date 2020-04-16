@@ -129,7 +129,7 @@ public class Store {
 			        
 			        if (fis != null) bis.close();
 			        if (bis != null) bis.close();
-			        return mybytearray.toString();
+			        return new String(mybytearray);
 			        //if (os != null) os.close();
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
