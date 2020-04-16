@@ -67,7 +67,6 @@ public class ConnectionHandler implements Runnable{
 								InitializeServerCluster.isAlive[InitializeServerCluster.LeaderId]=false;
 								try {
 									InitializeServerCluster.reelection();
-									InitializeServerCluster.reelectionStarted=true;
 								} catch (Exception e1) {
 									// TODO Auto-generated catch block
 									e1.printStackTrace();

@@ -133,8 +133,6 @@ public class ServerNetwork implements Runnable{
 			out = new DataOutputStream(target.getOutputStream());
 			NetworkMessage.send(out, msg);
 		} catch (IOException e) {
-			//throw new Exception("The specified IP/port number combination is not registered in this server");
-			
 			// TODO Auto-generated catch block
 			//e.printStackTrace();
 		}
@@ -220,7 +218,7 @@ public class ServerNetwork implements Runnable{
 	  * @param inetAddress
 	  * @param port
 	  */
-	 public void removeFromMap(String inetAddress, int port) {
+	 public void removeFromMap(InetAddress inetAddress, int port) {
 		 String key = inetAddress + Integer.toString(port);
 		 if(client_to_socket.containsKey(key)) {
 			 client_to_socket.remove(key);
