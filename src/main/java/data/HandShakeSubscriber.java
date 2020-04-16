@@ -1,5 +1,7 @@
 package data;
 
+import java.util.Map;
+
 public class HandShakeSubscriber {
 
 	private int ka;
@@ -9,19 +11,23 @@ public class HandShakeSubscriber {
 	/**
 	 * Constructor, generates a random token when first set up
 	 */
+
+	
 	public HandShakeSubscriber() {
-		generateToken();
-	}
-
-
-	public HandShakeSubscriber(int ka) {
-		this();
-		setKA(ka);
+		setKA(-1);
+		setToken(-1);
+		setID(-1);
 	}
 	
-	public HandShakeSubscriber(int ka, int id, long up_time) {
-		setToken(up_time);
+	public HandShakeSubscriber(int id, int ka) {
 		setKA(ka);
+		this.id=id;
+		generateToken();
+	}
+	
+	public HandShakeSubscriber(int id, int token, double up_time) {
+		setToken(up_time);
+		setKA(token);
 		this.id=id;
 	}
 
@@ -39,16 +45,9 @@ public class HandShakeSubscriber {
 	 * @param obj - The name of the object from which this handshake was initiated from
 	 * @return
 	 */
-	public String serializeHandShake(String obj) {
-		StringBuilder s = new StringBuilder();
-		s.append("type:HSS "+obj+": " +Integer.toString(getKA())+" "+Double.toString(getToken()));
-
-		return s.toString();
-	}
-
 	public String serializeHandShake() {
 		StringBuilder s = new StringBuilder();
-		s.append("type:HSS "+Integer.toString(this.id)+": " +Integer.toString(getKA())+" "+Double.toString(getToken()));
+		s.append("type:HSS "+ "server:" +this.id +" ka:"+Integer.toString(getKA())+" token:"+Double.toString(getToken()));
 
 		return s.toString();
 	}
@@ -59,23 +58,15 @@ public class HandShakeSubscriber {
 	 * @return - returns the token for subscriber
 	 */
 	public void parseHandShake(String s) {
-		String[] serialized = s.split(" ");
-
-		String type = serialized[0];
-		String obj_from = serialized[1];
-		try {
-			setID(Integer.parseInt(obj_from.split(":")[0]));
-			}
-		catch (Exception e) {
-			System.out.println("Error converting ID");
-		}
-		//this.id = Integer.parseInt(obj_from.split(":")[0]);
-
-		int ka = Integer.parseInt(serialized[2]);
-		Double token = Double.parseDouble(serialized[3]);
-
-		setKA(ka);
-		setToken(token);
+		
+		
+		Map<String, String> m = MessageDecoder.createmap(s);
+		this.id=Integer.parseInt(m.get("server"));
+		int ka_recv = Integer.parseInt(m.get("ka"));
+		double token_recv = Double.parseDouble(m.get("token"));
+		
+		setKA(ka_recv);
+		setToken(token_recv);
 
 	}
 
