@@ -7,7 +7,7 @@ import data.NetworkMessage;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -21,8 +21,13 @@ import java.util.concurrent.PriorityBlockingQueue;
 public class TaskScheduler extends Thread {
     private PriorityBlockingQueue<WorkerRecord> WorkerQueue;
     private LinkedList<WorkerRecord> WorkingWorkers;
-    private HashSet<BigInt> primes;
-    private HashMap<Integer, Boolean> ActiveWorkers; //checks if worker with wid is working or not. Working only if true. If not on list/or set to false not working.
+    
+    private HashMap<BigInt, BigInt> num_to_divisors;
+    private HashMap<BigInt, Integer> num_to_workers;
+    private ArrayList<BigInt> primes;
+    
+
+	private HashMap<Integer, Boolean> ActiveWorkers; //checks if worker with wid is working or not. Working only if true. If not on list/or set to false not working.
     private BigInt totalScore;
     private int doneWorkers;
     
@@ -50,13 +55,15 @@ public class TaskScheduler extends Thread {
         ActiveWorkers = new HashMap<Integer, Boolean>();
         this.doneWorkers = 0;
         this.target = target;
-        this.primes = new HashSet<BigInt>();
+        this.primes = new ArrayList<BigInt>();
         this.lower=lower;
         this.upper=upper;
         this.WorkingWorkers = new LinkedList<WorkerRecord>();
         totalScore= new BigInt("0");
         
         workerMessages= new LinkedBlockingDeque<String>();
+        num_to_divisors= new HashMap<BigInt, BigInt>();
+        num_to_workers= new HashMap<BigInt, Integer>(); 
         
 
     }
@@ -97,12 +104,15 @@ public class TaskScheduler extends Thread {
         WorkerQueue = new PriorityBlockingQueue<WorkerRecord>();
         ActiveWorkers = new HashMap<Integer, Boolean>();
         this.doneWorkers = 0;
-        this.primes = new HashSet<BigInt>();
+        this.primes = new ArrayList<BigInt>();
         this.WorkingWorkers = new LinkedList<WorkerRecord>();
         totalScore= new BigInt("0");
         
         workerMessages= new LinkedBlockingDeque<String>();
         this.current= new BigInt(BigInt.ZERO);
+        
+        num_to_divisors = new HashMap<BigInt, BigInt>();
+        num_to_workers= new HashMap<BigInt, Integer>(); 
         
 	}
 	
@@ -170,6 +180,15 @@ public class TaskScheduler extends Thread {
     }
 */
     private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current){
+    	
+    	//Add to the hashset
+    	if(!num_to_workers.containsKey(current)) {
+    		num_to_workers.put(current, 1);
+    	}
+    	else {
+    		num_to_workers.put(current, num_to_workers.get(current)+1);
+    	}
+    	
     	
         wR.setWorkrange(range);
         wR.startWork();
@@ -258,12 +277,31 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 	    				Map<String, String> m = MessageDecoder.createmap(msg);
 	//    				System.out.println("4");
 	    				String result = m.get("divisor");
+	    				BigInt tested = new BigInt( m.get("tested"));
+	    				
+	    				BigInt result_big = new BigInt(result);
 	    				if (result.equals("0")){
 	    					System.out.println(wR.getCurrent()+ " is a prime? Divisor recieved is " + result);
-	    					primes.add(wR.getCurrent());
+	    					//primes.add(wR.getCurrent());
 	    				}else {
 	    					System.out.println(wR.getCurrent()+" divided by "+ result + " reported by "+ wR.getWID());
 	    				}
+	    				
+	    				//substract from workers
+	    				num_to_workers.put(tested,num_to_workers.get(tested)-1);
+	    				
+	    				if(!num_to_divisors.containsKey(tested)) {
+	    					num_to_divisors.put(tested, result_big);
+	    				}
+	    				else {
+	    					num_to_divisors.put(tested, new BigInt(num_to_divisors.get(tested).add(result_big)));
+	    				}
+	    				
+	    				//Check if all workers have finished work and add to primes if it is one
+	    				if(num_to_divisors.get(tested).equals(BigInt.ZERO) && num_to_workers.get(tested)==0) {
+	    					primes.add(tested);
+	    				}
+	    				
 	    				wR.setResult(result);
     					System.out.println("msg:" + msg);
     					long delta = System.currentTimeMillis() - wR.getworkerTimeout();
@@ -335,9 +373,11 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
             wR.setWorkrange(range);
             wR.setCurrent(current);
         	sendRange(wR, range, current);
-        	st.writeLast("Last checked:"+current.toString());
-        	
-        	
+        	/*
+        	try {
+        		st.writeLast("Last checked:"+current.toString());
+        	}catch(Exception e) {}
+        	*/
         }
 	}
 
@@ -554,6 +594,15 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 
 	public void setCurrent(BigInt current) {
 		this.current = current;
+	}
+	
+	public ArrayList<BigInt> getPrimes() {
+		return primes;
+	}
+
+
+	public void setPrimes(ArrayList<BigInt> primes) {
+		this.primes = primes;
 	}
 
 	@Override

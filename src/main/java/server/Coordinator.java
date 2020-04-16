@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class Coordinator {
 	private int primeLimit;
 	static Store st;
 	
-	private HashSet<BigInt> primes;
+	private ArrayList<BigInt> primes;
 	
 	private BigInt current_worked_on;
 	
@@ -40,7 +41,7 @@ public class Coordinator {
     	this.listener=listener;
 		this.st=st;
 		
-		primes = new HashSet<>();
+		primes = new ArrayList<>();
 		lowerBound= new BigInt(BigInt.ZERO);
 		upperBound= new BigInt(BigInt.ZERO);
 		primeLimit= 0;
@@ -166,6 +167,26 @@ public class Coordinator {
 			//Get message from workers
 			String next_message=null;
 			
+			
+			//Poll the primes
+			
+			
+			for(int i=0; i<ts.getPrimes().size(); i++) {
+				BigInt p =ts.getPrimes().get(i);
+				if(!this.primes.contains(p)) {
+					this.primes.add(p);
+					String send_msg= "type:COR_PRIME prime:"+p;
+					try {
+						server.sendServers(send_msg, id);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+			}
+			
+			/*
 			next_message = getWorkerMessage(ts);
 			if(next_message!=null) {
 				Map<String, String> m = MessageDecoder.createmap(next_message);
@@ -198,9 +219,15 @@ public class Coordinator {
 				
 				
 			}
+			*/
+			
 			//Get message from subscribers
 			if(server.viewNextMessage()!=null) {
 				next_message = server.receiveNextMessage();
+			}
+			
+			if(next_message!=null) {
+				Map<String, String> m = MessageDecoder.createmap(next_message);
 			}
 			
 			
