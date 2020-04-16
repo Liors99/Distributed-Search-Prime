@@ -55,13 +55,15 @@ public class Subscriber {
 				
 				if(m.get("type").contentEquals("COR_PRIME")) {
 					BigInt prime_add = new BigInt(m.get("prime"));
-					System.out.println("Added "+ prime_add + " to the list");
 					primes.add(prime_add);
+					st.writeResult("Prime: "+prime_add);
+					System.out.println("Added "+ prime_add + " to the list");
 				}
 				else if(m.get("type").contentEquals("COR_CURRENT")) {
 					BigInt current = new BigInt(m.get("current"));
-					System.out.println("Chagned current number to "+ current);
 					current_worked_on=current;
+					st.writeLast("Last checked: "+current);
+					System.out.println("Chagned current number to "+ current);
 					
 				}
 				else if(m.get("type").contentEquals("COR_GOAL")) {
@@ -72,6 +74,8 @@ public class Subscriber {
 				else if(m.get("type").contentEquals("recover")) {
 					
 					int sendto=Integer.parseInt(m.get("id"));
+					//Not functionally alive unless recovered
+					InitializeServerCluster.isAlive[sendto]=false;
 					try {
 						Socket Sk = server.startConnection(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto], InitializeServerCluster.ips[sendto], InitializeServerCluster.ports[sendto]+(InitializeServerCluster.offset*(sendto+1)));
 					} catch (Exception e1) {
@@ -87,6 +91,10 @@ public class Subscriber {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+				}
+				else if(m.get("type").equals("RC-Done")) {
+					//Server Has reached operational state
+					InitializeServerCluster.isAlive[Integer.parseInt(m.get("id"))]=true;	
 				}
 			}
 		}

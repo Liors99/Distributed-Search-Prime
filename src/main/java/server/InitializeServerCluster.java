@@ -366,7 +366,49 @@ public class InitializeServerCluster {
     	   System.exit(-1);
        }
        else {
-    	   //Talk to other subscriber
+    	   startTime=System.currentTimeMillis();
+           duration=0;
+           //Find the other active server
+           int other=-1;
+           for(int i=0; i<3; i++) {
+        	   if (i!=LeaderId && i!=id) {
+        		 other=i;  
+        	   }
+           }
+           int p = (offsetted[other])?ports[other]+offset*other:ports[other];
+           server.printConnections();
+           try {
+               server.send(ips[other], p, "type:recover id:"+id);
+           }
+           catch(Exception e) {
+        	   //Not sure who is active
+           }
+    	   //Talk to other subscriber, who will win election by default
+    	   while(recovering && duration<recoverTimeout) {
+    	       	if(server.viewNextMessage()!=null) {
+    	   			String next_message = server.receiveNextMessage();
+    	   			System.out.println("Recovery recieved:"+next_message);
+    	   		    Map<String, String> m=MessageDecoder.createmap(next_message);
+    	   		    if(m.get("type").equals("COR_Goal")) {
+    	           	  rs.setGoal(m);	
+    	           	}
+    	   		    else if(m.get("type").equals("l")) {
+    	           		LeaderId=Integer.parseInt(m.get("leader"));
+    	           	}
+    	   		    else if(m.get("type").equals("store")) {
+    	   		    	rs.setStore(next_message.split("file:")[0]);
+    	   		    }
+    	   		    else if(m.get("type").equals("RC-Done")) {
+    	   		    	if(LeaderId==-2) {
+    	   		    		LeaderId=Integer.parseInt(m.get("id"));
+    	   		    	}
+    	   		        System.out.println("Recovery Complete!");
+    	   		        server.sendServers("Type:Notification Note:Recovered ID:"+id, id);
+    	   		        rs.notMain(id);
+    	   		        recovering=false;
+    	   		    }
+                }
+    	   }
        }
        
    }
