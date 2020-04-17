@@ -18,6 +18,7 @@ public class WorkerRunner extends Thread{
 	String[] hostnames;
 	int[] ports;
 	Connection[] connections;
+	private boolean[] wasCoordinator;
 	int currentCoordinator;
 	private boolean killswitch = false;
 	
@@ -27,6 +28,7 @@ public class WorkerRunner extends Thread{
 		hostnames = new String[Networking.NUMBER_OF_SERVERS];
 		ports = new int[Networking.NUMBER_OF_SERVERS];
 		connections = new Connection[Networking.NUMBER_OF_SERVERS];
+		wasCoordinator = new boolean[Networking.NUMBER_OF_SERVERS];
 	}
 	
 	public void run() {
@@ -47,9 +49,10 @@ public class WorkerRunner extends Thread{
 //		} catch (InterruptedException e) {
 //			e.printStackTrace();
 //		}
-		findCoordinator();
+		
 		
 		while(!killswitch) {
+			findCoordinator();
 			doWork();
 		}
 		
@@ -60,6 +63,15 @@ public class WorkerRunner extends Thread{
 	public String getTask() {
 		String task = null;
 		Socket coordSocket = connections[currentCoordinator].sock;
+		while (coordSocket == null) {
+			try {
+				Thread.sleep(2000);
+				coordSocket = connections[currentCoordinator].sock;
+			}catch (Exception e) {
+				
+			}
+		}
+		System.out.println("no longer null");
 		while(!killswitch && task==null) {
 			try {
 				coordSocket.setSoTimeout(5000);
@@ -110,9 +122,19 @@ public class WorkerRunner extends Thread{
 	
 	public void findCoordinator() {
 		for(int i = 0; i<Networking.NUMBER_OF_SERVERS; i++) {
-				if (connections[i].isCoordinator()) {				
-					currentCoordinator = i;
-			}
+				if (connections[i].isCoordinator()) {
+					if (wasCoordinator[i] == false) {
+						currentCoordinator = i;
+						for (int j = 0; j<Networking.NUMBER_OF_SERVERS; j++) {
+							if (i != j) {
+								connections[j].removeCoordinator();
+								wasCoordinator[j] = false;
+							}
+						}
+						wasCoordinator[i] = true;
+					}
+					
+				}
 		}
 	}
 	

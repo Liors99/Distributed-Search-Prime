@@ -139,6 +139,23 @@ public class ConnectionListener extends Thread{
 		
 	}
 	
+	
+	public String receiveWorkerMessage(int wid) {
+		WorkerConnection con = wdb.workerConnections.get(wid);
+		String message = null;
+		while (true) {
+			try {
+				message = NetworkMessage.receive(con.sockIn);
+				break;
+			}
+			catch(Exception e) {
+				
+			}
+		}
+		return message;
+		
+	}
+	
 	public boolean isReady() {
 		return ready;
 	}

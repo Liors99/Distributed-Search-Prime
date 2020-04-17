@@ -46,6 +46,8 @@ public class Connection extends Thread{
 			}
 		}
 		while(!killswitch) {
+			waitForCoordinatorSignal();
+			
 			
 		}
 	}
@@ -87,6 +89,29 @@ public class Connection extends Thread{
 	
 	public boolean isCoordinator() {
 		return isCoordinator;
+	}
+	
+	public void removeCoordinator() {
+		isCoordinator = false;
+	}
+	
+	private void waitForCoordinatorSignal() {
+		boolean signalReceived = false;
+		
+		while (!signalReceived && !killswitch) {
+			try {
+				Thread.sleep(5000);
+				String signal = NetworkMessage.receive(sockIn);
+				String sigType = MessageDecoder.createmap(signal).get("type");
+				if (sigType.equals("CoordinatorTakeover")) {
+					isCoordinator = true;
+					signalReceived = true;
+					System.out.println("Received new coordinator signal");
+				}
+			}catch (Exception e) {
+				
+			}
+		}
 	}
 	
 	public void kill() {
