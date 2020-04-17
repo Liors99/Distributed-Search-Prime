@@ -127,32 +127,14 @@ public class ConnectionListener extends Thread{
 
 	public void sendWorkerMessage(int wid, String message) {
 		WorkerConnection con = wdb.workerConnections.get(wid);
-		while (true) {
-			try {
-				NetworkMessage.send(con.sockOut, message);
-				break;
-			}
-			catch(Exception e) {
-				
-			}
-		}
-		
+		con.sendMessage(message);
+
 	}
 	
 	
 	public String receiveWorkerMessage(int wid) {
 		WorkerConnection con = wdb.workerConnections.get(wid);
-		String message = null;
-		while (true) {
-			try {
-				message = NetworkMessage.receive(con.sockIn);
-				break;
-			}
-			catch(Exception e) {
-				
-			}
-		}
-		return message;
+		return con.receiveMessage();
 		
 	}
 	

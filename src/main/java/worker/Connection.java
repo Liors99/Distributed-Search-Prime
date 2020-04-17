@@ -27,7 +27,7 @@ public class Connection extends Thread{
 		while (true) {
 			try {
 				connect();
-				sendInitialHandshake();				
+				receiveInitialHandshake();				
 				break;
 			}
 			catch (Exception e) {
@@ -46,7 +46,10 @@ public class Connection extends Thread{
 			}
 		}
 		while(!killswitch) {
-			waitForCoordinatorSignal();
+			if (!isCoordinator) {
+				waitForCoordinatorSignal();
+
+			}
 			
 			
 		}
@@ -66,7 +69,7 @@ public class Connection extends Thread{
 		}
 	}
 	
-	void sendInitialHandshake() {
+	void receiveInitialHandshake() {
 		while(true) {
 			try {
 				String response = NetworkMessage.receive(sockIn);

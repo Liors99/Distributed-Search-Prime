@@ -77,7 +77,6 @@ public class WorkerRunner extends Thread{
 				coordSocket.setSoTimeout(5000);
 				task = NetworkMessage.receive(new DataInputStream(coordSocket.getInputStream()));
 			} catch (Exception e) {
-
 			}
 		}
 		return task;
