@@ -3,11 +3,13 @@ package server;
 import data.HandShakeSubscriber;
 import data.MessageDecoder;
 
+import java.io.IOException;
 import java.net.BindException;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class InitializeServerCluster {
 /*
@@ -33,8 +35,9 @@ public class InitializeServerCluster {
     private static ConnectionListener listener;
     public static WorkerDatabase wdb;
     public static Store st;
+    public static Boolean r=false;
+    public static int recoverTimeout=5;
     private static Subscriber s;
-    
     public static boolean reelectionStarted=false;
     
     public static void main(String args[]) throws Exception {
@@ -73,7 +76,10 @@ public class InitializeServerCluster {
             //DO initial election
             LeaderId = initial_election();
         }
-
+        if (LeaderId==-2) {
+        	recover();
+        	//If all goes well recover() does not return
+        }
 
         //TODO: REMOVE THIS FORCED VICTORY ONCE THE FAILED WORK ON A NON-ZERO ID LEADER BUG IS SOLVED
 		LeaderId = 0;
@@ -134,8 +140,11 @@ public class InitializeServerCluster {
             Socket Sk = null;
             //(!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) 
             /*!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i])) ||*/
-            while(Sk == null && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]+offset)))){ //check for +20
-                try{
+            int tries =0;
+            //try 20 times (gotta be fast starting up)
+            while(tries<20 && Sk == null && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]+offset)))){ //check for +20
+                tries++;
+            	try{
                     Sk = server.startConnection(ips[i],ports[i], ips[id], ports[id]+(offset*(i+1)));
                     System.out.println("Initiated Connection to " + ips[i] + " "+ Integer.toString(ports[i]));
                     offsetted[i] = false; 
@@ -161,7 +170,20 @@ public class InitializeServerCluster {
             e.printStackTrace();
         }
     }
-
+    
+   public static void destroyConnections(){
+	   HashMap<String, Socket> connections=server.getClient_to_socket();
+       for(Socket i:connections.values()) {
+    	  try {
+			i.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+       }
+       server.setClient_to_socket(new HashMap<String, Socket>());
+   }
+   
     /**
     * @return winner id or -1 if failed
     */
@@ -179,7 +201,12 @@ public class InitializeServerCluster {
             //check if in hashtable or +20
             int p = (offsetted[i])?ports[i]+offset*i:ports[i];
             server.printConnections();
-            server.send(ips[i], p, serializedToken);
+            try {
+                server.send(ips[i], p, serializedToken);
+            }
+            catch(Exception e) {
+            	//Someone died
+            }
         }
 
         String responses[] = new String[2];
@@ -246,6 +273,7 @@ public class InitializeServerCluster {
     public static void reelection(){
     	
     	 HandShakeSubscriber Hs = new HandShakeSubscriber(id, 10, up_time);
+    	 Hs.setReelection(true);
          String serializedToken = Hs.serializeHandShake();
          double this_token = Hs.getToken();
          System.out.println(" THIS SERVERS UP TIME: "+ this_token);
@@ -270,6 +298,7 @@ public class InitializeServerCluster {
          }
          
          System.out.println("Finished reelection");
+        
          
         
     }
@@ -322,6 +351,121 @@ public class InitializeServerCluster {
 	     return LeaderId;
     }
     
-    
+   public static void recover() throws Exception {
+	   if (id == 0) {
+			listenerPort = 8000;
+		}
+		else if(id == 1) {
+			listenerPort = 8001;
+		}
+		else {
+			listenerPort = 8002;
+		}
+	 //create role
+	wdb= new WorkerDatabase();
+    listener = new ConnectionListener(wdb, listenerPort, null ,false);
+    listener.start();
+   	Subscriber rs=new Subscriber(id, LeaderId, server, listener, st);
+   	//Enter Recovery mode
+   	destroyConnections();
+   	establishConnections();
+       //broadcast recovery
+       for (int i=0;i<3;i++){
+           if (i==id){
+               continue;
+           }
+           //check if in hashtable or +20
+           int p = (offsetted[i])?ports[i]+offset*i:ports[i];
+           server.printConnections();
+           try {
+               server.send(ips[i], p, "type:recover id:"+id);
+           }
+           catch(Exception e) {
+        	   //Not sure who is active
+           }
+       }
+       boolean recovering=true;
+       long startTime=System.currentTimeMillis();
+       long duration=0;
+       while(recovering && duration<recoverTimeout) {
+       	if(server.viewNextMessage()!=null) {
+   			String next_message = server.receiveNextMessage();
+   			System.out.println("Recovery recieved:"+next_message);
+   		    Map<String, String> m=MessageDecoder.createmap(next_message);
+   		    if(m.get("type").equals("COR_Goal")) {
+           	  rs.setGoal(m);	
+           	}
+   		    else if(m.get("type").equals("l")) {
+           		LeaderId=Integer.parseInt(m.get("leader"));
+           	}
+   		    else if(m.get("type").equals("store")) {
+   		    	rs.setStore(next_message.split("file:")[0]);
+   		    }
+   		    else if(m.get("type").equals("RC-Done")) {
+   		    	if(LeaderId==-2) {
+   		    		LeaderId=Integer.parseInt(m.get("id"));
+   		    	}
+   		        System.out.println("Recovery Complete!");
+   		        server.sendServers("type:Notification Note:Recovered ID:"+id, id);
+   		        rs.notMain();
+   		        recovering=false;
+   		    }
+       	}
+       	    long endTime = System.currentTimeMillis();
+		    duration = (endTime - startTime)/1000;
+       }
+       if(LeaderId==-2) {
+    	   System.out.println("The System has entered an unrecoverable state");
+    	   System.out.println("Shutting Down");
+    	   System.exit(-1);
+       }
+       else {
+    	   startTime=System.currentTimeMillis();
+           duration=0;
+           //Find the other active server
+           int other=-1;
+           for(int i=0; i<3; i++) {
+        	   if (i!=LeaderId && i!=id) {
+        		 other=i;  
+        	   }
+           }
+           int p = (offsetted[other])?ports[other]+offset*other:ports[other];
+           server.printConnections();
+           try {
+        	   //Coordinator is too slow can you help me?
+               server.send(ips[other], p, "type:recoverS id:"+id);
+           }
+           catch(Exception e) {
+        	   //Not sure who is active
+           }
+    	   //Talk to other subscriber, who will win election by default
+    	   while(recovering && duration<recoverTimeout) {
+    	       	if(server.viewNextMessage()!=null) {
+    	   			String next_message = server.receiveNextMessage();
+    	   			System.out.println("Recovery recieved:"+next_message);
+    	   		    Map<String, String> m=MessageDecoder.createmap(next_message);
+    	   		    if(m.get("type").equals("COR_Goal")) {
+    	           	  rs.setGoal(m);	
+    	           	}
+    	   		    else if(m.get("type").equals("l")) {
+    	           		LeaderId=Integer.parseInt(m.get("leader"));
+    	           	}
+    	   		    else if(m.get("type").equals("store")) {
+    	   		    	rs.setStore(next_message.split("file:")[0]);
+    	   		    }
+    	   		    else if(m.get("type").equals("RC-Done")) {
+    	   		    	if(LeaderId==-2) {
+    	   		    		LeaderId=Integer.parseInt(m.get("id"));
+    	   		    	}
+    	   		        System.out.println("Recovery Complete!");
+    	   		        server.sendServers("type:Notification Note:Recovered ID:"+id, id);
+    	   		        rs.notMain();
+    	   		        recovering=false;
+    	   		    }
+                }
+    	   }
+       }
+       
+   }
     
 }

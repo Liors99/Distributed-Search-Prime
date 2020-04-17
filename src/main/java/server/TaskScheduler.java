@@ -39,6 +39,8 @@ public class TaskScheduler extends Thread {
     
     private BlockingQueue<String> workerMessages;
     private BigInt current;
+    //is the current task complete
+    private boolean done=false;
     
 
     
@@ -300,6 +302,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 	    				//Check if all workers have finished work and add to primes if it is one
 	    				if(num_to_divisors.get(tested).equals(BigInt.ZERO) && num_to_workers.get(tested)==0) {
 	    					primes.add(tested);
+	    					st.writeResult("Prime: "+tested.toString());
 	    				}
 	    				
 	    				wR.setResult(result);
@@ -448,6 +451,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 	        	}
 	        	
         		assignRange(range);
+        		st.writeLast("Last checked: "+current);
         		
         		current = new BigInt(current.add(new BigInt("2")).toString(10));
         	
@@ -473,8 +477,12 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
             //currentLower = new BigInt("3");
             
 
-      
-        System.out.println("Finished Scheduling; Primes Found:");
+        if(primes.size()>1) {
+           System.out.println("Finished Scheduling; Primes Found:");
+        }
+        else {
+        	System.out.println("Finished Scheduling; Prime Found:");	
+        }
         int counter =0;
         for (BigInt prime : primes) {
         	if (counter == target) {break;
@@ -483,6 +491,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
         	counter++;
         	System.out.println(prime.toString(10));
         }
+        done=true;
         return true;
     }
 
@@ -607,6 +616,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 
 	@Override
 	public void run() {
+		done=false;
 		scheduleTask();
 		
 	}
@@ -614,6 +624,11 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 
 	public void setStore(Store st) {
 		this.st=st;
+		
+	}
+	
+	public boolean isDone() {
+		return done;
 		
 	}
 }

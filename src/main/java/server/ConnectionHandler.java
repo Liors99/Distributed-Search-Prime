@@ -58,8 +58,8 @@ public class ConnectionHandler implements Runnable{
 					System.out.println("Server "+ Integer.toString(this.clientSocket.getPort()) + "Has disconnected");
 					
 					//Check if coordinator or subscriber
-					
-					if(server.removeSlash(this.clientSocket.getInetAddress().toString()).equals(InitializeServerCluster.ips[InitializeServerCluster.LeaderId])) { //If the IP match
+					if(InitializeServerCluster.LeaderId!=-2) {
+					   if(server.removeSlash(this.clientSocket.getInetAddress().toString()).equals(InitializeServerCluster.ips[InitializeServerCluster.LeaderId])) { //If the IP match
 						for(int i=0; i< InitializeServerCluster.ports.length; i++) {
 							if(this.clientSocket.getPort() == InitializeServerCluster.ports[InitializeServerCluster.LeaderId] + InitializeServerCluster.offset*(i+1) 
 									|| this.clientSocket.getPort() == InitializeServerCluster.ports[InitializeServerCluster.LeaderId]) {
@@ -75,6 +75,7 @@ public class ConnectionHandler implements Runnable{
 								break;
 							}
 						}
+					 }
 					}
 					else {
 						for(int i=0; i<3 ;i++) {
@@ -87,7 +88,13 @@ public class ConnectionHandler implements Runnable{
 				}
 				
 				isConnected=false; //We dropped a connection if we get an error recieving
-				//this.server.removeFromMap(this.clientSocket.getLocalAddress(), this.clientSocket.getLocalPort());
+				try {
+					clientSocket.close();
+				} catch (IOException e1) {
+					
+				}
+				isConnected=false; //We dropped a connection if we get an error recieving
+				//this.server.removeFromMap(this.clientSocket.getLocalAddress()., this.clientSocket.getLocalPort());
 				
 				
 			}
@@ -132,6 +139,7 @@ public class ConnectionHandler implements Runnable{
         		if(!MessageDecoder.findMessageType(next_msg).equals("A")) {
         			System.out.println("Got a message: "+ next_msg);
         			this.server.addToMessageQueue(next_msg);
+        			
         		}
         		this.startTime = System.currentTimeMillis();
         		

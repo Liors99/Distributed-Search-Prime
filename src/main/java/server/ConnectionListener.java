@@ -86,8 +86,10 @@ public class ConnectionListener extends Thread{
 				NetworkMessage.send(out, con.createHandshakeResponse());
 
 			
+
 //				sampleWID = id;
 //				System.out.println("Sample id: "+sampleWID);
+
 				ready = true;
 				sock.close();
 				serv.close();
