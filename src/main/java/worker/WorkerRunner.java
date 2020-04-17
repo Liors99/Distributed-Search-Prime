@@ -66,7 +66,6 @@ public class WorkerRunner extends Thread{
 				}
 				coordinatorChanged = false;
 			}
-			findCoordinator();
 
 			if (currentCoordinator != -1) {
 				
