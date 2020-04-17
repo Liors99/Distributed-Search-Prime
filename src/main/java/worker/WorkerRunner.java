@@ -21,6 +21,7 @@ public class WorkerRunner extends Thread{
 	private boolean[] wasCoordinator;
 	int currentCoordinator = -1;
 	private boolean killswitch = false;
+	private boolean coordinatorChanged = false;
 	
 	Networking network;
 	
@@ -49,10 +50,22 @@ public class WorkerRunner extends Thread{
 //		} catch (InterruptedException e) {
 //			e.printStackTrace();
 //		}
-		
+		findCoordinator();
 		
 		while(!killswitch) {
-			findCoordinator();
+			if (coordinatorChanged) {
+				Socket testSocket = null;
+				while(testSocket == null) {
+					try {
+						System.out.println("trying to connect to the new coordinator: "+connections[currentCoordinator].sock.getPort());
+						Thread.sleep(2000);
+						testSocket = connections[currentCoordinator].sock;
+					}catch (Exception e) {
+						
+					}
+				}
+				coordinatorChanged = false;
+			}
 
 			if (currentCoordinator != -1) {
 				
@@ -71,8 +84,8 @@ public class WorkerRunner extends Thread{
 		Socket coordSocket = null;
 		
 	
-		while(!killswitch && task==null) {
-			while (coordSocket == null) {
+		while(!coordinatorChanged && !killswitch && task==null) {
+			while (!coordinatorChanged && coordSocket == null) {
 				try {
 					System.out.println("trying to connect to "+connections[currentCoordinator].sock.getPort());
 					Thread.sleep(2000);
@@ -81,13 +94,14 @@ public class WorkerRunner extends Thread{
 					
 				}
 			}
-			System.out.println("no longer null");
-			System.out.println("I am waiting for a task from "+coordSocket.getPort());
+			
 			try {
 				coordSocket.setSoTimeout(5000);
+				System.out.println("I am waiting for a task from server #"+currentCoordinator+": "+coordSocket.getPort());
+				Thread.sleep(2000);
 				task = NetworkMessage.receive(new DataInputStream(coordSocket.getInputStream()));
 			} catch (Exception e) {
-				//System.out.println("timed out");
+				findCoordinator();
 			}
 		}
 		return task;
@@ -96,6 +110,9 @@ public class WorkerRunner extends Thread{
 	
 	public void doWork() {
 		String task = getTask();
+		if (coordinatorChanged) {
+			return;
+		}
 		Map<String, String> assignMap = MessageDecoder.createmap(task);
 		String lower = assignMap.get("lower");
 		String upper = assignMap.get("upper");
@@ -142,6 +159,8 @@ public class WorkerRunner extends Thread{
 					//System.out.println("wasCoordinator["+i+"] = " + wasCoordinator[i]);
 					if (wasCoordinator[i] == false) {
 						currentCoordinator = i;
+						coordinatorChanged = true;
+						System.out.println("Coordinator changed: "+i);
 						for (int j = 0; j<Networking.NUMBER_OF_SERVERS; j++) {
 							if (i != j) {
 								connections[j].removeCoordinator();
@@ -154,7 +173,7 @@ public class WorkerRunner extends Thread{
 				}
 		}
 	}
-	
+		
 	public void runConsole(PrintStream console, Scanner input) {
 		String userIn;
 		int choice;

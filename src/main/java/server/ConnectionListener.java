@@ -126,6 +126,12 @@ public class ConnectionListener extends Thread{
 
 	}
 	
+	public void takeOverAsCoordinator() {
+		for (int wid : wdb.workerConnections.keySet()) {
+			sendWorkerMessage(wid, "type:CoordinatorTakeover");
+		}
+	}
+	
 	
 	public String receiveWorkerMessage(int wid) {
 		WorkerConnection con = wdb.workerConnections.get(wid);

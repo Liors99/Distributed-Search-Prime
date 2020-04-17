@@ -55,6 +55,7 @@ public class Coordinator {
 		//Set it to a coordinator on the listener
 		this.listener.setTs(ts);
 		this.listener.setCoordinator(true);
+		listener.takeOverAsCoordinator();
 		
 		
     	

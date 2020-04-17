@@ -110,7 +110,7 @@ public class Connection extends Thread{
 				if (sigType.equals("CoordinatorTakeover")) {
 					isCoordinator = true;
 					signalReceived = true;
-					System.out.println("Received new coordinator signal");
+					System.out.println("Received new coordinator signal from "+ sock.getPort());
 				}
 			}catch (Exception e) {
 				
