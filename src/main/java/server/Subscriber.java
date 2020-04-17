@@ -188,6 +188,7 @@ public class Subscriber {
 					}
 					InitializeServerCluster.ElectReelectionLeader(null);
 				}
+				
 			}
 		}
 	}
