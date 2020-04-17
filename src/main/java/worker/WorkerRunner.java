@@ -53,6 +53,7 @@ public class WorkerRunner extends Thread{
 		
 		while(!killswitch) {
 			findCoordinator();
+			System.out.println("Coordinator is " + currentCoordinator);
 			doWork();
 		}
 		
@@ -71,13 +72,13 @@ public class WorkerRunner extends Thread{
 				
 			}
 		}
-		System.out.println("no longer null");
+		//System.out.println("no longer null");
 		while(!killswitch && task==null) {
 			try {
 				coordSocket.setSoTimeout(5000);
 				task = NetworkMessage.receive(new DataInputStream(coordSocket.getInputStream()));
 			} catch (Exception e) {
-				System.out.println("timed out");
+				//System.out.println("timed out");
 			}
 		}
 		return task;
@@ -123,6 +124,7 @@ public class WorkerRunner extends Thread{
 	public void findCoordinator() {
 		for(int i = 0; i<Networking.NUMBER_OF_SERVERS; i++) {
 				if (connections[i].isCoordinator()) {
+					//System.out.println("wasCoordinator["+i+"] = " + wasCoordinator[i]);
 					if (wasCoordinator[i] == false) {
 						currentCoordinator = i;
 						for (int j = 0; j<Networking.NUMBER_OF_SERVERS; j++) {

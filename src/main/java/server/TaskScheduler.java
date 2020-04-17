@@ -23,7 +23,7 @@ public class TaskScheduler extends Thread {
     private LinkedList<WorkerRecord> WorkingWorkers;
     
     private HashMap<BigInt, BigInt> num_to_divisors;
-    private HashMap<BigInt, Integer> num_to_workers;
+    private HashMap<BigInt, BigInt> num_to_total;
     private ArrayList<BigInt> primes;
     
 
@@ -65,7 +65,7 @@ public class TaskScheduler extends Thread {
         
         workerMessages= new LinkedBlockingDeque<String>();
         num_to_divisors= new HashMap<BigInt, BigInt>();
-        num_to_workers= new HashMap<BigInt, Integer>(); 
+        num_to_total= new HashMap<BigInt, BigInt>(); 
         
 
     }
@@ -114,7 +114,7 @@ public class TaskScheduler extends Thread {
         this.current= new BigInt(BigInt.ZERO);
         
         num_to_divisors = new HashMap<BigInt, BigInt>();
-        num_to_workers= new HashMap<BigInt, Integer>(); 
+        num_to_total= new HashMap<BigInt, BigInt>(); 
         
 	}
 	
@@ -183,13 +183,15 @@ public class TaskScheduler extends Thread {
 */
     private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current){
     	
+    	
     	//Add to the hashset
-    	if(!num_to_workers.containsKey(current)) {
-    		num_to_workers.put(current, 1);
+    	if(!num_to_total.containsKey(current)) {
+    		num_to_total.put(current, new BigInt(range[1].subtract(range[0])));
     	}
     	else {
-    		num_to_workers.put(current, num_to_workers.get(current)+1);
+    		num_to_total.put(current, new BigInt(num_to_total.get(current).add(range[1].subtract(range[0]))));
     	}
+    	
     	
     	
         wR.setWorkrange(range);
@@ -289,9 +291,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 	    					System.out.println(wR.getCurrent()+" divided by "+ result + " reported by "+ wR.getWID());
 	    				}
 	    				
-	    				//substract from workers
-	    				num_to_workers.put(tested,num_to_workers.get(tested)-1);
-	    				
+	    				//Save the divisors results
 	    				if(!num_to_divisors.containsKey(tested)) {
 	    					num_to_divisors.put(tested, result_big);
 	    				}
@@ -299,11 +299,31 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 	    					num_to_divisors.put(tested, new BigInt(num_to_divisors.get(tested).add(result_big)));
 	    				}
 	    				
+	    				//BigInt[] work_range=wR.getWorkrange();
+	    				//System.out.println("Work range: " + work_range[1].subtract(work_range[0]));
+	    				
+	    				//Add if and only if all the ranges have been covered and no divisors
+	    				BigInt max_range = new BigInt((tested.sqrt()).subtract(new BigInt("3")));
+	    				if(num_to_total.get(tested).equals(max_range) && num_to_divisors.get(tested).equals(BigInt.ZERO)) {
+	    					System.out.println("All ranges have been tested for " + tested + ", "+ max_range);
+	    					primes.add(tested);
+	    					st.writeResult("Prime: "+tested.toString());
+	    				}
+	    				
+	    				
+	    				/*
+	    				//substract from workers
+	    				num_to_workers.put(tested,num_to_workers.get(tested)-1);
+	    				
+	    				
+	    				
+	    				
 	    				//Check if all workers have finished work and add to primes if it is one
 	    				if(num_to_divisors.get(tested).equals(BigInt.ZERO) && num_to_workers.get(tested)==0) {
 	    					primes.add(tested);
 	    					st.writeResult("Prime: "+tested.toString());
 	    				}
+	    				*/
 	    				
 	    				wR.setResult(result);
     					System.out.println("msg:" + msg);
