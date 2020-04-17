@@ -94,7 +94,8 @@ public class ConnectionListener extends Thread{
 				}
 			
 				sampleWID = id;
-				System.out.println("Sample id: "+sampleWID);
+				
+				//System.out.println("Sample id: "+sampleWID);
 				ready = true;
 				sock.close();
 				serv.close();

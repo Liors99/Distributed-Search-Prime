@@ -13,98 +13,19 @@ import java.util.concurrent.TimeUnit;
 
 
 public class CoordConsole {
-	public static boolean debug=true; 
-	 //going to have to be updated on each machine
-	static String [] Ips= {"192.168.1.65", "192.168.1.65", "192.168.1.65"};
-	//pick fav port number
-	static int [] ServerPorts = {4444, 5555, 6666};
-	public static String[] status= {"dead", "dead", "dead"};
-	//by default run as 
-	private static int mode=0;
-	public static Socket [] sockets =new Socket [3];
-	public static ArrayList<WorkerRecord> wr= new ArrayList<WorkerRecord>();
 	
 	static boolean validRange = false;
 	static BigInteger lowerBound;
 	static BigInteger upperBound;
 	static int primeLimit;
-	private static ServerSocket s;
-    static int send =1000;
-	static int timeout=2000;
-	public static int id=-1; 
+ 
 	
-	public static void main(String[] args) {
-	//public static void notMain(String[] args){
-	 Socket [] sockets =new Socket [3];
-	 id=Integer.parseInt(args[0]);
-	 status[id]="setup";
-	 //Create a server socket and two other sockets
-	 setup();
-	 //listen
-	 Accept a=new Accept(s);
-	 Thread thread = new Thread(a);
-	 thread.start();
-	//might recommend sleeping for a bit to activate servers, feel free to increase
-		 try {
-			TimeUnit.SECONDS.sleep(20);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	 //Attempt to connect to other servers
-	 for (int i=0; i<3; i++) {
-		if (i!=id) {
-			try {
-				sockets[i] = new Socket(Ips[i], ServerPorts[i]);
-				if (debug) {
-					System.out.println("Connected to "+sockets[i]);
-				}
-				//May need to actually ask but good enough for now
-				if (status[i].equals("dead")) {
-					status[i]="setup";
-					Receive r=new Receive(sockets[i], send, timeout);
-					Thread thread1 = new Thread(r);
-					thread1.start();
-				}
-			} catch (Exception e) {
-				//Assume still inactive, they will contact us
-				System.out.println(i+" suspected inactive");
-			}
-		}
-	 } //end loop
-	 //need to give everyone time to start up 
-	 //then need to host an election
-	 
-	 ElectionProtocol initialElection = new ElectionProtocol(sockets);
-	 
-	 //for now just going to keep alive forever :)
-	 
-	 //Not currently using election
-	 if (id==0){
-		 mode=1;
-	 }
-	 //get input and send to other servers
-	 if (mode==1) {
-		 console();
-		 status[id]="active";
-		 for (int i=0; i<3; i++) {
-				if (i!=id) {
-					if (!status[i].equals("dead")&sockets[1]!=null){
-						try {
-							OutputStream s=sockets[i].getOutputStream();
-							new DataOutputStream(s).writeUTF("type:goal upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					
-				}
-		 } //end for loop
-	 }
-	 
-	 
-	while(true){}
+	//Change values to defaults
+	public static void resetVals() {
+		lowerBound=new BigInteger("-1");
+		upperBound=new BigInteger("-1");
+		primeLimit=-1;
+		validRange=false;
 	}
 
 
@@ -196,72 +117,7 @@ public class CoordConsole {
 		
 	}
 	
-public static void setup() {
-	//Get Network info for testing
-			try {
-				s=new ServerSocket(ServerPorts[id]);
-				InetAddress ip = InetAddress.getLocalHost();
-	            String hostname = ip.getHostName();
-	            System.out.println("Your current IP address : " + ip);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-}
 
-public static void createServer() {
-	try {
-		s = new ServerSocket(ServerPorts[id]);
-	} catch (UnknownHostException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-}
 
-public static void updateConnection(Map<String, String> map) {
-	int id=Integer.parseInt(map.get("id"));
-		if (map.containsKey("status")) {
-			if (status[id].equals("dead") && status[CoordConsole.id].equals("active")) {
-			  try {
-				sockets[id] = new Socket(Ips[id], ServerPorts[id]);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			  status[id]="recover";
-			  Recover r=new Recover();
-			  r.setup(id);
-			  r.run();
-			}
-			else
-			{
-			    status[id]=map.get("status");
-			}
-		}
-		
 
-  }
-	
-	public static void task(Map<String, String> map) {
-		if (map.containsKey("upper")) {
-			upperBound=new BigInteger(map.get("upper"));
-		}
-		if (map.containsKey("lower")) {
-			upperBound=new BigInteger(map.get("lower"));
-		}
-		if (map.containsKey("limit")) {
-			primeLimit=Integer.parseInt((map.get("limit")));
-		}	
-		if(map.containsKey("recover")) {
-			status[id]="recover";
-		}
-		else {
-		    status[id]="active";
-		}
-	
-}
-	
 }

@@ -39,6 +39,8 @@ public class TaskScheduler extends Thread {
     
     private BlockingQueue<String> workerMessages;
     private BigInt current;
+    //is the current task complete
+    private boolean done=false;
     
 
     
@@ -489,6 +491,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
         	counter++;
         	System.out.println(prime.toString(10));
         }
+        done=true;
         return true;
     }
 
@@ -613,6 +616,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 
 	@Override
 	public void run() {
+		done=false;
 		scheduleTask();
 		
 	}
@@ -620,6 +624,11 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 
 	public void setStore(Store st) {
 		this.st=st;
+		
+	}
+	
+	public boolean isDone() {
+		return done;
 		
 	}
 }
