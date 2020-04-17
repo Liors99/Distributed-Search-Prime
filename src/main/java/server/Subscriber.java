@@ -89,6 +89,9 @@ public class Subscriber {
 					System.out.println("----- Setting initial parameters ----- ");
 					setGoal(m);
 				}
+				else if(m.get("type").equals("quit")) {
+					System.exit(0);
+				}
 				else if(m.get("type").contentEquals("recover")) {
 					
 					int sendto=Integer.parseInt(m.get("id"));

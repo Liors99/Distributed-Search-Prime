@@ -18,6 +18,7 @@ public class CoordConsole {
 	static BigInteger lowerBound;
 	static BigInteger upperBound;
 	static int primeLimit;
+	static boolean quit=false;
  
 	
 	//Change values to defaults
@@ -35,6 +36,9 @@ public class CoordConsole {
 		
 		while (!validRange) {
 			lowerBound = getBound(console, scan, "lower");
+			if(quit) {
+				return;
+			}
 			upperBound = getBound(console, scan, "upper");
 			
 			if (lowerBound.compareTo(upperBound) >= 0) {
@@ -61,7 +65,7 @@ public class CoordConsole {
 		
 		while (!validInput) {
 			
-			console.println("Please enter the "+boundType+" bound for the search:");
+			console.println("Please enter the "+boundType+" bound for the search: or q to quit");
 			try {
 				result = parseInput(scan.nextLine());
 				validInput = true;
@@ -81,10 +85,16 @@ public class CoordConsole {
 			result = result.multiply(new BigInteger("10").pow(Integer.parseInt(baseExp[1])));
 		}
 		else {
+			if(str.equals("q")) {
+				quit=true;
+				result=new BigInteger("1");
+			}
+			else {
 			result = new BigInteger(str);
 			if (result.compareTo(new BigInteger("0")) <= 0) {
 				throw new NumberFormatException();
 			}
+		}
 		}
 		return result;
 		

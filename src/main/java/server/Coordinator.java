@@ -124,12 +124,12 @@ public class Coordinator {
 	
 	public void getUserInput(TaskScheduler ts) {
 		//Get user input
+		CoordConsole.resetVals();
 		CoordConsole.console();
 		lowerBound=new BigInt(CoordConsole.lowerBound);
 		upperBound=new BigInt(CoordConsole.upperBound);
 		primeLimit= CoordConsole.primeLimit;
 		String task="type:COR_GOAL upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit;
-		
 		this.current_worked_on=lowerBound;
 		
 		ts.setLower(lowerBound);
@@ -140,7 +140,13 @@ public class Coordinator {
 		
 		// Send tasks to other servers
 		try {
-			server.sendServers(task, id);
+			if(CoordConsole.quit) {
+				server.sendServers("type:quit", id);
+				System.exit(0);
+			}
+			else {
+			   server.sendServers(task, id);
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -200,18 +206,21 @@ public class Coordinator {
 				newts.setWorkerQueue(ts.getWorkerQueue());
 				newts.setActiveWorkers(ts.getActiveWorkers());
 				
-				ts=newts;
-				ts.start();
 				System.out.println("The system will try to find " + primeLimit +" primes in the range of " + lowerBound +" to "+ upperBound);
 				
 				// Send tasks to other servers
 				try {
+					if(CoordConsole.quit) {
+						server.sendServers("type:quit", id);
+					    System.exit(0);
+					}
 					server.sendServers(task, id);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
+				ts=newts;
+				ts.start();
 				
 			}
 			//Get message from workers
