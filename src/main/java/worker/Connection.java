@@ -24,7 +24,7 @@ public class Connection extends Thread{
 	
 	public void run() {
 
-		while (true) {
+		while (!killswitch) {
 			try {
 				connect();
 				receiveInitialHandshake();				
@@ -35,7 +35,7 @@ public class Connection extends Thread{
 			}
 		}
 		
-		while (true) {
+		while (!killswitch) {
 			try {
 				connect();
 				break;
@@ -57,20 +57,21 @@ public class Connection extends Thread{
 	
 	
 	public void connect() {
-		try {
-			sock = new Socket(hostname, port);
-			sockIn = new DataInputStream(sock.getInputStream());
-			sockOut = new DataOutputStream(sock.getOutputStream());
-			WorkerRunner.console.println("Successfully connected to "+sock.getInetAddress()+":"+sock.getPort());
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		while (!killswitch) {
+			try {
+				sock = new Socket(hostname, port);
+				sockIn = new DataInputStream(sock.getInputStream());
+				sockOut = new DataOutputStream(sock.getOutputStream());
+				WorkerRunner.console.println("Successfully connected to "+sock.getInetAddress()+":"+sock.getPort());
+				break;
+			}catch (Exception e) {
+			}
 		}
+		
 	}
 	
 	void receiveInitialHandshake() {
-		while(true) {
+		while(!killswitch) {
 			try {
 				String response = NetworkMessage.receive(sockIn);
 				System.out.println("Received:"+ response);
@@ -83,7 +84,6 @@ public class Connection extends Thread{
 				break;
 				
 			} catch (Exception e) {
-				e.printStackTrace();
 			}
 		}
 		

@@ -85,13 +85,6 @@ public class ConnectionListener extends Thread{
 				System.out.println("Sending: "+con.createHandshakeResponse());
 				NetworkMessage.send(out, con.createHandshakeResponse());
 
-				while(true) {
-					try {
-//						sendTask(con);
-						break;
-					} catch (Exception e) {
-					}
-				}
 			
 				sampleWID = id;
 				System.out.println("Sample id: "+sampleWID);
