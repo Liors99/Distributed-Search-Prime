@@ -9,8 +9,8 @@ public class Networking {
 		int port;
 		
 		public ConnectionInfo() {
-			hostname = "localhost";
-			port = 8080;
+//			hostname = "localhost";
+//			port = 8080;
 		}
 		
 		public ConnectionInfo(String hostname, int port) {
