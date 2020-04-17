@@ -19,7 +19,7 @@ public class WorkerRunner extends Thread{
 	int[] ports;
 	Connection[] connections;
 	private boolean[] wasCoordinator;
-	int currentCoordinator;
+	int currentCoordinator = -1;
 	private boolean killswitch = false;
 	
 	Networking network;
@@ -53,8 +53,12 @@ public class WorkerRunner extends Thread{
 		
 		while(!killswitch) {
 			findCoordinator();
-			System.out.println("Coordinator is " + currentCoordinator);
-			doWork();
+
+			if (currentCoordinator != -1) {
+				
+				doWork();
+			}
+			
 		}
 		
 		
@@ -63,17 +67,22 @@ public class WorkerRunner extends Thread{
 	
 	public String getTask() {
 		String task = null;
-		Socket coordSocket = connections[currentCoordinator].sock;
-		while (coordSocket == null) {
-			try {
-				Thread.sleep(2000);
-				coordSocket = connections[currentCoordinator].sock;
-			}catch (Exception e) {
-				
-			}
-		}
-		//System.out.println("no longer null");
+
+		Socket coordSocket = null;
+		
+	
 		while(!killswitch && task==null) {
+			while (coordSocket == null) {
+				try {
+					System.out.println("trying to connect to "+connections[currentCoordinator].sock.getPort());
+					Thread.sleep(2000);
+					coordSocket = connections[currentCoordinator].sock;
+				}catch (Exception e) {
+					
+				}
+			}
+			System.out.println("no longer null");
+			System.out.println("I am waiting for a task from "+coordSocket.getPort());
 			try {
 				coordSocket.setSoTimeout(5000);
 				task = NetworkMessage.receive(new DataInputStream(coordSocket.getInputStream()));
@@ -122,6 +131,12 @@ public class WorkerRunner extends Thread{
 	}
 	
 	public void findCoordinator() {
+		System.out.println("current coordinator: "+currentCoordinator);
+		try {
+			Thread.sleep(1000);
+		} catch (Exception e) {
+
+		}
 		for(int i = 0; i<Networking.NUMBER_OF_SERVERS; i++) {
 				if (connections[i].isCoordinator()) {
 					//System.out.println("wasCoordinator["+i+"] = " + wasCoordinator[i]);
