@@ -60,7 +60,7 @@ public class Subscriber {
 	public void notMain() {
 		
 	
-		
+		int updates=0;
 		//Read from coordinator
 		
 		while(true) {
@@ -88,6 +88,11 @@ public class Subscriber {
 					
 					System.out.println("----- Setting initial parameters ----- ");
 					setGoal(m);
+					if(updates>0) {
+						st=new Store("output"+id+""+updates+".txt");
+						st.writeLast("Last checked 0\n");
+					}
+					updates++;
 				}
 				else if(m.get("type").equals("quit")) {
 					System.exit(0);

@@ -182,47 +182,7 @@ public class Coordinator {
 		int snum=0;
 		//Start getting messages
 		while(true) {
-			//Check if task complete
-			if(ts.isDone()) {
-			    TaskScheduler newts=new TaskScheduler();
-				snum++;
-				Store news=new Store("output"+id+""+snum+".txt");
-				news.writeLast("Last checked 0\n");
-				CoordConsole.resetVals();
-				CoordConsole.console();
-				lowerBound=new BigInt(CoordConsole.lowerBound);
-				upperBound=new BigInt(CoordConsole.upperBound);
-				primeLimit= CoordConsole.primeLimit;
-				String task="type:COR_GOAL upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit;
-				
-				this.current_worked_on=lowerBound;
-				
-				newts.setLower(lowerBound);
-				newts.setUpper(upperBound);
-				newts.setTarget(primeLimit);
-				newts.setCurrent(lowerBound);
-				//Create a new store
-				newts.setStore(news);
-				newts.setWorkerQueue(ts.getWorkerQueue());
-				newts.setActiveWorkers(ts.getActiveWorkers());
-				
-				System.out.println("The system will try to find " + primeLimit +" primes in the range of " + lowerBound +" to "+ upperBound);
-				
-				// Send tasks to other servers
-				try {
-					if(CoordConsole.quit) {
-						server.sendServers("type:quit", id);
-					    System.exit(0);
-					}
-					server.sendServers(task, id);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				ts=newts;
-				ts.start();
-				
-			}
+			
 			//Get message from workers
 			String next_message=null;
 			
@@ -315,7 +275,47 @@ public class Coordinator {
 			
 			
 			//Send worker information
-			
+			//Check if task complete
+			if(ts.isDone()) {
+			    TaskScheduler newts=new TaskScheduler();
+				snum++;
+				Store news=new Store("output"+id+""+snum+".txt");
+				news.writeLast("Last checked 0\n");
+				CoordConsole.resetVals();
+				CoordConsole.console();
+				lowerBound=new BigInt(CoordConsole.lowerBound);
+				upperBound=new BigInt(CoordConsole.upperBound);
+				primeLimit= CoordConsole.primeLimit;
+				String task="type:COR_GOAL upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit;
+				
+				this.current_worked_on=lowerBound;
+				
+				newts.setLower(lowerBound);
+				newts.setUpper(upperBound);
+				newts.setTarget(primeLimit);
+				newts.setCurrent(lowerBound);
+				//Create a new store
+				newts.setStore(news);
+				newts.setWorkerQueue(ts.getWorkerQueue());
+				newts.setActiveWorkers(ts.getActiveWorkers());
+				
+				System.out.println("The system will try to find " + primeLimit +" primes in the range of " + lowerBound +" to "+ upperBound);
+				
+				// Send tasks to other servers
+				try {
+					if(CoordConsole.quit) {
+						server.sendServers("type:quit", id);
+					    System.exit(0);
+					}
+					server.sendServers(task, id);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				ts=newts;
+				ts.start();
+				
+			}
 			
 		}
 		
