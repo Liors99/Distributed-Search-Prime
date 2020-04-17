@@ -356,7 +356,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
     	            nWR.setWorkrange(wR.getWorkrange());
     	            nWR.setCurrent(wR.getCurrent());
     	        	sendRange(nWR, nWR.getWorkrange(), nWR.getCurrent(), false);
-    	        	st.writeLast("Last checked:"+current.toString());
+    	        	st.writeLast("Last checked: "+current.toString());
     			}
     		}
     		//System.out.println();

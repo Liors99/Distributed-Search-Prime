@@ -1,8 +1,10 @@
 package server;
 
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -27,7 +29,7 @@ public class Subscriber {
 
 	private ConnectionListener listener;
 	
-	public Subscriber(int id, int id_cor, ServerNetwork server, ConnectionListener listener, Store st) {
+	public Subscriber(int id, int id_cor, ServerNetwork server, ConnectionListener listener) {
 
 		this.id=id;
 		this.id_cor=id_cor;
@@ -88,10 +90,10 @@ public class Subscriber {
 					
 					System.out.println("----- Setting initial parameters ----- ");
 					setGoal(m);
-					if(updates>0) {
-						st=new Store("output"+id+""+updates+".txt");
-						st.writeLast("Last checked 0\n");
-					}
+					SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
+				    String dateAsString = simpleDateFormat.format(new Date());
+					st=new Store("Primes_"+lowerBound+"_to_"+upperBound+dateAsString+"_ID"+id+".txt");
+					st.writeLast("Last checked 0\n");
 					updates++;
 				}
 				else if(m.get("type").equals("quit")) {

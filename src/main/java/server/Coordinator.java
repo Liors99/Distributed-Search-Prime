@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,11 +38,10 @@ public class Coordinator {
 	
     
 
-    public Coordinator(int id, ServerNetwork server, ConnectionListener listener, Store st) {
+    public Coordinator(int id, ServerNetwork server, ConnectionListener listener) {
     	this.id=id;
     	this.server=server;
     	this.listener=listener;
-		this.st=st;
 		
 		primes = new ArrayList<>();
 		lowerBound= new BigInt(BigInt.ZERO);
@@ -132,7 +133,9 @@ public class Coordinator {
 		primeLimit= CoordConsole.primeLimit;
 		String task="type:COR_GOAL upper:"+upperBound.toString()+" lower:"+lowerBound.toString()+" limit:"+primeLimit;
 		this.current_worked_on=lowerBound;
-		
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
+	    String dateAsString = simpleDateFormat.format(new Date());
+		this.st=new Store("Primes_"+lowerBound+"_to_"+upperBound+dateAsString+"_ID"+id+".txt");
 		ts.setLower(lowerBound);
 		ts.setUpper(upperBound);
 		ts.setTarget(primeLimit);
@@ -180,7 +183,7 @@ public class Coordinator {
 		System.out.println("The system will try to find " + primeLimit +" primes in the range of " + lowerBound +" to "+ upperBound);
 		//while (!listener.isReady()) {} //TODO: check what this does
 		
-		int snum=0;
+		int snum=1;
 		//Start getting messages
 		while(true) {
 			
@@ -279,8 +282,9 @@ public class Coordinator {
 			//Check if task complete
 			if(ts.isDone()) {
 			    TaskScheduler newts=new TaskScheduler();
-				snum++;
-				Store news=new Store("output"+id+""+snum+".txt");
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
+			    String dateAsString = simpleDateFormat.format(new Date());
+				Store news=new Store("Primes_"+lowerBound+"_to_"+upperBound+dateAsString+"_ID"+id+".txt");
 				news.writeLast("Last checked 0\n");
 				CoordConsole.resetVals();
 				CoordConsole.console();

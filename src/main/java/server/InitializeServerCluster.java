@@ -57,8 +57,6 @@ public class InitializeServerCluster {
                 System.exit(1);
             }
         }
-        st=new Store("output"+id+".txt");
-        st.writeLast("Last checked: 0");
         up_time = System.currentTimeMillis();
         server = new ServerNetwork(ips[id], ports[id]);//?
         new Thread(server).start();
@@ -97,7 +95,7 @@ public class InitializeServerCluster {
 		wdb= new WorkerDatabase();
 		listener = new ConnectionListener(wdb, listenerPort, null ,false);
 		listener.start();
-		s = new Subscriber(id, LeaderId, server, listener, st);
+		s = new Subscriber(id, LeaderId, server, listener);
 		
         assignRole(false);
         
@@ -113,7 +111,7 @@ public class InitializeServerCluster {
         if(LeaderId==id) {
         	
         	
-        	Coordinator c = new Coordinator(id, server, listener, st);
+        	Coordinator c = new Coordinator(id, server, listener);
         	if(isReelection) {
         		c.loadFromSubscriber(s);
         	}
@@ -365,7 +363,7 @@ public class InitializeServerCluster {
 	wdb= new WorkerDatabase();
     listener = new ConnectionListener(wdb, listenerPort, null ,false);
     listener.start();
-   	Subscriber rs=new Subscriber(id, LeaderId, server, listener, st);
+   	Subscriber rs=new Subscriber(id, LeaderId, server, listener);
    	//Enter Recovery mode
    	destroyConnections();
    	establishConnections();
