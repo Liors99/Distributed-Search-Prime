@@ -132,6 +132,12 @@ public class ConnectionListener extends Thread{
 		}
 	}
 	
+	public void announceDisconnectedServer(int id) {
+		System.out.println("Sending dead server signal");
+		for (int wid : wdb.workerConnections.keySet()) {
+			sendWorkerMessage(wid, "type:DeadServer DeadServerID:"+id);
+		}
+	}
 	
 	public String receiveWorkerMessage(int wid) {
 		WorkerConnection con = wdb.workerConnections.get(wid);
