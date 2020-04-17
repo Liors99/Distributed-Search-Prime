@@ -216,14 +216,14 @@ public class TaskScheduler extends Thread {
         return false;
     }
     
-private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boolean concur){
+    private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boolean concur){
     	
         wR.setWorkrange(range);
         wR.startWork();
         //send range
         
         ActiveWorkers.put(wR.getWID(),true);
-        System.out.println("Sending "+ serializeWorkRange(range, current)+ " to worker");
+        System.out.println("Sending "+ serializeWorkRange(range, current)+ " to worker " + wR.getWID());
         while(true) {
         	try {
         		wR.getWc().sendMessage(serializeWorkRange(range, current));
@@ -258,10 +258,10 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
     		wR.setScore(wR.getScore()+100);
     	}
 
-    	System.out.println("Score  of WID: "+wR.getScore() + " is: "+wR.getScore());
+    	System.out.println("Score  of WID: "+wR.getWID() + " is: "+wR.getScore());
     }
     
-    public void iterateWorkingWorkers() {
+    public void iterateWorkingWorkers(LinkedList<WorkerRecord> WorkingWorkers) {
 //    	System.out.println("Checking for incoming messages from workers...");
     	LinkedList<WorkerRecord> deadRecords = new LinkedList<WorkerRecord>();
     	LinkedList<WorkerRecord> newRecords = new LinkedList<WorkerRecord>();
@@ -349,14 +349,36 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
     			if (delta > TIMEOUT) {
     				//worker timed out
     				System.out.println("Worker with WID "+wR.getWID()+" Timed out!");
-    				while(getWorkerQueue().isEmpty()) {}
+    				deadRecords.add(wR);
+    				
+    				while(getWorkerQueue().isEmpty()) {
+    					LinkedList<WorkerRecord> WorkingWorkers_modified = new LinkedList<WorkerRecord>();
+    					for(WorkerRecord wR_modified : WorkingWorkers) {
+    						if(wR_modified != wR) {
+    							WorkingWorkers_modified.add(wR_modified);
+    						}
+    					}
+    					
+    					iterateWorkingWorkers(WorkingWorkers_modified);
+    				}
+    				
     				WorkerRecord nWR = getWorkerQueue().poll();
     				System.out.println("ReScheduling "+Integer.toString((wR.getWID())));
     	        	
     	            nWR.setWorkrange(wR.getWorkrange());
     	            nWR.setCurrent(wR.getCurrent());
     	        	sendRange(nWR, nWR.getWorkrange(), nWR.getCurrent(), false);
-    	        	st.writeLast("Last checked: "+current.toString());
+    	        	st.writeLast("Last checked : "+current.toString());
+    	            BigInt[] range = nWR.getWorkrange();
+    	            
+    	            //ADDED "FIX" FOR -2
+    	        	if(new BigInt(range[1].subtract(range[0])).gt(BigInt.ZERO)) {
+    	        		sendRange(nWR, nWR.getWorkrange(), nWR.getCurrent(), false);
+    	        	}
+    	        	
+    	        	
+    	        	newRecords.add(nWR);
+    	        	//st.writeLast("Last checked:"+current.toString());
     			}
     		}
     		//System.out.println();
@@ -392,10 +414,16 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
         	
         	
         	System.out.println("Scheduling "+Integer.toString((wR.getWID())));
+        	
+        	BigInt[] range_copy = new BigInt[2];
+        	range_copy[0]=range[0];
+        	range_copy[1]=range[1];
+        	
         	wR = pollFromQueue();
-            wR.setWorkrange(range);
+            wR.setWorkrange(range_copy);
+          
             wR.setCurrent(current);
-        	sendRange(wR, range, current);
+        	sendRange(wR, range_copy, current);
         	/*
         	try {
         		st.writeLast("Last checked:"+current.toString());
@@ -428,6 +456,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
         	
         	range[0] = new BigInt("3");
         	range[1] = new BigInt(current.sqrt());
+        	BigInt topRangeTarget = new BigInt(current.sqrt());
         	if(!getWorkerQueue().isEmpty()) {
 	        	BigInt rangeSize = new BigInt(range[1].subtract(range[0]));
 	        	if(rangeSize.gt(new BigInt(Long.toString(defaultAssignment)))) {
@@ -440,7 +469,7 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 	        		System.out.println();
 	        		
 	        		
-	        		BigInt topRangeTarget = new BigInt(current.sqrt());
+	        		
 	        		while(rangeSize.gt(new BigInt(Long.toString(defaultAssignment)))) {
 	        			if(!getWorkerQueue().isEmpty()) {
 	        				WorkerRecord wR = getWorkerQueue().peek();
@@ -465,18 +494,22 @@ private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boole
 	        			
 		        			
 	        			}
-	        			range[1] = topRangeTarget;
-	            		iterateWorkingWorkers();
+	        			//range[1] = topRangeTarget;
+	            		iterateWorkingWorkers(this.WorkingWorkers);
 	        		}
 	        	}
 	        	
-        		assignRange(range);
+	        	//ADDED "FIX" FOR -2
+	        	if(new BigInt(range[1].subtract(range[0])).ge(BigInt.ZERO)) {
+	        		assignRange(range);
+	        	}
+        		
         		st.writeLast("Last checked: "+current);
         		
         		current = new BigInt(current.add(new BigInt("2")).toString(10));
         	
         	}
-        	iterateWorkingWorkers();
+        	iterateWorkingWorkers(this.WorkingWorkers);
         }  
            // int workerPoolSize = getWorkerQueue().size();
 //           while((doneWorkers < workerPoolSize) || range[1].lt(new BigInt(current.sqrt().subtract(BigInt.TWO)))){
