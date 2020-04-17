@@ -58,6 +58,7 @@ public class WorkerConnection extends Thread {
 		while (!killswitch) {
 			try {
 				NetworkMessage.send(sockOut, message);
+				System.out.println("Successfully sent "+message);
 				break;
 			}
 			catch(Exception e) {

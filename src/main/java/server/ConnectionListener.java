@@ -22,7 +22,7 @@ public class ConnectionListener extends Thread{
 	private boolean isCoordinator = false;
 	
 	
-	public int sampleWID = 0;
+//	public int sampleWID = 0;
 	public boolean ready = false;
 
 	private TaskScheduler ts;
@@ -86,8 +86,8 @@ public class ConnectionListener extends Thread{
 				NetworkMessage.send(out, con.createHandshakeResponse());
 
 			
-				sampleWID = id;
-				System.out.println("Sample id: "+sampleWID);
+//				sampleWID = id;
+//				System.out.println("Sample id: "+sampleWID);
 				ready = true;
 				sock.close();
 				serv.close();

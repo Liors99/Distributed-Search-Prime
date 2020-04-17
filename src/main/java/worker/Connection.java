@@ -74,7 +74,7 @@ public class Connection extends Thread{
 		while(!killswitch) {
 			try {
 				String response = NetworkMessage.receive(sockIn);
-				System.out.println("Received:"+ response);
+				System.out.println("Received:"+ response+" from "+ sock.getPort());
 				Map<String,String> responseMap = MessageDecoder.createmap(response);
 				sock.close();
 				port = Integer.parseInt(responseMap.get("port"));
@@ -105,6 +105,7 @@ public class Connection extends Thread{
 			try {
 				Thread.sleep(5000);
 				String signal = NetworkMessage.receive(sockIn);
+				System.out.println("signal "+signal);
 				String sigType = MessageDecoder.createmap(signal).get("type");
 				if (sigType.equals("CoordinatorTakeover")) {
 					isCoordinator = true;
