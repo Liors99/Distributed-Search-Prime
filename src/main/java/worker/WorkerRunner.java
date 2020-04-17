@@ -110,13 +110,20 @@ public class WorkerRunner extends Thread{
 	
 	public void doWork() {
 		String task = getTask();
+		Map<String, String> messageMap =null;
+		if (task != null) {
+			messageMap = MessageDecoder.createmap(task);
+			if (messageMap.get("type").equals("DeadServer")) {
+				processDeadServerMessage(messageMap);
+				return;
+			}
+		}
 		if (coordinatorChanged) {
 			return;
 		}
-		Map<String, String> assignMap = MessageDecoder.createmap(task);
-		String lower = assignMap.get("lower");
-		String upper = assignMap.get("upper");
-		String tested = assignMap.get("tested");
+		String lower = messageMap.get("lower");
+		String upper = messageMap.get("upper");
+		String tested = messageMap.get("tested");
 		System.out.println("I got assigned: lower:"+lower+" upper:"+upper+" tested number:"+ tested);
 		PrimeSearch ps = new PrimeSearch(new BigInteger(lower), new BigInteger(upper), new BigInteger(tested));
 		ps.run();
@@ -127,6 +134,8 @@ public class WorkerRunner extends Thread{
 		String taskReport = "type:SearchResult tested:"+ps.subject+" divisor:"+result;
 		sendResult(taskReport);
 	}
+
+	
 	
 	public void sendResult(String result) {
 		Socket coordSocket = connections[currentCoordinator].sock;
@@ -146,6 +155,14 @@ public class WorkerRunner extends Thread{
 			}
 		}
 	}
+	
+	
+	private void processDeadServerMessage(Map<String,String> map) {
+		
+		int id = Integer.parseInt(map.get("DeadServerID"));
+		System.out.println("Server #"+ id+ " has disconnected");
+	}
+	
 	
 	public void findCoordinator() {
 		System.out.println("current coordinator: "+currentCoordinator);

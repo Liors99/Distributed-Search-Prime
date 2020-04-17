@@ -47,7 +47,7 @@ public class Connection extends Thread{
 		}
 		while(!killswitch) {
 			if (!isCoordinator) {
-				waitForCoordinatorSignal();
+				waitForSignal();
 
 			}
 			
@@ -98,7 +98,7 @@ public class Connection extends Thread{
 		isCoordinator = false;
 	}
 	
-	private void waitForCoordinatorSignal() {
+	private void waitForSignal() {
 		boolean signalReceived = false;
 		
 		while (!signalReceived && !killswitch) {
@@ -106,11 +106,17 @@ public class Connection extends Thread{
 				Thread.sleep(5000);
 				String signal = NetworkMessage.receive(sockIn);
 				System.out.println("signal "+signal);
-				String sigType = MessageDecoder.createmap(signal).get("type");
+				Map<String, String> msgMap = MessageDecoder.createmap(signal);
+				String sigType = msgMap.get("type");
 				if (sigType.equals("CoordinatorTakeover")) {
 					isCoordinator = true;
 					signalReceived = true;
 					System.out.println("Received new coordinator signal from "+ sock.getPort());
+				}
+				else if (sigType.equals("DeadServer")) {
+					int id = Integer.parseInt(msgMap.get("DeadServerID"));
+					System.out.println("Server #"+ id+ " has disconnected (con)");
+					
 				}
 			}catch (Exception e) {
 				
