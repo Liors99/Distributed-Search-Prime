@@ -92,7 +92,7 @@ public class Subscriber {
 					setGoal(m);
 					SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
 				    String dateAsString = simpleDateFormat.format(new Date());
-					st=new Store("Primes_"+lowerBound+"_to_"+upperBound+dateAsString+"_ID"+id+".txt");
+					st=new Store("Primes_"+lowerBound+"_to_"+upperBound+"_"+dateAsString+"_ID"+id+".txt");
 					st.writeLast("Last checked 0\n");
 					updates++;
 				}

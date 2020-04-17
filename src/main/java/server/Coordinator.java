@@ -135,7 +135,7 @@ public class Coordinator {
 		this.current_worked_on=lowerBound;
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
 	    String dateAsString = simpleDateFormat.format(new Date());
-		this.st=new Store("Primes_"+lowerBound+"_to_"+upperBound+dateAsString+"_ID"+id+".txt");
+		this.st=new Store("Primes_"+lowerBound+"_to_"+upperBound+"_"+dateAsString+"_ID"+id+".txt");
 		ts.setLower(lowerBound);
 		ts.setUpper(upperBound);
 		ts.setTarget(primeLimit);
@@ -284,7 +284,7 @@ public class Coordinator {
 			    TaskScheduler newts=new TaskScheduler();
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
 			    String dateAsString = simpleDateFormat.format(new Date());
-				Store news=new Store("Primes_"+lowerBound+"_to_"+upperBound+dateAsString+"_ID"+id+".txt");
+				Store news=new Store("Primes_"+lowerBound+"_to_"+upperBound+"_"+dateAsString+"_ID"+id+".txt");
 				news.writeLast("Last checked 0\n");
 				CoordConsole.resetVals();
 				CoordConsole.console();
