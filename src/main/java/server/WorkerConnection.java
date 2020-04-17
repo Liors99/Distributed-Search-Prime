@@ -54,16 +54,23 @@ public class WorkerConnection extends Thread {
 	}
 	
 	public void sendMessage(String message) {
-		try {
-			NetworkMessage.send(sockOut, message);
-		} catch (IOException e) {
-
+	
+		while (!killswitch) {
+			try {
+				NetworkMessage.send(sockOut, message);
+				System.out.println("Successfully sent "+message);
+				break;
+			}
+			catch(Exception e) {
+				
+			}
 		}
 	}
 	
 	public String receiveMessage() {
 		String message=null;
 		try {
+			sock.setSoTimeout(5000);
 			message = NetworkMessage.receive(sockIn);
 		} catch (IOException e) {
 

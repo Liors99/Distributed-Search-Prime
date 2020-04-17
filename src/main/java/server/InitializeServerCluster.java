@@ -81,7 +81,8 @@ public class InitializeServerCluster {
         	//If all goes well recover() does not return
         }
 
-		
+        //TODO: REMOVE THIS FORCED VICTORY ONCE THE FAILED WORK ON A NON-ZERO ID LEADER BUG IS SOLVED
+		LeaderId = 0;
 		
 		if (id == 0) {
 			listenerPort = 8000;

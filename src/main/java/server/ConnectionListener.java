@@ -22,7 +22,7 @@ public class ConnectionListener extends Thread{
 	private boolean isCoordinator = false;
 	
 	
-	public int sampleWID = 0;
+//	public int sampleWID = 0;
 	public boolean ready = false;
 
 	private TaskScheduler ts;
@@ -85,17 +85,11 @@ public class ConnectionListener extends Thread{
 				System.out.println("Sending: "+con.createHandshakeResponse());
 				NetworkMessage.send(out, con.createHandshakeResponse());
 
-				while(true) {
-					try {
-//						sendTask(con);
-						break;
-					} catch (Exception e) {
-					}
-				}
 			
-				sampleWID = id;
-				
-				//System.out.println("Sample id: "+sampleWID);
+
+//				sampleWID = id;
+//				System.out.println("Sample id: "+sampleWID);
+
 				ready = true;
 				sock.close();
 				serv.close();
@@ -128,15 +122,14 @@ public class ConnectionListener extends Thread{
 
 	public void sendWorkerMessage(int wid, String message) {
 		WorkerConnection con = wdb.workerConnections.get(wid);
-		while (true) {
-			try {
-				NetworkMessage.send(con.sockOut, message);
-				break;
-			}
-			catch(Exception e) {
-				
-			}
-		}
+		con.sendMessage(message);
+
+	}
+	
+	
+	public String receiveWorkerMessage(int wid) {
+		WorkerConnection con = wdb.workerConnections.get(wid);
+		return con.receiveMessage();
 		
 	}
 	

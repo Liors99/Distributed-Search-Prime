@@ -24,10 +24,10 @@ public class Connection extends Thread{
 	
 	public void run() {
 
-		while (true) {
+		while (!killswitch) {
 			try {
 				connect();
-				sendInitialHandshake();				
+				receiveInitialHandshake();				
 				break;
 			}
 			catch (Exception e) {
@@ -35,7 +35,7 @@ public class Connection extends Thread{
 			}
 		}
 		
-		while (true) {
+		while (!killswitch) {
 			try {
 				connect();
 				break;
@@ -46,30 +46,35 @@ public class Connection extends Thread{
 			}
 		}
 		while(!killswitch) {
+			if (!isCoordinator) {
+				waitForCoordinatorSignal();
+
+			}
+			
 			
 		}
 	}
 	
 	
 	public void connect() {
-		try {
-			sock = new Socket(hostname, port);
-			sockIn = new DataInputStream(sock.getInputStream());
-			sockOut = new DataOutputStream(sock.getOutputStream());
-			WorkerRunner.console.println("Successfully connected to "+sock.getInetAddress()+":"+sock.getPort());
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		while (!killswitch) {
+			try {
+				sock = new Socket(hostname, port);
+				sockIn = new DataInputStream(sock.getInputStream());
+				sockOut = new DataOutputStream(sock.getOutputStream());
+				WorkerRunner.console.println("Successfully connected to "+sock.getInetAddress()+":"+sock.getPort());
+				break;
+			}catch (Exception e) {
+			}
 		}
+		
 	}
 	
-	void sendInitialHandshake() {
-		while(true) {
+	void receiveInitialHandshake() {
+		while(!killswitch) {
 			try {
-//				NetworkMessage.send(sockOut, "type:WorkerHandshake");
 				String response = NetworkMessage.receive(sockIn);
-				System.out.println("Received:"+ response);
+				System.out.println("Received:"+ response+" from "+ sock.getPort());
 				Map<String,String> responseMap = MessageDecoder.createmap(response);
 				sock.close();
 				port = Integer.parseInt(responseMap.get("port"));
@@ -79,7 +84,6 @@ public class Connection extends Thread{
 				break;
 				
 			} catch (Exception e) {
-				e.printStackTrace();
 			}
 		}
 		
@@ -88,6 +92,30 @@ public class Connection extends Thread{
 	
 	public boolean isCoordinator() {
 		return isCoordinator;
+	}
+	
+	public void removeCoordinator() {
+		isCoordinator = false;
+	}
+	
+	private void waitForCoordinatorSignal() {
+		boolean signalReceived = false;
+		
+		while (!signalReceived && !killswitch) {
+			try {
+				Thread.sleep(5000);
+				String signal = NetworkMessage.receive(sockIn);
+				System.out.println("signal "+signal);
+				String sigType = MessageDecoder.createmap(signal).get("type");
+				if (sigType.equals("CoordinatorTakeover")) {
+					isCoordinator = true;
+					signalReceived = true;
+					System.out.println("Received new coordinator signal");
+				}
+			}catch (Exception e) {
+				
+			}
+		}
 	}
 	
 	public void kill() {
