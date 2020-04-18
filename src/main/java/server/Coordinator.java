@@ -171,6 +171,13 @@ public class Coordinator {
 		if(primeLimit == 0) {
 			getUserInput(ts);
 		}
+		else {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
+		    String dateAsString = simpleDateFormat.format(new Date());
+			Store news=new Store("Primes_"+lowerBound+"_to_"+upperBound+"_"+dateAsString+"_ID"+id+".txt");
+		    ts.setStore(news);
+		}
+		
 		
 		
 		ts.setCurrent(this.current_worked_on);
