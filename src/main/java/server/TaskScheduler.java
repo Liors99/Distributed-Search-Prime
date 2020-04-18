@@ -378,8 +378,6 @@ public class TaskScheduler extends Thread {
     	        	
     	        	
     	        	newRecords.add(nWR);
-    	        	
-    	        	//TODO: Check if possible to emit, try catch sometimes breaks
     	        	//st.writeLast("Last checked:"+current.toString());
     			}
     		}

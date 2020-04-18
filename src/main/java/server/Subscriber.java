@@ -36,7 +36,6 @@ public class Subscriber {
 		this.server=server;		
 
 		this.listener=listener;
-		this.st=st;
 		
 		primes = new ArrayList<>();
 		lowerBound= new BigInt(BigInt.ZERO);
@@ -82,7 +81,12 @@ public class Subscriber {
 				else if(m.get("type").contentEquals("COR_CURRENT")) {
 					BigInt current = new BigInt(m.get("current"));
 					current_worked_on=current;
+					try {
 					st.writeLast("Last checked: "+current);
+					}
+					catch (Exception e ){
+						//make sure only written if smaller
+					}
 					System.out.println("Changed current number to "+ current);
 					
 				}
@@ -93,7 +97,7 @@ public class Subscriber {
 					SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
 				    String dateAsString = simpleDateFormat.format(new Date());
 					st=new Store("Primes_"+lowerBound+"_to_"+upperBound+"_"+dateAsString+"_ID"+id+".txt");
-					st.writeLast("Last checked 0\n");
+					st.writeLast("Last checked: 0\n");
 					updates++;
 				}
 				else if(m.get("type").equals("quit")) {
@@ -188,7 +192,6 @@ public class Subscriber {
 					}
 					InitializeServerCluster.ElectReelectionLeader(null);
 				}
-				
 			}
 		}
 	}
@@ -211,6 +214,10 @@ public class Subscriber {
 	}
 	
 	public void setStore(String file) {
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
+	    String dateAsString = simpleDateFormat.format(new Date());
+		st=new Store("Primes_"+lowerBound+"_to_"+upperBound+"_"+dateAsString+"_ID"+id+".txt");
+		
 		st.writeResult(file);
 		String [] lines = file.split("\\r?\\n");
 		current_worked_on=new BigInt(file.split("Last checked: ")[0]);

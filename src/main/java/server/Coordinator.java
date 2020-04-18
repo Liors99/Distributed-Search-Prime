@@ -139,6 +139,7 @@ public class Coordinator {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
 	    String dateAsString = simpleDateFormat.format(new Date());
 		this.st=new Store("Primes_"+lowerBound+"_to_"+upperBound+"_"+dateAsString+"_ID"+id+".txt");
+		st.writeLast("Last checked 0\n");
 		ts.setLower(lowerBound);
 		ts.setUpper(upperBound);
 		ts.setTarget(primeLimit);
@@ -192,7 +193,6 @@ public class Coordinator {
 		System.out.println("The system will try to find " + primeLimit +" primes in the range of " + lowerBound +" to "+ upperBound);
 		//while (!listener.isReady()) {} //TODO: check what this does
 		
-		int snum=1;
 		//Start getting messages
 		while(true) {
 			
@@ -291,10 +291,6 @@ public class Coordinator {
 			//Check if task complete
 			if(ts.isDone()) {
 			    TaskScheduler newts=new TaskScheduler();
-				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
-			    String dateAsString = simpleDateFormat.format(new Date());
-				Store news=new Store("Primes_"+lowerBound+"_to_"+upperBound+"_"+dateAsString+"_ID"+id+".txt");
-				news.writeLast("Last checked 0\n");
 				CoordConsole.resetVals();
 				CoordConsole.console();
 				lowerBound=new BigInt(CoordConsole.lowerBound);
@@ -308,8 +304,12 @@ public class Coordinator {
 				newts.setUpper(upperBound);
 				newts.setTarget(primeLimit);
 				newts.setCurrent(lowerBound);
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
+			    String dateAsString = simpleDateFormat.format(new Date());
+				st=new Store("Primes_"+lowerBound+"_to_"+upperBound+"_"+dateAsString+"_ID"+id+".txt");
+				st.writeLast("Last checked 0\n");
 				//Create a new store
-				newts.setStore(news);
+				newts.setStore(st);
 				newts.setWorkerQueue(ts.getWorkerQueue());
 				newts.setActiveWorkers(ts.getActiveWorkers());
 				
