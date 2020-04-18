@@ -2,20 +2,36 @@
 package data;
 
 import java.math.BigInteger;
-
+/**
+ * 
+ * Wrapper for BigInt
+ *
+ */
 public class BigInt extends BigInteger {
   private String val;
-  
+  /**
+   * 
+   * @return value as string
+   */
   public String getVal(){ return this.val;}
-  
+    /**
+     * 
+     * @param val string representation of value
+     */
 	public BigInt(String val) {
 		super(val);
 	}
-	
+	/**
+	 * 
+	 * @param val int representation of value
+	 */
 	public BigInt(int val) {
 		this(Integer.toString(val));
 	}
-	
+	/**
+	 * 
+	 * @param val BigInteger representation
+	 */
 	public BigInt(BigInteger val) {
 		super(val.toString());
 	}
