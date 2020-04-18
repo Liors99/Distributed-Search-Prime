@@ -8,14 +8,26 @@ public class Record {
     private Timestamp timeout;
     public boolean flag=true;
 
+    /**
+     * empty record constructor. class used as a parent for worker record.
+     */
     Record(){}
-
+    /**
+     * creates a new instance of a record
+     * @param IP of the instance being recorded
+     * @param Port of the connection with the instance
+     * @param timeout a timestamp
+     */
     Record(String IP, int Port, Timestamp timeout){
         this.IP = IP;
         this.Port = Port;
         this.timeout = timeout;
     }
     
+    /**
+     * used for parsing serialized strings
+     * @param serial string message to be deserialized
+     */
     Record(String serial){
     	if(serial.contains("Object:Record")) {
     		serial=serial.split("Object:Record\\{")[1].split("\\}")[0];
@@ -45,30 +57,56 @@ public class Record {
     	
     }
 
+    /*
+     * get ip of the record
+     */
     public String getIP() {
         return IP;
     }
 
+    /**
+     * set the record ip
+     * @param IP of the instance being correlated to the record
+     */
     public void setIP(String IP) {
         this.IP = IP;
     }
 
+    /**
+     * get port of the instance
+     * @return int port number
+     */
     public int getPort() {
         return Port;
     }
 
+    /**
+     * set port of the instance
+     * @param port set port
+     */
     public void setPort(int port) {
         Port = port;
     }
 
+    /**
+     * get the value of timeout
+     * @return Timestamp timeout
+     */
     public Timestamp getTimeout() {
         return timeout;
     }
 
+    /**
+     * set the value of the timeout
+     * @param timeout the value to be set
+     */
     public void setTimeout(Timestamp timeout) {
         this.timeout = timeout;
     }
     
+    /**
+     * serialize the object to string
+     */
     public String toString() {
     	String value="Object:Record{IP:"+IP+" Port:"+Port+" timeout:"+timeout.toString()+"}";
 		return value;

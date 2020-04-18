@@ -6,6 +6,7 @@ public class DebugIn extends Thread{
     public DebugIn(){}
 
     /**
+     * enables reading of commands  in debug mode which was not implemented
      * has to be started in CoordConsole
      */
     public void run(){
