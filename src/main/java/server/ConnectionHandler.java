@@ -58,10 +58,8 @@ public class ConnectionHandler implements Runnable {
 
 					// Check if coordinator or subscriber
 					if (InitializeServerCluster.LeaderId != -2) {
-						System.out.println("(1)");	
 						if (server.removeSlash(this.clientSocket.getInetAddress().toString()).equals(InitializeServerCluster.ips[InitializeServerCluster.LeaderId])) { // If the IP match
-							System.out.println("(2)");
-								
+
 							boolean is_leader_crashed=false;
 							int crashed_id = -1;
 							for (int i = 0; i < InitializeServerCluster.ports.length; i++) {
@@ -84,19 +82,29 @@ public class ConnectionHandler implements Runnable {
 								}
 							}
 							
-							if(!is_leader_crashed) {
-								for (int i = 0; i < 3; i++) {
-									if (!(InitializeServerCluster.LeaderId == i) && !(InitializeServerCluster.id == i)) {
-										InitializeServerCluster.isAlive[i] = false;
-										crashed_id = i;
+							
+							//If the current is the leader
+							if(InitializeServerCluster.LeaderId == InitializeServerCluster.id) {
+								crashed_id = this.clientSocket.getPort()%10;
+							}
+							else {
+								if(!is_leader_crashed) {
+									for (int i = 0; i < 3; i++) {
+										if (!(InitializeServerCluster.LeaderId == i) && !(InitializeServerCluster.id == i)) {
+											System.out.println("The crashed id is "+i);
+											InitializeServerCluster.isAlive[i] = false;
+											crashed_id = i;
+										}
 									}
+									System.out.println("A subscriber " + crashed_id + " has crashed");
+									is_leader_crashed=false;
+									
 								}
-								System.out.println("A subscriber has crashed");
-								is_leader_crashed=false;
-								
 							}
 							
 							
+							
+
 							InitializeServerCluster.sendDisconnectedServer(crashed_id);
 							//Clear the connections and deal with the process that died
 							 for(int i=0; i<3; i++) {

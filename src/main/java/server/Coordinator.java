@@ -110,8 +110,11 @@ public class Coordinator {
 		this.ts.setLower(this.lowerBound);
 		this.ts.setUpper(this.upperBound);
 		this.ts.setTarget(this.primeLimit);
+
+		this.ts.setStore(st);
+
 		
-		
+		this.ts.setPrimes(this.primes); //Add the list of primes to the new TS
 
 	}
 	
@@ -141,7 +144,7 @@ public class Coordinator {
 		ts.setTarget(primeLimit);
 		//ts.setCurrent(lowerBound);
 		
-		
+		this.ts.setStore(st);
 		// Send tasks to other servers
 		try {
 			if(CoordConsole.quit) {
@@ -171,10 +174,16 @@ public class Coordinator {
 		if(primeLimit == 0) {
 			getUserInput(ts);
 		}
+		else {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
+		    String dateAsString = simpleDateFormat.format(new Date());
+			Store news=new Store("Primes_"+lowerBound+"_to_"+upperBound+"_"+dateAsString+"_ID"+id+".txt");
+		    ts.setStore(news);
+		}
+		
 		
 		
 		ts.setCurrent(this.current_worked_on);
-		ts.setStore(st);
 		
 		
 		
