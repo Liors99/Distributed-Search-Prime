@@ -469,5 +469,9 @@ public class InitializeServerCluster {
        }
        
    }
+   
+   public static void sendDisconnectedServer(int id) {
+	   listener.announceDisconnectedServer(id);
+   }
     
 }

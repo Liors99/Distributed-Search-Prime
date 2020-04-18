@@ -96,6 +96,8 @@ public class ConnectionHandler implements Runnable {
 								
 							}
 							
+							
+							InitializeServerCluster.sendDisconnectedServer(crashed_id);
 							//Clear the connections and deal with the process that died
 							 for(int i=0; i<3; i++) {
 								 if(i==crashed_id) {
