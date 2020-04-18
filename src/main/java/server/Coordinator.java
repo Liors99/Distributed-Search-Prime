@@ -161,7 +161,7 @@ public class Coordinator {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
 	    String dateAsString = simpleDateFormat.format(new Date());
 		this.st=new Store("Primes_"+lowerBound+"_to_"+upperBound+"_"+dateAsString+"_ID"+id+".txt");
-		st.writeLast("Last checked 0\n");
+		st.writeLast("Last checked: 0\n");
 		ts.setLower(lowerBound);
 		ts.setUpper(upperBound);
 		ts.setTarget(primeLimit);

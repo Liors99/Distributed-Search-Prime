@@ -17,7 +17,11 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.file.Files;
-
+/**
+ * 
+ * Class to write to long term storage
+ *
+ */
 public class Store {
 	
 	RandomAccessFile out;
@@ -25,8 +29,11 @@ public class Store {
 	private final static Object lock = new Object();
 	String Filename;
 	
-	
-	//only initialize once 
+	/**
+	 * 
+	 * @param Filename unique filename
+	 */
+	//Pass unique filename
 	public Store(String Filename) {
 		try {
 			this.Filename=Filename;
@@ -42,6 +49,7 @@ public class Store {
 		
 	}
 	
+
 	/**
 	 * Write result to file 
 	 * @return - returns a random number
@@ -57,7 +65,7 @@ public class Store {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}	
+			} //unlock	
 	}
 		
 	/**
@@ -72,9 +80,11 @@ public class Store {
 					reader = new BufferedReader(new InputStreamReader( new FileInputStream(f), "UTF-8"));
 					String line = reader.readLine();
 					reader.close();
+					//make sure current doesn't decrease
 					if (line.length()>last.length()){
 						throw new IllegalArgumentException("Last must not be a shorter line");
 					}
+					//write at start of file
 					out.seek(0);
 				    updateLine(line, last);
 				    
@@ -101,6 +111,7 @@ public class Store {
 
 			}
 	    }
+
 	    
 		/**
 	 	* Update a specified string
@@ -112,7 +123,7 @@ public class Store {
 	        File temp=new File(f+".out");
 	        PrintWriter writer = new PrintWriter(temp, "UTF-8");
 	        String line;
-
+            //make sure line exists
 	        while ((line = file.readLine()) != null)
 	        {
 	            line = line.replace(toUpdate, updated);
@@ -124,6 +135,7 @@ public class Store {
 	        Files.move(temp.getAbsoluteFile().toPath(), f.getAbsoluteFile().toPath(), REPLACE_EXISTING);     
 	        out = new RandomAccessFile(Filename, "rw");
 	    }
+
 
 		/**
 	 	* Recieve the contents of a file as a byte array 
@@ -174,11 +186,15 @@ public class Store {
 			e.printStackTrace();
 		     }
 		}
+
+
+	
 	   }
 
 		/**
 	 	* Shutdown outputting processes 
 		*/	 
+
 	   public void shutdown() {
 		   synchronized(lock) {
 			 try {

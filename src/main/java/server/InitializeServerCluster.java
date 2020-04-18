@@ -367,6 +367,7 @@ public class InitializeServerCluster {
      * @throws Exception
      */
    public static void recover() throws Exception {
+	   //set up listener for workers
 	   if (id == 0) {
 			listenerPort = 8000;
 		}
@@ -400,22 +401,41 @@ public class InitializeServerCluster {
            }
        }
        boolean recovering=true;
+       //Set up time out
        long startTime=System.currentTimeMillis();
        long duration=0;
        while(recovering && duration<recoverTimeout) {
+    	   //check if message available 
        	if(server.viewNextMessage()!=null) {
    			String next_message = server.receiveNextMessage();
    			System.out.println("Recovery recieved:"+next_message);
-   		    Map<String, String> m=MessageDecoder.createmap(next_message);
+   			Map<String, String> m;
+   			//won't have normal format
+   			if(next_message.contains(":Store")) {
+   				m=new HashMap<String, String>();
+   				m.put("type", "Store");
+   			}
+   			else {
+   		       m=MessageDecoder.createmap(next_message);
+   			}
+   			//Task to solve
    		    if(m.get("type").equals("COR_Goal")) {
            	  rs.setGoal(m);	
            	}
+   		    //Leader
    		    else if(m.get("type").equals("l")) {
            		LeaderId=Integer.parseInt(m.get("leader"));
            	}
-   		    else if(m.get("type").equals("store")) {
-   		    	rs.setStore(next_message.split("file:")[0]);
+   		    //Store file contains primes and current
+   		    else if(m.get("type").equals("Store")) {
+   		    	try {
+   		    	rs.setStore(next_message.split("file ")[1]);
+   		    	}
+   		    	catch(Exception e){
+   		    		
+   		    	}
    		    }
+   		    //Recovery finished
    		    else if(m.get("type").equals("RC-Done")) {
    		    	if(LeaderId==-2) {
    		    		LeaderId=Integer.parseInt(m.get("id"));
@@ -429,11 +449,13 @@ public class InitializeServerCluster {
        	    long endTime = System.currentTimeMillis();
 		    duration = (endTime - startTime)/1000;
        }
+       //no active
        if(LeaderId==-2) {
     	   System.out.println("The System has entered an unrecoverable state");
     	   System.out.println("Shutting Down");
     	   System.exit(-1);
        }
+       //Repeat above with other server
        else {
     	   startTime=System.currentTimeMillis();
            duration=0;
@@ -458,7 +480,14 @@ public class InitializeServerCluster {
     	       	if(server.viewNextMessage()!=null) {
     	   			String next_message = server.receiveNextMessage();
     	   			System.out.println("Recovery recieved:"+next_message);
-    	   		    Map<String, String> m=MessageDecoder.createmap(next_message);
+    	   			Map<String, String> m;
+    	   			if(next_message.contains(":Store")) {
+    	   				m=new HashMap<String, String>();
+    	   				m.put("type", "Store");
+    	   			}
+    	   			else {
+    	   		       m=MessageDecoder.createmap(next_message);
+    	   			}
     	   		    if(m.get("type").equals("COR_Goal")) {
     	           	  rs.setGoal(m);	
     	           	}
