@@ -9,8 +9,12 @@ import java.net.Socket;
 
 import data.MessageDecoder;
 import data.NetworkMessage;
-import exceptions.TimoutException;
+import exceptions.TimeoutException;
 
+/**
+ * A class that handles the connection for a specific socket (on the server side)
+ *
+ */
 public class ConnectionHandler implements Runnable {
 
 	private Socket clientSocket = null;
@@ -38,20 +42,25 @@ public class ConnectionHandler implements Runnable {
 			in = new DataInputStream(clientSocket.getInputStream());
 			out = new DataOutputStream(clientSocket.getOutputStream());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
+
 		}
 
 	}
-
+	
+	/**
+	 * Run method for the thread, runs whenever the thread is initiated
+	 */
 	public void run() {
+		//Loop as long as the entity is connected
 		while (isConnected) {
 			try {
-				// NetworkMessage.send(out, "test");
 				sendKA();
 				receive();
-			} catch (TimoutException e) {
-
+			} catch (TimeoutException e) {
+				
+				//If we got a timeout, figure out who it came from
+				
+				//Check if IP matched an IP of a subscriber or coordinator
 				if (server.isServer(server.removeSlash(this.clientSocket.getInetAddress().toString()),
 						this.clientSocket.getPort())) {
 					System.out.println("Server " + Integer.toString(this.clientSocket.getPort()) + "Has disconnected");
@@ -83,7 +92,7 @@ public class ConnectionHandler implements Runnable {
 							}
 							
 							
-							//If the current is the leader
+							//If the current server (non-crashed) is the leader
 							if(InitializeServerCluster.LeaderId == InitializeServerCluster.id) {
 								crashed_id = this.clientSocket.getPort()%10;
 							}
@@ -110,7 +119,6 @@ public class ConnectionHandler implements Runnable {
 							 for(int i=0; i<3; i++) {
 								 if(i==crashed_id) {
 									 System.out.println("Removing " + i+"'s connections");
-									 //isAlive[i]=false;
 									 
 									 //Remove the inbound connection from this server
 									 for(int j=0;j<3;j++) {
@@ -145,8 +153,7 @@ public class ConnectionHandler implements Runnable {
 
 				}
 				isConnected = false; // We dropped a connection if we get an error recieving
-				// this.server.removeFromMap(this.clientSocket.getLocalAddress().,
-				// this.clientSocket.getLocalPort());
+
 
 			}
 
@@ -157,8 +164,12 @@ public class ConnectionHandler implements Runnable {
 		}
 
 	}
-
-	public void sendKA() throws TimoutException {
+	
+	/**
+	 * Sends a KA to the entity that is connected through this socket
+	 * @throws TimeoutException - Thrown if the connected entity has timed out
+	 */
+	public void sendKA() throws TimeoutException {
 
 		int interval = 10;
 
@@ -166,22 +177,25 @@ public class ConnectionHandler implements Runnable {
 		long duration = (endTime - startTime_ka) / 1000;
 
 		if ((int) duration > interval) {
-			// out.write("type:A".getBytes());
 
 			int port = InitializeServerCluster.ports[0] + (clientSocket.getPort() % 10);
 			try {
 				server.send(server.removeSlash(clientSocket.getInetAddress().toString()), port, "type:A");
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				throw new TimoutException("A connection has dropped from " + this.clientSocket.getInetAddress() + "/ "
+				throw new TimeoutException("A connection has dropped from " + this.clientSocket.getInetAddress() + "/ "
 						+ this.clientSocket.getLocalPort());
 			}
 			this.startTime_ka = System.currentTimeMillis();
 		}
 
 	}
-
-	public void receive() throws TimoutException {
+	
+	/**
+	 * Receives the next message from the input stream
+	 * @throws TimeoutException - Thrown if the entity is timed out
+	 */
+	public void receive() throws TimeoutException {
 		try {
 			if (in.available() > 0) {
 
@@ -201,17 +215,18 @@ public class ConnectionHandler implements Runnable {
 				if ((int) duration > ka && display) {
 					System.out.println("Got a timeout");
 					display = false;
-					throw new TimoutException("A connection has dropped from " + this.clientSocket.getInetAddress()
+					throw new TimeoutException("A connection has dropped from " + this.clientSocket.getInetAddress()
 							+ "/ " + this.clientSocket.getLocalPort());
 				}
 			}
 		} catch (IOException e) {
-			// throw new TimoutException("A connection has dropped from " +
-			// this.clientSocket.getInetAddress() + "/ " +
-			// this.clientSocket.getLocalPort());
+
 		}
 	}
 
+	/**
+	 * Closes all the connections to the connected socket
+	 */
 	public void close() {
 		try {
 			out.close();

@@ -12,6 +12,10 @@ import java.util.Map;
 import data.BigInt;
 import data.MessageDecoder;
 
+/**
+ * Class for the subscriber
+ *
+ */
 public class Subscriber {
 	
 	private int id;
@@ -29,6 +33,13 @@ public class Subscriber {
 
 	private ConnectionListener listener;
 	
+	/**
+	 * Subscriber constructor
+	 * @param id - id of this subscriber
+	 * @param id_cor - id of the coordinator 
+	 * @param server - server which listens to incoming messages and connections
+	 * @param listener - listener which listens for workers coming in
+	 */
 	public Subscriber(int id, int id_cor, ServerNetwork server, ConnectionListener listener) {
 
 		this.id=id;
@@ -49,6 +60,10 @@ public class Subscriber {
 
 	}
 	
+	/**
+	 * Loads the subscriber information from another subscriber
+	 * @param s - Subscriber from whom we get all data
+	 */
 	public void loadFromSubscriber(Subscriber s) {
 		this.lowerBound=s.getLowerBound();
 		this.upperBound=s.getUpperBound();
@@ -153,7 +168,7 @@ public class Subscriber {
 				        //Send the store
 					      server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],"type:Store "+st.get()); 
 					    //Send the worker database (would prefer they reconnect)
-					      //server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],listener.wdb.workers());
+
 				        //Let know recover is complete
 					      server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],"type:RC-Done id:"+id);
 					      InitializeServerCluster.isAlive[sendto]=false;
@@ -179,6 +194,7 @@ public class Subscriber {
 				}
 			}
 			else {
+				//Check if the only one alive
 				if(checkOnlyAlive()) {
 					//Add the message back for re-election to deal with it
 					while(!InitializeServerCluster.reelectionStarted) {
@@ -196,6 +212,10 @@ public class Subscriber {
 		}
 	}
 	
+	/**
+	 * Check if the this server is the only one alive 
+	 * @return - returns true if this server is the only one alive, and false otherwise
+	 */
 	public boolean checkOnlyAlive() {
 		if(InitializeServerCluster.isAlive[(id+1)%3] || InitializeServerCluster.isAlive[(id+2)%3]) {
 			return false;
@@ -207,12 +227,20 @@ public class Subscriber {
 		
 	}
 	
+	/**
+	 * Sets the goal for the system, i.e. the upper, lower, and limit
+	 * @param m - a map containing the upper, lower, and limit
+	 */
 	public void setGoal(Map<String, String> m){
 		this.lowerBound=new BigInt(m.get("lower"));
 		this.upperBound = new BigInt(m.get("upper"));
 		this.primeLimit = Integer.parseInt(m.get("limit"));
 	}
 	
+	/**
+	 * Sets the long term storage of this server
+	 * @param file - the file on which the data will be stored on
+	 */
 	public void setStore(String file) {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
 	    String dateAsString = simpleDateFormat.format(new Date());
@@ -226,6 +254,7 @@ public class Subscriber {
 		}
 	}
 	
+	//Getters and setters
 	public void setWDB(String workers) {
 		listener.wdb.fromString(workers);
 	}

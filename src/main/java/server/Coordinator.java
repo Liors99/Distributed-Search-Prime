@@ -18,6 +18,10 @@ import data.BigInt;
 import data.MessageDecoder;
 import data.NetworkMessage;
 
+/**
+ * A class for the coordinator
+ *
+ */
 public class Coordinator {
 	
     int id=-2;
@@ -37,7 +41,12 @@ public class Coordinator {
 	
 	
     
-
+	/**
+	 * Constructor for the Coordinator
+	 * @param id - id of the server
+	 * @param server - the server object that listens for connections
+	 * @param listener - Listener for the workers
+	 */
     public Coordinator(int id, ServerNetwork server, ConnectionListener listener) {
     	this.id=id;
     	this.server=server;
@@ -63,6 +72,7 @@ public class Coordinator {
     }
     
     
+    //Getters and setters
     public String getWorkerMessage(TaskScheduler ts) {
     	return ts.getNextWorkerMessage();
     }
@@ -98,7 +108,12 @@ public class Coordinator {
 	}
 	
 	
+	/**
+	 * Load all the parameters from the subscriber into this coordinator object
+	 * @param s - The old subscriber from which we take the data from
+	 */
 	public void loadFromSubscriber(Subscriber s) {
+		System.out.println("Loading from subscriber");
 		this.lowerBound=s.getLowerBound();
 		this.upperBound=s.getUpperBound();
 		this.primeLimit=s.getPrimeLimit();
@@ -118,6 +133,9 @@ public class Coordinator {
 
 	}
 	
+	/**
+	 * Adds workers to queue to be scheduled by
+	 */
 	public void addWorkersToTaskScheduler() {
 		WorkerDatabase wdb = this.listener.getWdb();
 		
@@ -127,6 +145,10 @@ public class Coordinator {
 	}
 	
 	
+	/**
+	 * Gets the user's input from the console
+	 * @param ts - Task scheduler to put the tasks into
+	 */
 	public void getUserInput(TaskScheduler ts) {
 		//Get user input
 		CoordConsole.resetVals();
@@ -143,7 +165,6 @@ public class Coordinator {
 		ts.setLower(lowerBound);
 		ts.setUpper(upperBound);
 		ts.setTarget(primeLimit);
-		//ts.setCurrent(lowerBound);
 		
 		this.ts.setStore(st);
 		// Send tasks to other servers
@@ -169,13 +190,13 @@ public class Coordinator {
 	 * Run as a coordinator 
 	 */
 	public void notMain() {
-		
-		
+
 		//If we haven't searched yet
 		if(primeLimit == 0) {
 			getUserInput(ts);
 		}
 		else {
+			//Load from the store otherwise
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
 		    String dateAsString = simpleDateFormat.format(new Date());
 			Store news=new Store("Primes_"+lowerBound+"_to_"+upperBound+"_"+dateAsString+"_ID"+id+".txt");
@@ -184,14 +205,11 @@ public class Coordinator {
 		
 		
 		
-		ts.setCurrent(this.current_worked_on);
+		ts.setCurrent(this.current_worked_on); //Set the current number being worked on
 		
-		
-		
-		ts.start();
+		ts.start(); //Start doing work
 	
 		System.out.println("The system will try to find " + primeLimit +" primes in the range of " + lowerBound +" to "+ upperBound);
-		//while (!listener.isReady()) {} //TODO: check what this does
 		
 		//Start getting messages
 		while(true) {
@@ -201,8 +219,6 @@ public class Coordinator {
 			
 			
 			//Poll the primes
-			
-			
 			for(int i=0; i<ts.getPrimes().size(); i++) {
 				BigInt p =ts.getPrimes().get(i);
 				if(!this.primes.contains(p)) {
@@ -250,7 +266,6 @@ public class Coordinator {
 				        //Send the store
 					      server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],"type:Store "+st.get()); 
 					    //Send the worker database (would prefer they reconnect)
-					      //server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],listener.wdb.workers());
 				        //Let know recover is complete
 					      server.send(InitializeServerCluster.ips[sendto],InitializeServerCluster.ports[sendto],"type:RC-Done id:"+id);
 				    } catch (Exception e) {
@@ -290,6 +305,7 @@ public class Coordinator {
 			//Send worker information
 			//Check if task complete
 			if(ts.isDone()) {
+				//If task is done, ask the user for another goal
 			    TaskScheduler newts=new TaskScheduler();
 				CoordConsole.resetVals();
 				CoordConsole.console();

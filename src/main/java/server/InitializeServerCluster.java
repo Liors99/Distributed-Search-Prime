@@ -85,9 +85,8 @@ public class InitializeServerCluster {
         	//If all goes well recover() does not return
         }
 
-        //TODO: REMOVE THIS FORCED VICTORY ONCE THE FAILED WORK ON A NON-ZERO ID LEADER BUG IS SOLVED
-		//LeaderId = 2;
-		
+        
+		//Assign listener port to id
 		if (id == 0) {
 			listenerPort = 8000;
 		}
@@ -103,7 +102,7 @@ public class InitializeServerCluster {
 		listener.start();
 		s = new Subscriber(id, LeaderId, server, listener);
 		
-        assignRole(false);
+        assignRole(false); //Assign roles, but this is not a re-election
         
         while(true) {}
 
@@ -150,8 +149,6 @@ public class InitializeServerCluster {
 
             //if not start a connection
             Socket Sk = null;
-            //(!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) 
-            /*!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i])) ||*/
             int tries =0;
             //try 20 times (gotta be fast starting up)
             while(tries<20 && Sk == null && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]))) && (!server.hasKey_client_to_socket(ips[i]+Integer.toString(ports[i]+offset)))){ //check for +20
@@ -164,11 +161,7 @@ public class InitializeServerCluster {
                     server.addServer(ips[i], ports[i]);
                     server.addServer(ips[id], ports[id]+(offset*(i+1)));
                 }catch(BindException e){
-                    //System.out.println("got an exception");
-                    
-                    //offsetted[i] = true; 
-                    //break;
-                    //e.printStackTrace();
+
                 }catch(Exception e) {
                     
                 }
@@ -363,26 +356,7 @@ public class InitializeServerCluster {
 	    	 System.out.println("Server " + id + ", I'm the leader");
 	     }
 		 
-		 /*
-		 //Clear the connections and deal with the process that died
-		 for(int i=0; i<3; i++) {
-			 if(i!=id && i!=id_recv) {
-				 System.out.println("Removing " + i+"'s connections");
-				 //isAlive[i]=false;
-				 
-				 //Remove the inbound connection from this server
-				 for(int j=0;j<3;j++) {
-					 System.out.println(ports[i]+offset*(j+1));
-					 server.removeFromMap(ips[i], ports[i]+offset*(j+1));
-				 }
-				 
-				 //Remove the outbound connection for this server
-				 server.removeFromMap(ips[i], ports[i]);
-				 
-				 server.printConnections();
-			 }
-		 }
-		 */
+		
 		 reelectionStarted=false;
 	     assignRole(true);
 	     return LeaderId;
