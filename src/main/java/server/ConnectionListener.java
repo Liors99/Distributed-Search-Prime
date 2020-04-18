@@ -14,6 +14,12 @@ import java.sql.Timestamp;
 
 import data.NetworkMessage;
 
+/**
+ * This class it the central communication hub between a server instance and all the workers in the system.
+ * The server listens for new connections and then assigns the newly connected workers an address
+ * @author Mark
+ *
+ */
 public class ConnectionListener extends Thread{
 
 	int port;
@@ -26,7 +32,6 @@ public class ConnectionListener extends Thread{
 	private boolean isCoordinator = false;
 	
 	
-//	public int sampleWID = 0;
 	public boolean ready = false;
 
 	private TaskScheduler ts;
@@ -37,18 +42,6 @@ public class ConnectionListener extends Thread{
 		
 		isCoordinator = isCoord;
 	}
-
-	/*
-	public ConnectionListener(WorkerDatabase wdb, int port, boolean isCoord) {
-		this.wdb = wdb;
-		this.port = port;
-		
-		this.ts=null;
-
-		isCoordinator = isCoord;
-
-	}
-	*/
 
 	
     /**
@@ -70,6 +63,7 @@ public class ConnectionListener extends Thread{
 	public void run() {
 		while (!killswitch) {
 			try {
+				//Start listening on the default port
 				serv = new ServerSocket(port);
 				serv.setReuseAddress(true);
 				System.out.println("Started listening on port "+port);
@@ -77,38 +71,33 @@ public class ConnectionListener extends Thread{
 				in = new DataInputStream(sock.getInputStream());
 				out = new DataOutputStream(sock.getOutputStream());
 				System.out.println("initiated connection with:" + sock.getInetAddress() + ":" + sock.getPort());
+				//Create a new connection on a new port, unique to this worker
 				WorkerConnection con = new WorkerConnection(isCoordinator);
+				//Generate a unique ID for the worker and create a record
 				int id = wdb.generateID();
 				WorkerRecord rec = new WorkerRecord(sock.getInetAddress().toString(),sock.getPort(), id, 100, new Timestamp(System.currentTimeMillis()), con);
 				wdb.addWorker(id, rec, con);
 				
-				//Schedule immedietly if you are the coordinator and recieve connections midway
+				//Schedule immediately if you are the coordinator and receive connections midway
 				if(this.isCoordinator) {
 					ts.addToWorkerQueue(rec);
 				}
-				
-				
-				
-				//TODO: Replicate worker record to subscribers
-				
+							
+				//Start the new worker connection
 				con.start();
 				
+				//Send a handshake to worker, letting it know of the new address to contact
 				System.out.println("Sending: "+con.createHandshakeResponse());
 				NetworkMessage.send(out, con.createHandshakeResponse());
 
 			
-
-//				sampleWID = id;
-//				System.out.println("Sample id: "+sampleWID);
-
+				//Reopen the listener port for the next worker to arrive
 				ready = true;
 				sock.close();
 				serv.close();
 			} catch (SocketException e) {
-//				System.out.println("sock exception");
 
 			} catch (IOException e) {
-//				System.out.println("io exception");
 
 			}
 		}

@@ -5,10 +5,11 @@ import java.util.*;
 
 import data.MessageDecoder;
 import data.NetworkMessage;
+import server.WorkerConnection;
 
 /**
  * This class is used as a thread between each worker and each server instance.
- * 
+ * This is the worker counterpart of {@link WorkerConnection}
  * @author Mark
  *
  */

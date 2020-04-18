@@ -2,10 +2,17 @@ package server;
 import java.util.*;
 
 import data.NetworkMessage;
+import worker.Connection;
 
 import java.io.*;
 import java.net.*;
 
+/**
+ * A class to handle a connection from a server instance to a worker.
+ * This is the server counterpart of {@link Connection}
+ * @author Mark
+ *
+ */
 public class WorkerConnection extends Thread {
 
 	private int workerID;
