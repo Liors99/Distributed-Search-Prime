@@ -6,6 +6,12 @@ import java.util.*;
 import data.MessageDecoder;
 import data.NetworkMessage;
 
+/**
+ * This class is used as a thread between each worker and each server instance.
+ * 
+ * @author Mark
+ *
+ */
 public class Connection extends Thread{
 
 	public String hostname;
@@ -22,6 +28,12 @@ public class Connection extends Thread{
 		
 	}
 	
+	/**
+	 * The normal workflow for the run method is this:
+	 * A worker connects to a specific listener port on a server instance.
+	 * The worker receives a handshake with the permanent port information.
+	 * The worker reconnects to the received port and starts working.
+	 */
 	public void run() {
 
 		while (!killswitch) {
@@ -41,7 +53,6 @@ public class Connection extends Thread{
 				break;
 			}
 			catch (Exception e) {
-				System.out.println("B");
 				
 			}
 		}
@@ -56,6 +67,9 @@ public class Connection extends Thread{
 	}
 	
 	
+	/**
+	 * Connects the worker to the specified server instance
+	 */
 	public void connect() {
 		while (!killswitch) {
 			try {
@@ -70,6 +84,12 @@ public class Connection extends Thread{
 		
 	}
 	
+	
+	/**
+	 * The worker waits for a response from the listener socket on the server.
+	 * The response contains the new port number dedicated to the worker, which the worker should reconnect to.
+	 * In the initial handshake, the coordinator announces it to the worker.
+	 */
 	void receiveInitialHandshake() {
 		while(!killswitch) {
 			try {
@@ -98,6 +118,12 @@ public class Connection extends Thread{
 		isCoordinator = false;
 	}
 	
+	
+	/**
+	 * Used to wait for either one of two signal types:
+	 * 1. A coordinator takeover signal sent by a coordinator that wins an election
+	 * 2. An announcement that one of the servers died
+	 */
 	private void waitForSignal() {
 		boolean signalReceived = false;
 		
@@ -124,6 +150,10 @@ public class Connection extends Thread{
 		}
 	}
 	
+	
+	/**
+	 * Used to engage the killswitch on blocking functions
+	 */
 	public void kill() {
 		try {
 			sockIn.close();

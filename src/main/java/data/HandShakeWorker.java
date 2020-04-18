@@ -8,7 +8,10 @@ public class HandShakeWorker {
 	private SubscriberInfo[] subscribers_info;
 	private int ka;
 	
-	
+	/**
+	 * A class that gives the basic description of a subscriber, which includes the IP and port number
+	 *
+	 */
 	class SubscriberInfo {
 		private String ip;
 		private String port;
@@ -34,7 +37,7 @@ public class HandShakeWorker {
 		
 	}
 
-	//If the ttl is known
+	//If the ka is known
 	public HandShakeWorker(int ka) {
 		
 		//Initialize the subscriber information
@@ -128,7 +131,7 @@ public class HandShakeWorker {
 		
 	}
 	
-	//Getters and setters for the ttl
+	//Getters and setters for the ka
 	public void setKA(int ka) {
 		this.ka=ka;
 	}
