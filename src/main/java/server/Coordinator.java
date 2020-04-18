@@ -110,7 +110,12 @@ public class Coordinator {
 		this.ts.setLower(this.lowerBound);
 		this.ts.setUpper(this.upperBound);
 		this.ts.setTarget(this.primeLimit);
+
 		this.ts.setStore(st);
+
+		
+		this.ts.setPrimes(this.primes); //Add the list of primes to the new TS
+	
 		
 
 	}
