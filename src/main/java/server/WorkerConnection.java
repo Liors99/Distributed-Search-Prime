@@ -48,6 +48,9 @@ public class WorkerConnection extends Thread {
 		
 	}
 	
+	/**
+	 * Send a kill signal to the current connection
+	 */
 	public void kill() {
 		killswitch = true;
 		try {
@@ -60,6 +63,11 @@ public class WorkerConnection extends Thread {
 		}
 	}
 	
+	/**
+	 * Send a message to the worker on the other side of this connection
+	 * 
+	 * @param message the message to be sent
+	 */
 	public void sendMessage(String message) {
 	
 		while (!killswitch) {
@@ -74,6 +82,11 @@ public class WorkerConnection extends Thread {
 		}
 	}
 	
+	/**
+	 * Receive a message from the worker on the other side of this connection
+	 * 
+	 * @return the received message, in string format
+	 */
 	public String receiveMessage() {
 		String message=null;
 		try {
@@ -86,9 +99,14 @@ public class WorkerConnection extends Thread {
 	}
 	
 	
+	/**
+	 * Create an intial handshake message to the worker, with its assigned port
+	 * @return
+	 */
 	public String createHandshakeResponse() {
 		
 		String message = "type:HandshakeResponse hostname:"+servSock.getInetAddress()+" port:"+servSock.getLocalPort();
+		//Add a signature for the type of server on the initial connection
 		if (isCoordinator) {
 			message += " ServerType:coord";
 		}
