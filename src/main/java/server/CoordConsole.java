@@ -1,5 +1,8 @@
+/**
+* Class to take in user's custom values and initialize system
+* Input = either no arguments or mode + Coordinator IP
+*/
 
-//either no arguments or mode + Coordinator IP
 package server;
 import java.io.*;
 import java.math.*;
@@ -29,7 +32,7 @@ public class CoordConsole {
 		validRange=false;
 	}
 
-
+	//Print console instructions
 	public static void console() {
 		PrintStream console = new PrintStream(System.out);
 		Scanner scan = new Scanner(System.in);
@@ -59,6 +62,13 @@ public class CoordConsole {
 		
 	}
 	
+	/** 
+	* Retrieve the value to use as a boundary 
+	* @param console - The means of outputting the value 
+	* @param scan - Scanner object 
+	* @param boundType - Whether it is an upper or lower bound 
+	* @return - The resulting bound 
+	*/ 
 	static BigInteger getBound(PrintStream console, Scanner scan, String boundType) {
 		BigInteger result = new BigInteger("0");
 		boolean validInput = false;
@@ -76,7 +86,12 @@ public class CoordConsole {
 		}
 		return result;
 	}
-	
+
+	/** 
+	* Parsing function for console
+	* @param str - The string to be parsed 
+	* @return - the formatted input 
+	*/ 	
 	public static BigInteger parseInput(String str) throws NumberFormatException {
 		BigInteger result = new BigInteger("0");
 		if (str.matches("\\d*[eE]\\d*")) {
@@ -99,7 +114,14 @@ public class CoordConsole {
 		return result;
 		
 	}
-	
+
+
+	/** 
+	* Ask for the desired number of primes and validate input 
+	* @param console - means of output
+	* @param scan - means of input
+	* @return - the number of desired primes 
+	*/ 		
 	static int getPrimeCount(PrintStream console, Scanner scan){
 		int result = 0;
 		boolean validInput = false;
