@@ -115,8 +115,6 @@ public class Coordinator {
 
 		
 		this.ts.setPrimes(this.primes); //Add the list of primes to the new TS
-	
-		
 
 	}
 	
