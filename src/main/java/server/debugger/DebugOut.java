@@ -15,6 +15,10 @@ public class DebugOut extends Thread{
     private static BlockingQueue<DebugMessage>  MessageQueue = new LinkedBlockingDeque<DebugMessage>();
     private String logFileName;
 
+    /**
+     * an empty constructor
+     * initializes class variables used for storing debug output
+     */
     public DebugOut(){
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
         LocalDateTime now = LocalDateTime.now();
@@ -22,11 +26,21 @@ public class DebugOut extends Thread{
         System.out.println("log file created: " + this.logFileName);
     }
 
+    /**
+     * adds a message to queue to be displayed
+     * @param dM debugmessage to be added
+     * @return true on success
+     */
     public synchronized boolean addMessageToQueue(DebugMessage dM){
         MessageQueue.add(dM);
         return true;
     }
 
+    /**
+     * get a message to queue to be displayed
+     * @return dM debugmessage to be removed
+     *  
+     */
     public synchronized DebugMessage getMessageFromQueue() throws NullPointerException{
         if(MessageQueue.size()>0){
             return MessageQueue.poll();
@@ -36,6 +50,7 @@ public class DebugOut extends Thread{
     }
 
     /**
+     * starts a thread dedicated to displaying output debug info. Should be run in unison with debug in. Neither feature were added as not core of the project.
      * has to be started in CoordConsole
      */
     public void run(){

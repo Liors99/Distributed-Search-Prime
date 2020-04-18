@@ -48,7 +48,13 @@ public class TaskScheduler extends Thread {
 
 	private Store st;
 
-
+	/**
+	 * creates an object of task scheduler
+	 * Initializes important values used for scheduling tasks
+	 * @param lower bound of a viable prime number
+	 * @param upper bound of a viable prime number to be considered
+	 * @param target number of primes we are looking for
+	 */
     TaskScheduler(BigInt lower, BigInt upper, int target) {
     	
     	//max_work = new BigInt(upper.subtract(lower).divide(new BigInteger("10")));
@@ -70,37 +76,59 @@ public class TaskScheduler extends Thread {
 
     }
     
-    
+    /**
+     * get target number of primes
+     * @return int value representing target value of primes
+     */
     public int getTarget() {
 		return target;
 	}
 
 
+    /**
+     * set the target number of primes
+     * @param target number of primes to be reached
+     */
 	public void setTarget(int target) {
 		this.target = target;
 	}
 
 
+	/**
+	 * get bigInt representing the target low bound
+	 * @return bigInt representing low bound
+	 */
 	public BigInt getLower() {
 		return lower;
 	}
 
-
+/**
+ * set the lower bound of viable primes to search
+ * @param lower value of the interval in which to look for primes
+ */
 	public void setLower(BigInt lower) {
 		this.lower = lower;
 	}
 
-
+/**
+ * get upper bound of the range in which we are searching for primes
+ * @return bigint value of the upperbound of viable primes
+ */
 	public BigInt getUpper() {
 		return upper;
 	}
 
-
+/**
+ * set upper bound bigInt no number above it will be considered
+ * @param upper bigint value to set upper bound to
+ */
 	public void setUpper(BigInt upper) {
 		this.upper = upper;
 	}
 
-
+/**
+ * an empty constructor for task scheduler. Initializes a lot of data structures used in scheduling.
+ */
 	TaskScheduler() {    	
     	//max_work = new BigInt(upper.subtract(lower).divide(new BigInteger("10")));
         WorkerQueue = new PriorityBlockingQueue<WorkerRecord>();
@@ -118,7 +146,10 @@ public class TaskScheduler extends Thread {
         
 	}
 	
-	
+	/**
+	 * used to get worker messages for scheduler worker communication
+	 * @return string representing the worker message
+	 */
 	public String getNextWorkerMessage() {
 		if(!this.workerMessages.isEmpty()) {
 			return this.workerMessages.poll();
@@ -127,7 +158,10 @@ public class TaskScheduler extends Thread {
 		return null;
 	}
 	
-	
+	/**
+	 * add worker message to a blocking queue
+	 * @param s a string message to be added to the queue
+	 */
 	public void addWorkerMessage(String s) {
 		this.workerMessages.add(s);
 	}
@@ -181,6 +215,13 @@ public class TaskScheduler extends Thread {
         return bound;
     }
 */
+	/**
+	 * used to send the range assigned to the worker, to the actual worker. Makes use of worker records and related data structs
+	 * @param wR workerRecord to whom to push the data
+	 * @param range the range worker needs to check if its divides or not
+	 * @param current the number which is being considered if its prime or not
+	 * @return true on success
+	 */
     private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current){
     	
     	
@@ -216,6 +257,15 @@ public class TaskScheduler extends Thread {
         return false;
     }
     
+	/**
+	 * this function can be used when iterating over list of working workers
+	 * used to send the range assigned to the worker, to the actual worker. Makes use of worker records and related data structs
+	 * @param wR workerRecord to whom to push the data
+	 * @param range the range worker needs to check if its divides or not
+	 * @param concur if ran inside of iterating over working workers list
+	 * @param current the number which is being considered if its prime or not
+	 * @return true on success
+	 */
     private boolean sendRange(WorkerRecord wR, BigInt[] range, BigInt current, boolean concur){
     	
         wR.setWorkrange(range);
@@ -242,6 +292,12 @@ public class TaskScheduler extends Thread {
         return false;
     }
     
+    /**
+     * serialize work range into a string
+     * @param range on which the worker is going to work on
+     * @param current number the worker is working on
+     * @return serialized version of the workrange
+     */
     private String serializeWorkRange(BigInt[] range, BigInt current) {
     	StringBuilder s = new StringBuilder();
     	s.append("type:sendTask upper:"+range[1]+" lower:"+range[0]+" tested:"+current);
@@ -249,6 +305,11 @@ public class TaskScheduler extends Thread {
     	return s.toString();
     }
 
+    /**
+     * modifies worker score depending on how close the delta is to the desired timeout range
+     * @param wR workerRecord who's score needs to be modified
+     * @param delta the time it took for the worker to work on the last assignment
+     */
     private void modifyWorkerScore(WorkerRecord wR, long delta ) {
     	if(delta>TIMEOUT/4 && delta<TIMEOUT*3/4) {
     		
@@ -261,6 +322,11 @@ public class TaskScheduler extends Thread {
     	System.out.println("Score  of WID: "+wR.getWID() + " is: "+wR.getScore());
     }
     
+    /**
+     * iterate the working workers to see if any of them finished work or timed out.
+     * if finished work pushed into a worker queue. timed out then reassign the work
+     * @param WorkingWorkers a linked list of worker Records to iterate over.
+     */
     public void iterateWorkingWorkers(LinkedList<WorkerRecord> WorkingWorkers) {
 //    	System.out.println("Checking for incoming messages from workers...");
     	LinkedList<WorkerRecord> deadRecords = new LinkedList<WorkerRecord>();
@@ -281,7 +347,7 @@ public class TaskScheduler extends Thread {
 	    				Map<String, String> m = MessageDecoder.createmap(msg);
 	//    				System.out.println("4");
 	    				String result = m.get("divisor");
-	    				BigInt tested = new BigInt( m.get("tested"));
+	    				BigInt tested = new BigInt( m.get("tested"));					//worker finished work
 	    				
 	    				BigInt result_big = new BigInt(result);
 	    				if (result.equals("0")){
@@ -341,7 +407,7 @@ public class TaskScheduler extends Thread {
 				System.out.println("hi this is iter over working workers");
 			}
 //    		System.out.print("workerTout: "+wR.getworkerTimeout());
-    		if(wR.getworkerTimeout()!=0) {
+    		if(wR.getworkerTimeout()!=0) {								// worker timed out. work needs to be reassigned
     			//check for timeout
     			long curTime = System.currentTimeMillis();
     			long delta = curTime - wR.getworkerTimeout();
@@ -395,20 +461,35 @@ public class TaskScheduler extends Thread {
     	//System.out.println("finished iterating");
     }
     
-    
+    /**
+     * get list of currently working workers
+     * @return
+     */
     public LinkedList<WorkerRecord> getWorkingWorkers() {
 		return WorkingWorkers;
 	}
 
 
+    /**
+     * set list of working workers
+     * @param workingWorkers a linked list to replace
+     */
 	public void setWorkingWorkers(LinkedList<WorkerRecord> workingWorkers) {
 		WorkingWorkers = workingWorkers;
 	}
 	
+	/**
+	 * remove a worker from working workers list
+	 * @param wR worker record to be assigned
+	 */
 	public void removeFromWorkingWorkers(WorkerRecord wR) {
 		WorkingWorkers.remove(wR);
 	}
 
+	/**
+	 * assign range to the worker record next in the priority queue
+	 * @param range
+	 */
 	private void assignRange(BigInt[] range) {
 		if(!getWorkerQueue().isEmpty()) { //Wait for worker
 		        	
@@ -453,7 +534,8 @@ public class TaskScheduler extends Thread {
         
         //upper= new BigInt(upper.sqrt().add(BigInt.ONE));
         while(current.le(upper) && (primes.size()<target)){ //less or equal to upperbound
-            //we will need to do something so it does not loop in idle
+            //assign the range to workers. if range too small split it
+        	//we will need to do something so it does not loop in idle
         	BigInt[] range = new BigInt[] {new BigInt(BigInt.ZERO), new BigInt(BigInt.ZERO)};
         	
         	range[0] = new BigInt("3");
@@ -473,6 +555,7 @@ public class TaskScheduler extends Thread {
 	        		
 	        		
 	        		while(rangeSize.gt(new BigInt(Long.toString(defaultAssignment)))) {
+	        			//if range is too big for one worker to handle split it between many workers
 	        			if(!getWorkerQueue().isEmpty()) {
 	        				WorkerRecord wR = getWorkerQueue().peek();
 		        			BigInt curA = new BigInt(Long.toString(defaultAssignment));
@@ -530,7 +613,9 @@ public class TaskScheduler extends Thread {
 //            }
           
             //currentLower = new BigInt("3");
-            
+          
+        
+        //once done print primes found  
 
         if(primes.size()>1) {
            System.out.println("Finished Scheduling; Primes Found:");
@@ -573,7 +658,12 @@ public class TaskScheduler extends Thread {
         return true;
     }
 
-
+/**
+ * process results once worker has finished working
+ * @param wR worker Record who did the work
+ * @param factors factors found of the current prime
+ * @return true on validated results
+ */
     public boolean processResults(WorkerRecord wR, BigInt[] factors) {
         wR.stopWork();
         ActiveWorkers.put(wR.getWID(),false);
@@ -603,72 +693,132 @@ public class TaskScheduler extends Thread {
         return true;
     }
 
+    /**
+     * get worker queue
+     * @return worker queue containing workers awaiting assignment
+     */
     public PriorityBlockingQueue<WorkerRecord> getWorkerQueue() {
         return WorkerQueue;
     }
 
+    /**
+     * set the worker queue instance
+     * @param workerQueue to be used to have the jobless workers
+     */
     public void setWorkerQueue(PriorityBlockingQueue<WorkerRecord> workerQueue) {
         WorkerQueue = workerQueue;
     }
     
+    /**
+     * get first worker record from the queue
+     * @return first record on the queue
+     */
     public  WorkerRecord pollFromQueue() {
     	WorkerRecord wR = this.WorkerQueue.poll();
 //    	setTotalScore(new BigInt(getTotalScore().subtract(new BigInt(Integer.toString(wR.getScore())))));
     	
     	return wR;
     }
-
+/**
+ * add worker to the queue of jobless workers
+ * @param wR workerRecord to be added to the jobless workers queue
+ */
     public void addToWorkerQueue(WorkerRecord wR){
     	//setTotalScore(new BigInt(getTotalScore().add(new BigInt(Integer.toString(wR.getScore())))));
         this.WorkerQueue.add(wR);
         
     }
 
-
+/**
+ * get total score of all workers in the queue
+ * likely deprecated
+ * @return get total score of all workers in the queue
+ */
     public BigInt getTotalScore() {
         return totalScore;
     }
 
+    /**
+     * set total score bigInt to a specific number
+     * @param totalScore of all workers in the jobless queue
+     */
     public void setTotalScore(BigInt totalScore) {
         this.totalScore = totalScore;
     }
 
+    /**
+     * get active workers, workers which are currently working
+     * deprecated
+     * @return get hashmap of worker ids to isworking
+     */
     public HashMap<Integer, Boolean> getActiveWorkers() {
         return ActiveWorkers;
     }
 
+    /**
+     * add a worker record to active workers
+     * @param wR worker record to be added
+     * @return true on success
+     */
     public boolean putActiveWorker(WorkerRecord wR){
         this.ActiveWorkers.put(wR.getWID(), true);
         return true;
     }
 
+    /**
+     * deactivate active worker if timed out
+     * likely deprecated
+     * @param wR worker record which timed out
+     * @return true on successful removal
+     */
     public boolean deactivateActiveWorker(WorkerRecord wR){
         this.ActiveWorkers.put(wR.getWID(), false);
         return true;
     }
 
+    /**
+     * set active workers hashmap to the one passed
+     * @param hasmap of active workers 
+     */
     public void setActiveWorkers(HashMap<Integer, Boolean> activeWorkers) {
         ActiveWorkers = activeWorkers;
     }
     
+    /**
+     * get current bigint system is working on
+     * @return bigint being checked for being a prime
+     */
     public BigInt getCurrent() {
 		return current;
 	}
 
-
+/**
+ * set current number on which system is working on
+ * @param current bigint to which set the number the system is working on
+ */
 	public void setCurrent(BigInt current) {
 		this.current = current;
 	}
 	
+	/**
+	 * get primes discovered by the system
+	 * @return arraylist of bigints which are prime numbers
+	 */
 	public ArrayList<BigInt> getPrimes() {
 		return primes;
 	}
 
-
+/**
+ * set prime list to the one passed
+ * @param primes pass arraylist with primes
+ */
 	public void setPrimes(ArrayList<BigInt> primes) {
 		this.primes = primes;
 	}
 
+	/**
+	 * ran when task scheduling thread is started
+	 */
 	@Override
 	public void run() {
 		done=false;

@@ -40,6 +40,12 @@ public class InitializeServerCluster {
     private static Subscriber s;
     public static boolean reelectionStarted=false;
     
+    /**
+     * main function of the program.
+     * Initializes server specific stuff as well as starts initial election.
+     * @param args command line arguments
+     * @throws Exception
+     */
     public static void main(String args[]) throws Exception {
         //Keep track of server connections
         id = 0;
@@ -103,7 +109,13 @@ public class InitializeServerCluster {
 
     }
     
-    
+    /**
+     * announces who won the election. Also starts a coordinator instance if same id as leaderid
+     * otherwise starts subscriber instance
+     * 
+     * in case of reelection has similar function
+     * @param isReelection
+     */
     public static void assignRole(boolean isReelection) {
     	System.out.println("Leader selected:"+LeaderId);
     	
@@ -125,7 +137,9 @@ public class InitializeServerCluster {
     	
     }
 
-    //Check hash table to verify all connections made
+    /**
+     * establishes and verifies connections to other instances in server cluster
+     */
     public static void establishConnections() {
         //check all combos are in the hashmap
         for(int i =0; i < 3; i++) {
@@ -169,6 +183,9 @@ public class InitializeServerCluster {
         }
     }
     
+    /**
+     * destroys existing server connections. Closes sockets then initializes a new hashmap for client to socket
+     */
    public static void destroyConnections(){
 	   HashMap<String, Socket> connections=server.getClient_to_socket();
        for(Socket i:connections.values()) {
@@ -183,7 +200,8 @@ public class InitializeServerCluster {
    }
    
     /**
-    * @return winner id or -1 if failed
+     * responsible for initial election
+    * @return winner id or -2 if failed initial election. -2 is normal in case of subscriber/coordinator reconnecting after a crash
     */
     public static Integer initial_election() throws Exception{
         HandShakeSubscriber Hs = new HandShakeSubscriber(id,10000);
@@ -238,6 +256,12 @@ public class InitializeServerCluster {
         
     }
 
+    /**
+     * identifies who is the winner provided everyones numbers
+     * @param vals list of numbers for each server in cluster
+     * @param max the max value which is the winning number
+     * @return id of the winner
+     */
     public static int findWinnerID(double[] vals, double max){
         int counter = 0;
         int winner = -1;
@@ -253,6 +277,11 @@ public class InitializeServerCluster {
         return winner;
     }
 
+    /**
+     * allows to find a max value in double
+     * @param vals a double array in which max value is to be found
+     * @return max value in the array
+     */
     public static double findMax(double[] vals){
         double max = -1;
         //find max double token
@@ -267,7 +296,9 @@ public class InitializeServerCluster {
  
     
 
-
+	/**
+	 * reelection process is described here. Ran if coordinator has crashed and new leader is required. Ran after leader timeout.
+	 */
     public static void reelection(){
     	
     	 HandShakeSubscriber Hs = new HandShakeSubscriber(id, 10, up_time);
@@ -303,7 +334,11 @@ public class InitializeServerCluster {
         
     }
     
-    
+    /**
+     * helps with reelection process by working with response provided by other servers in the cluster
+     * @param response of the other server in a cluster.
+     * @return leader id
+     */
     public static int ElectReelectionLeader(String response) {
     	int id_recv = -1;
 		 if(isAlive[(id+1)%3] || isAlive[(id+2)%3]) {
@@ -353,6 +388,10 @@ public class InitializeServerCluster {
 	     return LeaderId;
     }
     
+    /**
+     * works with recovery in case of a crash.
+     * @throws Exception
+     */
    public static void recover() throws Exception {
 	   if (id == 0) {
 			listenerPort = 8000;
@@ -470,6 +509,10 @@ public class InitializeServerCluster {
        
    }
    
+   /**
+    * announces that server was disconected. used to notify workers that coordinator has failed.
+    * @param id
+    */
    public static void sendDisconnectedServer(int id) {
 	   listener.announceDisconnectedServer(id);
    }
