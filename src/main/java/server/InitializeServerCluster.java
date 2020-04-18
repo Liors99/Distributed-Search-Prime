@@ -296,6 +296,8 @@ public class InitializeServerCluster {
          }
          
          System.out.println("Finished reelection");
+         reelectionStarted=true;
+         System.out.println(isAlive[(id+1)%3]+", " + isAlive[(id+2)%3]);
         
          
         
@@ -326,6 +328,7 @@ public class InitializeServerCluster {
 	    	 System.out.println("Server " + id + ", I'm the leader");
 	     }
 		 
+		 /*
 		 //Clear the connections and deal with the process that died
 		 for(int i=0; i<3; i++) {
 			 if(i!=id && i!=id_recv) {
@@ -344,6 +347,7 @@ public class InitializeServerCluster {
 				 server.printConnections();
 			 }
 		 }
+		 */
 		 reelectionStarted=false;
 	     assignRole(true);
 	     return LeaderId;
@@ -464,6 +468,10 @@ public class InitializeServerCluster {
     	   }
        }
        
+   }
+   
+   public static void sendDisconnectedServer(int id) {
+	   listener.announceDisconnectedServer(id);
    }
     
 }
