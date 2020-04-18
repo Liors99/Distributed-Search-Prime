@@ -590,7 +590,13 @@ public class TaskScheduler extends Thread {
 	        		assignRange(range);
 	        	}
         		
-        		st.writeLast("Last checked: "+current);
+	        	try {
+	        		st.writeLast("Last checked: "+current);
+	        	}
+	        	catch(Exception e) {
+	        		
+	        	}
+        		
         		
         		current = new BigInt(current.add(new BigInt("2")).toString(10));
         	

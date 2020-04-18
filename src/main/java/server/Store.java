@@ -44,7 +44,7 @@ public class Store {
 		}
 		 catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		
 	}
@@ -62,18 +62,7 @@ public class Store {
 					out.seek(out.length());
 					out.write(result.getBytes());
 				} catch (IOException e) {
-					try {
-						out.close();
-					} catch (IOException e1) {
-						
-					}
-					try {
-						out = new RandomAccessFile(Filename, "rw");
-					} catch (FileNotFoundException e1) {
-						
-					}
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					
 				}
 			} //unlock	
 	}
@@ -99,25 +88,16 @@ public class Store {
 				    updateLine(line, last);
 				    
 				} catch (IOException e) {
-					try {
-						out.close();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					try {
-						out = new RandomAccessFile(Filename, "rw");
-					} catch (FileNotFoundException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
 				}
 				  catch( NullPointerException e){
 					  try {
 							out.write(last.getBytes());
 						} catch (IOException ee) {
 							// TODO Auto-generated catch block
-							ee.printStackTrace();
+							//ee.printStackTrace();
 						}
 					  
 				  } finally {
@@ -182,10 +162,10 @@ public class Store {
 			        //if (os != null) os.close();
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//e.printStackTrace();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
 		   }
 		return null;
@@ -203,7 +183,7 @@ public class Store {
 			    out.close();
 		     } catch (FileNotFoundException e) {
 		 	// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		     }
 		}
 
@@ -221,7 +201,7 @@ public class Store {
 				out.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//e.printStackTrace();
 			}  
 			   
 		   }
