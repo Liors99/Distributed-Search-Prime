@@ -545,11 +545,12 @@ public class TaskScheduler extends Thread {
 	        		//if one worker cannot do this by himself partition so it can
 	        		
 	        		System.out.println("range too big splitting! ");
+	        		/*
 	        		System.out.print(" rSize "+rangeSize.toString(10));
 	        		System.out.print(" r0 "+range[0].toString(10));
 	        		System.out.print(" r9 "+range[1].toString(10));
 	        		System.out.println();
-	        		
+	        		*/
 	        		
 	        		
 	        		while(rangeSize.gt(new BigInt(Long.toString(defaultAssignment)))) {
@@ -562,10 +563,12 @@ public class TaskScheduler extends Thread {
 		        			BigInt curRange = curMod;
 		        			curA = curMod;
 		        			BigInt estEnd = new BigInt(curRange.add(range[0]));
+		        			/*
 		        			System.out.println("current Assignment sz " + curA.toString(10));
 		        			System.out.println("current Assignment mod " + curMod.toString(10));
 		        			System.out.println("current Assignment range sz " + curRange.toString(10));
 		        			System.out.println("current Assignment estend " + estEnd.toString(10));
+		        			*/
 		        			if(estEnd.gt(topRangeTarget)) {
 		        				estEnd = topRangeTarget;
 		        			}
