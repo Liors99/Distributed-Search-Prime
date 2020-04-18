@@ -62,6 +62,16 @@ public class Store {
 					out.seek(out.length());
 					out.write(result.getBytes());
 				} catch (IOException e) {
+					try {
+						out.close();
+					} catch (IOException e1) {
+						
+					}
+					try {
+						out = new RandomAccessFile(Filename, "rw");
+					} catch (FileNotFoundException e1) {
+						
+					}
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -89,8 +99,18 @@ public class Store {
 				    updateLine(line, last);
 				    
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					try {
+						out.close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					try {
+						out = new RandomAccessFile(Filename, "rw");
+					} catch (FileNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 				  catch( NullPointerException e){
 					  try {
