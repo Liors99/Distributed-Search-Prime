@@ -3,6 +3,11 @@ package worker;
 import java.math.*;
 import java.util.*;
 
+/**
+ * This class runs as a thread to try dividing the subject by all numbers in the range
+ * @author Mark
+ *
+ */
 public class PrimeSearch extends Thread{
 
 	BigInteger lower;
@@ -10,6 +15,13 @@ public class PrimeSearch extends Thread{
 	BigInteger subject;
 	BigInteger result;
 	
+	/**
+	 * The base constructor for the prime search algorithm
+	 * 
+	 * @param lowerLimit
+	 * @param upperLimit
+	 * @param testedNumber the number we are trying to divide by numbers in the range
+	 */
 	public PrimeSearch(BigInteger lowerLimit, BigInteger upperLimit, BigInteger testedNumber) {
 		result = BigInteger.ZERO;
 		if (lowerLimit.mod(BigInteger.TWO) == BigInteger.ZERO) {
@@ -27,6 +39,7 @@ public class PrimeSearch extends Thread{
 		subject = testedNumber;		
 	}
 	
+	
 	public void run() {
 		result = search();
 		
@@ -38,11 +51,14 @@ public class PrimeSearch extends Thread{
 		}
 	}
 	
+	/**
+	 * After the prime search object is constructed, the search function is called from within {@link run}
+	 * @return The divisor in range, if found, 0 otherwise
+	 */
 	public BigInteger search() {
 		BigInteger index = lower;
 		System.out.println(lower);
 		System.out.println(upper);
-		long start = System.currentTimeMillis();
 
 		if(lower.compareTo(BigInteger.TWO) <= 0 && upper.compareTo(BigInteger.TWO) >= 0) {
 			System.out.println("2 is in range, testing if number is even");
@@ -60,13 +76,13 @@ public class PrimeSearch extends Thread{
 				index = index.add(BigInteger.TWO);
 			}
 			counter--;
+			//For extremely long searches, prints out every 1 million attempted factors, to show progress
+			//Very unlikely to happen, as the coordinator scheduler is much more efficient than that
 			if (counter == 0) {
 				counter=1000000;
 				System.out.println(index);
 			}
 		}
-		long stop = System.currentTimeMillis();
-		System.out.println(stop-start);
 		
 		return BigInteger.ZERO;
 		
