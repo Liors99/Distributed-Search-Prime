@@ -17,7 +17,11 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.file.Files;
-
+/**
+ * 
+ * Class to write to long term storage
+ *
+ */
 public class Store {
 	
 	RandomAccessFile out;
@@ -25,8 +29,11 @@ public class Store {
 	private final static Object lock = new Object();
 	String Filename;
 	
-	
-	//only initialize once 
+	/**
+	 * 
+	 * @param Filename unique filename
+	 */
+	//Pass unique filename
 	public Store(String Filename) {
 		try {
 			this.Filename=Filename;
@@ -42,8 +49,13 @@ public class Store {
 		
 	}
 	
-		
+		//Write a prime
+	    /**
+	     * 
+	     * @param result prime number to add
+	     */
 		public void writeResult(String result) {
+			//lock file
 			synchronized(lock) {
 				try {
 					result=result+System.lineSeparator();
@@ -53,9 +65,13 @@ public class Store {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}	
+			} //unlock	
 	}
-		
+		//Write most recent value
+		/**
+		 * 
+		 * @param last Last check value for systen
+		 */
 	    public void writeLast(String last) {
 			synchronized(lock) {
 				//last=last+System.lineSeparator();
@@ -64,9 +80,11 @@ public class Store {
 					reader = new BufferedReader(new InputStreamReader( new FileInputStream(f), "UTF-8"));
 					String line = reader.readLine();
 					reader.close();
+					//make sure current doesn't decrease
 					if (line.length()>last.length()){
 						throw new IllegalArgumentException("Last must not be a shorter line");
 					}
+					//write at start of file
 					out.seek(0);
 				    updateLine(line, last);
 				    
@@ -93,13 +111,13 @@ public class Store {
 
 			}
 	    }
-	    
+	    //Specificaly replace first line of a file
 	    private void updateLine(String toUpdate, String updated) throws IOException {
 	        BufferedReader file = new BufferedReader(new FileReader(f));
 	        File temp=new File(f+".out");
 	        PrintWriter writer = new PrintWriter(temp, "UTF-8");
 	        String line;
-
+            //make sure line exists
 	        while ((line = file.readLine()) != null)
 	        {
 	            line = line.replace(toUpdate, updated);
@@ -111,7 +129,10 @@ public class Store {
 	        Files.move(temp.getAbsoluteFile().toPath(), f.getAbsoluteFile().toPath(), REPLACE_EXISTING);     
 	        out = new RandomAccessFile(Filename, "rw");
 	    }
-	    
+	    /**
+	     *  
+	     * @return file as a string
+	     */
 	   public static String get() {
 		   synchronized(lock) {
 			      String head="type:file ";
@@ -141,7 +162,10 @@ public class Store {
 		   }
 		return null;
 	   }
-	    
+	    /**
+	     * 
+	     * @param data write to end of file
+	     */
 	   public void update(String data) {
 		   synchronized(lock) {
 		   try {
@@ -153,7 +177,10 @@ public class Store {
 			e.printStackTrace();
 		     }
 		}
-	   }  
+	   } 
+	   /**
+	    * Close file
+	    */
 	   public void shutdown() {
 		   synchronized(lock) {
 			 try {

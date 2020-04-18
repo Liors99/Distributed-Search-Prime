@@ -212,17 +212,22 @@ public class Subscriber {
 		this.upperBound = new BigInt(m.get("upper"));
 		this.primeLimit = Integer.parseInt(m.get("limit"));
 	}
-	
+	/**
+	 * For use during recovery
+	 * @param file string of a storage file
+	 */
 	public void setStore(String file) {
+		//Create file name
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM_dd_hh_mm");
 	    String dateAsString = simpleDateFormat.format(new Date());
 		st=new Store("Primes_"+lowerBound+"_to_"+upperBound+"_"+dateAsString+"_ID"+id+".txt");
 		
 		st.writeResult(file);
-		String [] lines = file.split("\\r?\\n");
-		current_worked_on=new BigInt(file.split("Last checked: ")[0]);
+		//Store the data in the subscriber
+		String [] lines = file.split("\\n");
+		current_worked_on=new BigInt(lines[0].split("Last checked: ")[1].strip());
 		for(int i=1; i<lines.length; i++) {
-			primes.add(new BigInt(lines[i].split("Prime: ")[0]));
+			primes.add(new BigInt(lines[i].split("Prime: ")[1].strip()));
 		}
 	}
 	

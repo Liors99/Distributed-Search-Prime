@@ -434,7 +434,7 @@ public class TaskScheduler extends Thread {
     	            nWR.setWorkrange(wR.getWorkrange());
     	            nWR.setCurrent(wR.getCurrent());
     	        	sendRange(nWR, nWR.getWorkrange(), nWR.getCurrent(), false);
-    	        	st.writeLast("Last checked : "+current.toString());
+    	        	st.writeLast("Last checked : "+current.toString()+"\n");
     	            BigInt[] range = nWR.getWorkrange();
     	            
     	            //ADDED "FIX" FOR -2
