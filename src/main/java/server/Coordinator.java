@@ -110,7 +110,7 @@ public class Coordinator {
 		this.ts.setLower(this.lowerBound);
 		this.ts.setUpper(this.upperBound);
 		this.ts.setTarget(this.primeLimit);
-		
+		this.ts.setStore(st);
 		
 
 	}
@@ -174,7 +174,6 @@ public class Coordinator {
 		
 		
 		ts.setCurrent(this.current_worked_on);
-		ts.setStore(st);
 		
 		
 		
