@@ -141,7 +141,7 @@ public class Coordinator {
 		ts.setTarget(primeLimit);
 		//ts.setCurrent(lowerBound);
 		
-		
+		this.ts.setStore(st);
 		// Send tasks to other servers
 		try {
 			if(CoordConsole.quit) {
