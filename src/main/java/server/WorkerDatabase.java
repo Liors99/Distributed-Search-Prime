@@ -1,7 +1,12 @@
 package server;
 import java.util.*;
 
-
+/**
+ * Aggregates information about the the active workers
+ * 
+ * @author Mark
+ *
+ */
 public class WorkerDatabase {
 
 	public HashMap<Integer, WorkerRecord> workers;
@@ -25,6 +30,11 @@ public class WorkerDatabase {
 		return work;
 	}
 	
+	/**
+	 * Adds a worker encoded in a string to a database
+	 * 
+	 * @param worker
+	 */
 	public void fromString(String worker) {
 		String[] data=worker.split(" wid:");
 		for (String i:data) {
@@ -36,6 +46,13 @@ public class WorkerDatabase {
 		
 	}
 	
+	
+	/**
+	 * Adds a worker to the database
+	 * @param id the unique worker id
+	 * @param wr the worker's record
+	 * @param wc the worker's connection
+	 */
 	public void addWorker(int id, WorkerRecord wr, WorkerConnection wc) {
 		synchronized(lock) {
 		workers.put(id, wr);
@@ -43,16 +60,31 @@ public class WorkerDatabase {
 		}
 	}
 	
+	/**
+	 * Get the connection object for the specified worker id
+	 * @param id the worker's ID
+	 * @return the connection instance to the worker
+	 */
 	public WorkerConnection getConnection(int id) {
 		
 		return workerConnections.get(id);
 	}
 	
+	/**
+	 * Get the record object for the specified worker id
+	 * @param id the worker's ID
+	 * @return the record instance to the worker
+	 */
 	public WorkerRecord getRecord(int id) {
 		
 		return workers.get(id);
 	}
 	
+	
+	/**
+	 * Randomly generate a unique ID for a worker
+	 * @return
+	 */
 	public int generateID() {
 		int id;
 		Random rand = new Random();
