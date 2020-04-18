@@ -42,8 +42,12 @@ public class Store {
 		
 	}
 	
-		
-		public void writeResult(String result) {
+	/**
+	 * Write result to file 
+	 * @return - returns a random number
+	 * @param result - the contents to be written to the file
+	 */	
+	public void writeResult(String result) {
 			synchronized(lock) {
 				try {
 					result=result+System.lineSeparator();
@@ -56,7 +60,11 @@ public class Store {
 			}	
 	}
 		
-	    public void writeLast(String last) {
+	/**
+	 * Write last string to file
+	 * @param last - the contents to be written to the file
+	 */	
+	public void writeLast(String last) {
 			synchronized(lock) {
 				//last=last+System.lineSeparator();
 				BufferedReader reader=null;
@@ -94,6 +102,11 @@ public class Store {
 			}
 	    }
 	    
+		/**
+	 	* Update a specified string
+	 	* @param toUpdate - specific string to be updated
+		* @param updated - content to replace current string 
+		*/	
 	    private void updateLine(String toUpdate, String updated) throws IOException {
 	        BufferedReader file = new BufferedReader(new FileReader(f));
 	        File temp=new File(f+".out");
@@ -111,7 +124,11 @@ public class Store {
 	        Files.move(temp.getAbsoluteFile().toPath(), f.getAbsoluteFile().toPath(), REPLACE_EXISTING);     
 	        out = new RandomAccessFile(Filename, "rw");
 	    }
-	    
+
+		/**
+	 	* Recieve the contents of a file as a byte array 
+		* @return the file as a bytearray or null if unable to do so.
+		*/	
 	   public static String get() {
 		   synchronized(lock) {
 			      String head="type:file ";
@@ -141,7 +158,11 @@ public class Store {
 		   }
 		return null;
 	   }
-	    
+
+		/**
+	 	* Update a file by writing to a file
+	 	* @param data - what to write to the file
+		*/	  
 	   public void update(String data) {
 		   synchronized(lock) {
 		   try {
@@ -153,7 +174,11 @@ public class Store {
 			e.printStackTrace();
 		     }
 		}
-	   }  
+	   }
+
+		/**
+	 	* Shutdown outputting processes 
+		*/	 
 	   public void shutdown() {
 		   synchronized(lock) {
 			 try {
