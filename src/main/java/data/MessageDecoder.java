@@ -11,9 +11,14 @@ import server.Store;
 //Message format assisting 
 public class MessageDecoder {
 	
-	
+	/**
+	 * 
+	 * @param message gotten message
+	 * @return type of message 
+	 */
 	public static String findMessageType(String message) {
 		String[] space=message.split(" ");
+		//type is an identifier of a message
 		String type;
 		try {
 		  type=space[0].split(":")[1];
@@ -26,11 +31,17 @@ public class MessageDecoder {
 		return type;
 	}
 
-	
+	/**
+	 * 
+	 * @param message, changes to hashmap
+	 * @return key value pairs in message
+	 */
 	public static Map<String, String> createmap(String message) {
+		//Split on space
 		String[] space=message.split(" ");
 		Map<String, String> map = new HashMap<String, String>();
 		for (String i:space) {
+			//Separate key vale pairs
 			String [] parts=i.split(":");
 			if (parts.length==1) {
 				System.out.println("Didn't understand "+message);
