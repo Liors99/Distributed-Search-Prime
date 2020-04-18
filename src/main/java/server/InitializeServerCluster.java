@@ -428,7 +428,12 @@ public class InitializeServerCluster {
            	}
    		    //Store file contains primes and current
    		    else if(m.get("type").equals("Store")) {
+   		    	try {
    		    	rs.setStore(next_message.split("file ")[1]);
+   		    	}
+   		    	catch(Exception e){
+   		    		
+   		    	}
    		    }
    		    //Recovery finished
    		    else if(m.get("type").equals("RC-Done")) {
